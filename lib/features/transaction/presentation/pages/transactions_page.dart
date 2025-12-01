@@ -174,7 +174,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         // Transaction list for this date
         ...transactions.map((transaction) => TransactionListItem(
               transaction: transaction,
-              onTap: () => _showTransactionEditSheet(context, transaction),
+              onTap: () => _showEditModalDirectly(context, transaction),
               onDismissed: () => _handleDelete(transaction),
             )),
 
@@ -283,7 +283,23 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     );
   }
 
-  /// Show transaction edit bottom sheet
+  /// Show transaction edit modal directly (improved UX)
+  void _showEditModalDirectly(
+    BuildContext context,
+    TransactionModel transaction,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => TransactionEditModalSheet(transaction: transaction),
+    );
+  }
+
+  /// Show transaction detail sheet (kept for future extensibility)
   void _showTransactionEditSheet(
     BuildContext context,
     TransactionModel transaction,

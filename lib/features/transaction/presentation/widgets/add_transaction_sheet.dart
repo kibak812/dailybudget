@@ -22,38 +22,12 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
 
-  // Predefined categories
-  final List<String> _expenseCategories = [
-    '식비',
-    '교통',
-    '쇼핑',
-    '생활',
-    '문화',
-    '의료',
-    '주거',
-    '통신',
-    '금융',
-    '기타',
-  ];
-
-  final List<String> _incomeCategories = [
-    '급여',
-    '용돈',
-    '보너스',
-    '기타',
-  ];
-
   @override
   void dispose() {
     _amountController.dispose();
     _memoController.dispose();
     super.dispose();
   }
-
-  List<String> get _currentCategories =>
-      _selectedType == TransactionType.expense
-          ? _expenseCategories
-          : _incomeCategories;
 
   Future<void> _handleSubmit() async {
     // Validate amount
@@ -113,6 +87,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final categoriesNotifier = ref.watch(categoriesProvider.notifier);
+    final currentCategories = categoriesNotifier.getCategoriesByType(
+      _selectedType == TransactionType.expense ? CategoryType.expense : CategoryType.income,
+    );
 
     return Container(
       padding: EdgeInsets.only(
@@ -214,7 +192,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                   prefixIcon: Icon(Icons.category),
                 ),
                 hint: const Text('선택하세요'),
-                items: _currentCategories
+                items: currentCategories
                     .map((category) => DropdownMenuItem(
                           value: category,
                           child: Text(category),

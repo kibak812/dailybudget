@@ -333,7 +333,10 @@ class _TransactionEditModalSheetState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final categories = ref.watch(categoriesProvider);
+    final categoriesNotifier = ref.watch(categoriesProvider.notifier);
+    final categories = categoriesNotifier.getCategoriesByType(
+      _typeValue == TransactionType.expense ? CategoryType.expense : CategoryType.income,
+    );
 
     return Padding(
       padding: EdgeInsets.only(
@@ -369,7 +372,10 @@ class _TransactionEditModalSheetState
             ],
             selected: {_typeValue},
             onSelectionChanged: (value) {
-              setState(() => _typeValue = value.first);
+              setState(() {
+                _typeValue = value.first;
+                _categoryValue = null; // Reset category when type changes
+              });
             },
           ),
           const SizedBox(height: 16),

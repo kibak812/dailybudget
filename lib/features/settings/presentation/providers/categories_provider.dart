@@ -1,8 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Category type enum
+enum CategoryType {
+  expense,
+  income,
+}
+
 /// StateNotifierProvider for managing categories
-/// Categories are stored in SharedPreferences
+/// Categories are stored in SharedPreferences with type prefix (expense:/income:)
 final categoriesProvider = StateNotifierProvider<CategoriesNotifier, List<String>>((ref) {
   return CategoriesNotifier();
 });
@@ -17,8 +23,14 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
   /// SharedPreferences key for storing categories
   static const String _categoriesKey = 'categories';
 
-  /// Default categories
-  static const List<String> _defaultCategories = [
+  /// Prefix for expense categories
+  static const String _expensePrefix = 'expense:';
+
+  /// Prefix for income categories
+  static const String _incomePrefix = 'income:';
+
+  /// Default expense categories
+  static const List<String> _defaultExpenseCategories = [
     '식비',
     '교통',
     '쇼핑',
@@ -28,24 +40,81 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
     '기타',
   ];
 
+  /// Default income categories
+  static const List<String> _defaultIncomeCategories = [
+    '급여',
+    '용돈',
+    '보너스',
+    '기타',
+  ];
+
+  /// Get categories by type
+  List<String> getCategoriesByType(CategoryType type) {
+    final prefix = type == CategoryType.expense ? _expensePrefix : _incomePrefix;
+    return state
+        .where((cat) => cat.startsWith(prefix))
+        .map((cat) => cat.substring(prefix.length))
+        .toList();
+  }
+
+  /// Get display name from full category name (removes prefix)
+  String getDisplayName(String fullName) {
+    if (fullName.startsWith(_expensePrefix)) {
+      return fullName.substring(_expensePrefix.length);
+    } else if (fullName.startsWith(_incomePrefix)) {
+      return fullName.substring(_incomePrefix.length);
+    }
+    return fullName;
+  }
+
+  /// Get full category name with prefix
+  String getFullName(String displayName, CategoryType type) {
+    final prefix = type == CategoryType.expense ? _expensePrefix : _incomePrefix;
+    return '$prefix$displayName';
+  }
+
   /// Load categories from SharedPreferences
   /// If no categories exist, use default categories
+  /// Also handles migration of old categories without prefix
   Future<void> loadCategories() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final savedCategories = prefs.getStringList(_categoriesKey);
 
       if (savedCategories != null && savedCategories.isNotEmpty) {
-        state = savedCategories;
+        // Migrate old categories without prefix
+        final migratedCategories = savedCategories.map((cat) {
+          if (!cat.startsWith(_expensePrefix) && !cat.startsWith(_incomePrefix)) {
+            // Old category without prefix - add expense prefix
+            return '$_expensePrefix$cat';
+          }
+          return cat;
+        }).toList();
+
+        // Save migrated categories if any changes were made
+        if (migratedCategories.join(',') != savedCategories.join(',')) {
+          state = migratedCategories;
+          await _saveCategories();
+        } else {
+          state = savedCategories;
+        }
       } else {
         // Initialize with default categories
-        state = List.from(_defaultCategories);
+        final defaultCategories = [
+          ..._defaultExpenseCategories.map((cat) => '$_expensePrefix$cat'),
+          ..._defaultIncomeCategories.map((cat) => '$_incomePrefix$cat'),
+        ];
+        state = defaultCategories;
         await _saveCategories();
       }
     } catch (e) {
       print('Error loading categories: $e');
       // Fall back to default categories on error
-      state = List.from(_defaultCategories);
+      final defaultCategories = [
+        ..._defaultExpenseCategories.map((cat) => '$_expensePrefix$cat'),
+        ..._defaultIncomeCategories.map((cat) => '$_incomePrefix$cat'),
+      ];
+      state = defaultCategories;
     }
   }
 
@@ -59,56 +128,62 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
     }
   }
 
-  /// Add a new category
+  /// Add a new category with type
   /// Returns true if successful, false if category already exists
-  Future<bool> addCategory(String name) async {
+  Future<bool> addCategory(String name, CategoryType type) async {
     if (name.trim().isEmpty) {
       return false;
     }
 
     final trimmedName = name.trim();
+    final fullName = getFullName(trimmedName, type);
 
     // Check if category already exists
-    if (state.contains(trimmedName)) {
+    if (state.contains(fullName)) {
       return false;
     }
 
     // Add category
-    state = [...state, trimmedName];
+    state = [...state, fullName];
     await _saveCategories();
     return true;
   }
 
-  /// Delete a category
+  /// Delete a category by display name and type
   /// Returns true if successful, false if category doesn't exist
-  Future<bool> deleteCategory(String name) async {
-    if (!state.contains(name)) {
+  Future<bool> deleteCategory(String displayName, CategoryType type) async {
+    final fullName = getFullName(displayName, type);
+
+    if (!state.contains(fullName)) {
       return false;
     }
 
     // Remove category
-    state = state.where((category) => category != name).toList();
+    state = state.where((category) => category != fullName).toList();
     await _saveCategories();
     return true;
   }
 
   /// Update a category name
   /// Returns true if successful
-  Future<bool> updateCategory(String oldName, String newName) async {
-    if (!state.contains(oldName) || newName.trim().isEmpty) {
+  Future<bool> updateCategory(String oldDisplayName, String newDisplayName, CategoryType type) async {
+    final oldFullName = getFullName(oldDisplayName, type);
+
+    if (!state.contains(oldFullName) || newDisplayName.trim().isEmpty) {
       return false;
     }
 
-    final trimmedNewName = newName.trim();
+    final trimmedNewName = newDisplayName.trim();
+    final newFullName = getFullName(trimmedNewName, type);
 
     // Check if new name already exists (and it's not the same as old name)
-    if (oldName != trimmedNewName && state.contains(trimmedNewName)) {
+    if (oldFullName != newFullName && state.contains(newFullName)) {
       return false;
     }
 
     // Update category
     state = state.map((category) {
-      return category == oldName ? trimmedNewName : category;
+      return category == oldFullName ? newFullName : category;
     }).toList();
 
     await _saveCategories();
@@ -117,7 +192,11 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
 
   /// Reset categories to default
   Future<void> resetToDefaults() async {
-    state = List.from(_defaultCategories);
+    final defaultCategories = [
+      ..._defaultExpenseCategories.map((cat) => '$_expensePrefix$cat'),
+      ..._defaultIncomeCategories.map((cat) => '$_incomePrefix$cat'),
+    ];
+    state = defaultCategories;
     await _saveCategories();
   }
 }
