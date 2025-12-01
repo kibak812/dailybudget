@@ -386,7 +386,7 @@ class DataManagementSection extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
-            '데이터는 브라우저에 저장됩니다. 캐시 삭제 시 데이터가 사라질 수 있습니다.',
+            '데이터는 기기에 안전하게 저장됩니다. 앱 삭제 시 데이터가 사라지므로 정기적으로 백업하세요.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.grey[400],
                 ),

@@ -234,172 +234,223 @@ class TransactionEditSheet extends ConsumerWidget {
   }
 
   void _showEditDialog(BuildContext context, WidgetRef ref) {
-    final amountController = TextEditingController(
-      text: Formatters.formatNumberInput(transaction.amount.toString()),
-    );
-    final memoController = TextEditingController(text: transaction.memo ?? '');
-    final categories = ref.read(categoriesProvider);
-
-    String? categoryValue = transaction.category;
-    TransactionType typeValue = transaction.type;
-    DateTime selectedDate = DateTime.parse(transaction.date);
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 24,
-            right: 24,
-            top: 24,
+      builder: (context) => TransactionEditModalSheet(transaction: transaction),
+    );
+  }
+}
+
+/// Separate modal sheet widget for editing transactions with proper Riverpod context
+class TransactionEditModalSheet extends ConsumerStatefulWidget {
+  final TransactionModel transaction;
+
+  const TransactionEditModalSheet({
+    super.key,
+    required this.transaction,
+  });
+
+  @override
+  ConsumerState<TransactionEditModalSheet> createState() =>
+      _TransactionEditModalSheetState();
+}
+
+class _TransactionEditModalSheetState
+    extends ConsumerState<TransactionEditModalSheet> {
+  late final TextEditingController _amountController;
+  late final TextEditingController _memoController;
+  late String? _categoryValue;
+  late TransactionType _typeValue;
+  late DateTime _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _amountController = TextEditingController(
+      text: Formatters.formatNumberInput(widget.transaction.amount.toString()),
+    );
+    _memoController = TextEditingController(
+      text: widget.transaction.memo ?? '',
+    );
+    _categoryValue = widget.transaction.category;
+    _typeValue = widget.transaction.type;
+    _selectedDate = DateTime.parse(widget.transaction.date);
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _memoController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleUpdate() async {
+    try {
+      final amount = Formatters.parseFormattedNumber(_amountController.text);
+      if (amount <= 0) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('올바른 금액을 입력해주세요')),
+          );
+        }
+        return;
+      }
+
+      final updates = <String, dynamic>{
+        'type': _typeValue,
+        'amount': amount,
+        'date': Formatters.formatDateISO(_selectedDate),
+        'category': (_categoryValue ?? '').isEmpty ? null : _categoryValue,
+        'memo': _memoController.text.trim().isEmpty
+            ? null
+            : _memoController.text.trim(),
+      };
+
+      await ref.read(transactionProvider.notifier).updateTransaction(
+            widget.transaction.id,
+            updates,
+          );
+
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('거래가 수정되었습니다')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('수정 중 오류가 발생했습니다: $e')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final categories = ref.watch(categoriesProvider);
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 24,
+        right: 24,
+        top: 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            '거래 수정',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
           ),
-          child: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    '거래 수정',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  SegmentedButton<TransactionType>(
-                    segments: const [
-                      ButtonSegment(
-                        value: TransactionType.expense,
-                        label: Text('지출'),
-                        icon: Icon(Icons.remove_circle_outline),
-                      ),
-                      ButtonSegment(
-                        value: TransactionType.income,
-                        label: Text('수입'),
-                        icon: Icon(Icons.add_circle_outline),
-                      ),
-                    ],
-                    selected: {typeValue},
-                    onSelectionChanged: (value) {
-                      setState(() => typeValue = value.first);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: amountController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: '금액',
-                      hintText: '0',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      final formatted = Formatters.formatNumberInput(value);
-                      if (formatted != value) {
-                        amountController.value = TextEditingValue(
-                          text: formatted,
-                          selection: TextSelection.collapsed(offset: formatted.length),
-                        );
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    value: categoryValue,
-                    decoration: const InputDecoration(
-                      labelText: '카테고리 (선택)',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: [
-                      if (categoryValue != null && !categories.contains(categoryValue))
-                        DropdownMenuItem(
-                          value: categoryValue,
-                          child: Text(categoryValue!),
-                        ),
-                      ...categories.map(
-                        (c) => DropdownMenuItem(
-                          value: c,
-                          child: Text(c),
-                        ),
-                      ),
-                    ],
-                    onChanged: (value) => setState(() => categoryValue = value),
-                    hint: const Text('선택하세요'),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: memoController,
-                    decoration: const InputDecoration(
-                      labelText: '메모 (선택)',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: selectedDate,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                      );
-                      if (picked != null) {
-                        setState(() => selectedDate = picked);
-                      }
-                    },
-                    icon: const Icon(Icons.calendar_today),
-                    label: Text('날짜: ${Formatters.formatDateFull(Formatters.formatDateISO(selectedDate))}'),
-                  ),
-                  const SizedBox(height: 20),
-                  FilledButton(
-                    onPressed: () async {
-                      final amount = Formatters.parseFormattedNumber(amountController.text);
-                      if (amount <= 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('올바른 금액을 입력해주세요')),
-                        );
-                        return;
-                      }
-
-                      final updates = <String, dynamic>{
-                        'type': typeValue,
-                        'amount': amount,
-                        'date': Formatters.formatDateISO(selectedDate),
-                        'category': (categoryValue ?? '').isEmpty ? null : categoryValue,
-                        'memo': memoController.text.trim().isEmpty ? null : memoController.text.trim(),
-                      };
-
-                      await ref.read(transactionProvider.notifier).updateTransaction(
-                            transaction.id,
-                            updates,
-                          );
-
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('거래가 수정되었습니다')),
-                        );
-                      }
-                    },
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: const Text('수정 완료'),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-              );
+          const SizedBox(height: 16),
+          SegmentedButton<TransactionType>(
+            segments: const [
+              ButtonSegment(
+                value: TransactionType.expense,
+                label: Text('지출'),
+                icon: Icon(Icons.remove_circle_outline),
+              ),
+              ButtonSegment(
+                value: TransactionType.income,
+                label: Text('수입'),
+                icon: Icon(Icons.add_circle_outline),
+              ),
+            ],
+            selected: {_typeValue},
+            onSelectionChanged: (value) {
+              setState(() => _typeValue = value.first);
             },
           ),
-        );
-      },
+          const SizedBox(height: 16),
+          TextField(
+            controller: _amountController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: '금액',
+              hintText: '0',
+              border: OutlineInputBorder(),
+            ),
+            onChanged: (value) {
+              final formatted = Formatters.formatNumberInput(value);
+              if (formatted != value) {
+                _amountController.value = TextEditingValue(
+                  text: formatted,
+                  selection: TextSelection.collapsed(offset: formatted.length),
+                );
+              }
+            },
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            initialValue: _categoryValue,
+            decoration: const InputDecoration(
+              labelText: '카테고리 (선택)',
+              border: OutlineInputBorder(),
+            ),
+            items: [
+              if (_categoryValue != null && !categories.contains(_categoryValue))
+                DropdownMenuItem(
+                  value: _categoryValue,
+                  child: Text(_categoryValue!),
+                ),
+              ...categories.map(
+                (c) => DropdownMenuItem(
+                  value: c,
+                  child: Text(c),
+                ),
+              ),
+            ],
+            onChanged: (value) => setState(() => _categoryValue = value),
+            hint: const Text('선택하세요'),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _memoController,
+            decoration: const InputDecoration(
+              labelText: '메모 (선택)',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 2,
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: _selectedDate,
+                firstDate: DateTime(2020),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
+              );
+              if (picked != null) {
+                setState(() => _selectedDate = picked);
+              }
+            },
+            icon: const Icon(Icons.calendar_today),
+            label: Text(
+                '날짜: ${Formatters.formatDateFull(Formatters.formatDateISO(_selectedDate))}'),
+          ),
+          const SizedBox(height: 20),
+          FilledButton(
+            onPressed: _handleUpdate,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: const Text('수정 완료'),
+          ),
+          const SizedBox(height: 12),
+        ],
+      ),
     );
   }
 }
