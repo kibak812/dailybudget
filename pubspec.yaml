@@ -43,6 +43,9 @@ dependencies:
   # Charts
   fl_chart: ^0.69.0
 
+  # Calendar
+  table_calendar: ^3.1.2
+
   # Widgets & Notifications (Phase 5 - Commented out for now)
   # home_widget: ^0.6.0
   # flutter_local_notifications: ^17.2.2

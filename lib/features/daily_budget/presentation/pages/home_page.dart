@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
-import 'package:daily_pace/features/budget/presentation/providers/current_month_provider.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/today_summary_card.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/today_spent_card.dart';
-import 'package:daily_pace/features/daily_budget/presentation/widgets/quick_add_card.dart';
+import 'package:daily_pace/features/daily_budget/presentation/widgets/daily_budget_trend_chart.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/budget_info_card.dart';
 import 'package:daily_pace/app/router/app_router.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/add_transaction_sheet.dart';
@@ -73,8 +72,8 @@ class HomePage extends ConsumerWidget {
             builder: (context) => const AddTransactionSheet(),
           );
         },
-        child: const Icon(Icons.add),
         tooltip: '거래 추가',
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -100,8 +99,8 @@ class HomePage extends ConsumerWidget {
           TodaySpentCard(budgetData: dailyBudget),
           const SizedBox(height: 16),
 
-          // Quick Add Form
-          const QuickAddCard(),
+          // Daily Budget Trend Chart
+          const DailyBudgetTrendChart(),
           const SizedBox(height: 16),
 
           // Budget Info

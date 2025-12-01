@@ -6,6 +6,7 @@ import 'package:daily_pace/features/transaction/data/models/transaction_model.da
 import 'package:daily_pace/features/transaction/presentation/widgets/transaction_list_item.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/transaction_edit_sheet.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/add_transaction_sheet.dart';
+import 'package:daily_pace/features/transaction/presentation/widgets/transaction_calendar.dart';
 
 /// Transactions page
 /// Displays list of all transactions grouped by date with filtering and management
@@ -19,6 +20,8 @@ class TransactionsPage extends ConsumerStatefulWidget {
 class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   String _searchKeyword = '';
   TransactionType? _typeFilter;
+  DateTime _focusedDay = DateTime.now();
+  DateTime _selectedDay = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +30,18 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     // Filter transactions for current month
     final monthTransactions = _filterByMonth(transactions, currentMonth);
-    final filteredTransactions = _applyFilters(monthTransactions);
 
-    // Group by date
-    final grouped = _groupByDate(filteredTransactions);
+    // Filter by selected date
+    final selectedDateStr = Formatters.formatDateISO(_selectedDay);
+    final dateTransactions = monthTransactions
+        .where((t) => t.date == selectedDateStr)
+        .toList();
 
-    // Calculate total spent
-    final totalSpent = _calculateTotalSpent(filteredTransactions);
+    // Apply additional filters
+    final filteredTransactions = _applyFilters(dateTransactions);
+
+    // Calculate total spent for the month
+    final totalSpent = _calculateTotalSpent(monthTransactions);
 
     return Scaffold(
       appBar: _buildAppBar(context, totalSpent),
@@ -41,7 +49,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         onRefresh: () async {
           await ref.read(transactionProvider.notifier).loadTransactions();
         },
-        child: _buildBody(context, grouped, filteredTransactions),
+        child: _buildBody(context, monthTransactions, filteredTransactions),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddTransactionSheet(context),
@@ -84,106 +92,85 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
   Widget _buildBody(
     BuildContext context,
-    Map<String, List<TransactionModel>> grouped,
     List<TransactionModel> monthTransactions,
+    List<TransactionModel> filteredTransactions,
   ) {
-    if (monthTransactions.isEmpty) {
-      return _buildEmptyState(context);
-    }
-
-    // Sort dates in descending order (newest first)
-    final sortedDates = grouped.keys.toList()
-      ..sort((a, b) => b.compareTo(a));
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: sortedDates.length + (_hasActiveFilters ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (_hasActiveFilters) {
-          if (index == 0) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  if (_searchKeyword.isNotEmpty)
-                    InputChip(
-                      label: Text('검색: $_searchKeyword'),
-                      onDeleted: () => setState(() => _searchKeyword = ''),
-                    ),
-                  if (_typeFilter != null)
-                    InputChip(
-                      label: Text(_typeFilter == TransactionType.expense ? '필터: 지출' : '필터: 수입'),
-                      onDeleted: () => setState(() => _typeFilter = null),
-                    ),
-                ],
-              ),
-            );
-          }
-          index -= 1;
-        }
-
-        final date = sortedDates[index];
-        final dateTransactions = grouped[date]!;
-        final dayTotal = _calculateDayTotal(dateTransactions);
-
-        return _buildDateSection(
-          context,
-          date,
-          dateTransactions,
-          dayTotal,
-        );
-      },
-    );
-  }
-
-  Widget _buildDateSection(
-    BuildContext context,
-    String date,
-    List<TransactionModel> transactions,
-    int dayTotal,
-  ) {
-    final theme = Theme.of(context);
-
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Date header
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${Formatters.formatDate(date)} (${_getDayOfWeek(date)})',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                Formatters.formatCurrency(dayTotal),
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+        // Calendar widget
+        TransactionCalendar(
+          focusedDay: _focusedDay,
+          selectedDay: _selectedDay,
+          transactions: monthTransactions,
+          onDaySelected: (selectedDay, focusedDay) {
+            setState(() {
+              _selectedDay = selectedDay;
+              _focusedDay = focusedDay;
+            });
+          },
+          onPageChanged: (focusedDay) {
+            setState(() {
+              _focusedDay = focusedDay;
+            });
+          },
+        ),
+
+        // Active filters chips
+        if (_hasActiveFilters)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (_searchKeyword.isNotEmpty)
+                  InputChip(
+                    label: Text('검색: $_searchKeyword'),
+                    onDeleted: () => setState(() => _searchKeyword = ''),
+                  ),
+                if (_typeFilter != null)
+                  InputChip(
+                    label: Text(_typeFilter == TransactionType.expense ? '필터: 지출' : '필터: 수입'),
+                    onDeleted: () => setState(() => _typeFilter = null),
+                  ),
+              ],
+            ),
+          ),
+
+        // Selected date header
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            '${Formatters.formatDate(Formatters.formatDateISO(_selectedDay))} (${_getDayOfWeek(Formatters.formatDateISO(_selectedDay))})',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
 
-        // Transaction list for this date
-        ...transactions.map((transaction) => TransactionListItem(
-              transaction: transaction,
-              onTap: () => _showEditModalDirectly(context, transaction),
-              onDismissed: () => _handleDelete(transaction),
-            )),
-
-        const SizedBox(height: 16),
+        // Transaction list for selected date
+        Expanded(
+          child: filteredTransactions.isEmpty
+              ? _buildEmptyDateState(context)
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: filteredTransactions.length,
+                  itemBuilder: (context, index) {
+                    final transaction = filteredTransactions[index];
+                    return TransactionListItem(
+                      transaction: transaction,
+                      onTap: () => _showEditModalDirectly(context, transaction),
+                      onDismissed: () => _handleDelete(transaction),
+                    );
+                  },
+                ),
+        ),
       ],
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyDateState(BuildContext context) {
     final theme = Theme.of(context);
 
     return Center(
@@ -193,30 +180,23 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.receipt_long_outlined,
-              size: 80,
+              Icons.event_busy_outlined,
+              size: 64,
               color: theme.colorScheme.outline,
             ),
             const SizedBox(height: 16),
             Text(
-              '아직 거래 내역이 없습니다',
-              style: theme.textTheme.titleLarge?.copyWith(
+              '이 날짜에 거래 내역이 없습니다',
+              style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              '홈 화면에서 지출을 기록해보세요',
+              '+ 버튼을 눌러 거래를 추가해보세요',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.outline,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: () => _showAddTransactionSheet(context),
-              icon: const Icon(Icons.add),
-              label: const Text('거래 추가하기'),
             ),
           ],
         ),
@@ -235,29 +215,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       ..sort((a, b) => b.date.compareTo(a.date)); // Newest first
   }
 
-  /// Group transactions by date
-  Map<String, List<TransactionModel>> _groupByDate(
-    List<TransactionModel> transactions,
-  ) {
-    final Map<String, List<TransactionModel>> grouped = {};
-    for (final t in transactions) {
-      if (!grouped.containsKey(t.date)) {
-        grouped[t.date] = [];
-      }
-      grouped[t.date]!.add(t);
-    }
-    return grouped;
-  }
-
   /// Calculate total spent (expenses only)
   int _calculateTotalSpent(List<TransactionModel> transactions) {
-    return transactions
-        .where((t) => t.type == TransactionType.expense)
-        .fold<int>(0, (sum, t) => sum + t.amount);
-  }
-
-  /// Calculate day total (expenses only)
-  int _calculateDayTotal(List<TransactionModel> transactions) {
     return transactions
         .where((t) => t.type == TransactionType.expense)
         .fold<int>(0, (sum, t) => sum + t.amount);
