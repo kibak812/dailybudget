@@ -17,6 +17,9 @@ class TransactionsPage extends ConsumerStatefulWidget {
 }
 
 class _TransactionsPageState extends ConsumerState<TransactionsPage> {
+  String _searchKeyword = '';
+  TransactionType? _typeFilter;
+
   @override
   Widget build(BuildContext context) {
     final currentMonth = ref.watch(currentMonthProvider);
@@ -24,12 +27,13 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     // Filter transactions for current month
     final monthTransactions = _filterByMonth(transactions, currentMonth);
+    final filteredTransactions = _applyFilters(monthTransactions);
 
     // Group by date
-    final grouped = _groupByDate(monthTransactions);
+    final grouped = _groupByDate(filteredTransactions);
 
     // Calculate total spent
-    final totalSpent = _calculateTotalSpent(monthTransactions);
+    final totalSpent = _calculateTotalSpent(filteredTransactions);
 
     return Scaffold(
       appBar: _buildAppBar(context, totalSpent),
@@ -37,7 +41,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         onRefresh: () async {
           await ref.read(transactionProvider.notifier).loadTransactions();
         },
-        child: _buildBody(context, grouped, monthTransactions),
+        child: _buildBody(context, grouped, filteredTransactions),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddTransactionSheet(context),
@@ -68,21 +72,11 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       actions: [
         IconButton(
           icon: const Icon(Icons.search),
-          onPressed: () {
-            // TODO: Implement search
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('검색 기능은 추후 구현 예정입니다')),
-            );
-          },
+          onPressed: () => _showSearchDialog(context),
         ),
         IconButton(
           icon: const Icon(Icons.filter_list),
-          onPressed: () {
-            // TODO: Implement filters
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('필터 기능은 추후 구현 예정입니다')),
-            );
-          },
+          onPressed: () => _showFilterSheet(context),
         ),
       ],
     );
@@ -103,8 +97,33 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: sortedDates.length,
+      itemCount: sortedDates.length + (_hasActiveFilters ? 1 : 0),
       itemBuilder: (context, index) {
+        if (_hasActiveFilters) {
+          if (index == 0) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (_searchKeyword.isNotEmpty)
+                    InputChip(
+                      label: Text('검색: $_searchKeyword'),
+                      onDeleted: () => setState(() => _searchKeyword = ''),
+                    ),
+                  if (_typeFilter != null)
+                    InputChip(
+                      label: Text(_typeFilter == TransactionType.expense ? '필터: 지출' : '필터: 수입'),
+                      onDeleted: () => setState(() => _typeFilter = null),
+                    ),
+                ],
+              ),
+            );
+          }
+          index -= 1;
+        }
+
         final date = sortedDates[index];
         final dateTransactions = grouped[date]!;
         final dayTotal = _calculateDayTotal(dateTransactions);
@@ -289,5 +308,110 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         const SnackBar(content: Text('거래가 삭제되었습니다')),
       );
     }
+  }
+
+  /// Apply search keyword and type filters
+  List<TransactionModel> _applyFilters(List<TransactionModel> transactions) {
+    return transactions.where((t) {
+      final matchesType = _typeFilter == null || t.type == _typeFilter;
+      final matchesSearch = _searchKeyword.isEmpty || _matchesSearch(t, _searchKeyword);
+      return matchesType && matchesSearch;
+    }).toList();
+  }
+
+  bool get _hasActiveFilters => _searchKeyword.isNotEmpty || _typeFilter != null;
+
+  bool _matchesSearch(TransactionModel transaction, String keyword) {
+    final query = keyword.toLowerCase();
+    final numericQuery = query.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if ((transaction.memo ?? '').toLowerCase().contains(query)) return true;
+    if ((transaction.category ?? '').toLowerCase().contains(query)) return true;
+    if (numericQuery.isNotEmpty && transaction.amount.toString().contains(numericQuery)) return true;
+
+    return false;
+  }
+
+  /// Open search dialog and save keyword
+  Future<void> _showSearchDialog(BuildContext context) async {
+    final controller = TextEditingController(text: _searchKeyword);
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('거래 검색'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: '메모, 카테고리, 금액으로 검색',
+          ),
+          autofocus: true,
+          onSubmitted: (value) => Navigator.of(context).pop(value.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(''),
+            child: const Text('초기화'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: const Text('검색'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        _searchKeyword = result;
+      });
+    }
+  }
+
+  /// Open filter chooser (all/expense/income)
+  Future<void> _showFilterSheet(BuildContext context) async {
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.all_inclusive),
+              title: const Text('전체 보기'),
+              onTap: () => Navigator.of(context).pop('all'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.remove_circle_outline),
+              title: const Text('지출만 보기'),
+              onTap: () => Navigator.of(context).pop('expense'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.add_circle_outline),
+              title: const Text('수입만 보기'),
+              onTap: () => Navigator.of(context).pop('income'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (!mounted || selected == null) return;
+
+    setState(() {
+      switch (selected) {
+        case 'expense':
+          _typeFilter = TransactionType.expense;
+          break;
+        case 'income':
+          _typeFilter = TransactionType.income;
+          break;
+        default:
+          _typeFilter = null;
+      }
+    });
   }
 }

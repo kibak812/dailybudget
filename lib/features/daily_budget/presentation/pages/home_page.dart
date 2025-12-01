@@ -7,6 +7,9 @@ import 'package:daily_pace/features/daily_budget/presentation/widgets/today_summ
 import 'package:daily_pace/features/daily_budget/presentation/widgets/today_spent_card.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/quick_add_card.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/budget_info_card.dart';
+import 'package:daily_pace/app/router/app_router.dart';
+import 'package:daily_pace/features/transaction/presentation/widgets/add_transaction_sheet.dart';
+import 'package:go_router/go_router.dart';
 
 /// Home page - Daily Budget Overview
 /// Displays today's budget, remaining amount, and quick actions
@@ -60,12 +63,14 @@ class HomePage extends ConsumerWidget {
       body: _buildContent(context, ref, dailyBudget),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Navigate to add transaction page or show bottom sheet
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('거래 추가 기능은 곧 구현됩니다'),
-              duration: Duration(seconds: 2),
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             ),
+            builder: (context) => const AddTransactionSheet(),
           );
         },
         child: const Icon(Icons.add),
@@ -140,13 +145,7 @@ class HomePage extends ConsumerWidget {
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () {
-                // TODO: Navigate to budget settings or show dialog
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('예산 설정 기능은 곧 구현됩니다'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                context.go(AppRouter.settingsPath);
               },
               icon: const Icon(Icons.add),
               label: const Text('예산 설정하기'),

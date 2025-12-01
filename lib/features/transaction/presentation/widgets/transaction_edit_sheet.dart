@@ -234,10 +234,172 @@ class TransactionEditSheet extends ConsumerWidget {
   }
 
   void _showEditDialog(BuildContext context, WidgetRef ref) {
-    // TODO: Implement edit dialog or navigate to edit page
-    // For now, just show a placeholder snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('수정 기능은 추후 구현 예정입니다')),
+    final amountController = TextEditingController(
+      text: Formatters.formatNumberInput(transaction.amount.toString()),
+    );
+    final memoController = TextEditingController(text: transaction.memo ?? '');
+    final categories = ref.read(categoriesProvider);
+
+    String? categoryValue = transaction.category;
+    TransactionType typeValue = transaction.type;
+    DateTime selectedDate = DateTime.parse(transaction.date);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 24,
+            right: 24,
+            top: 24,
+          ),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    '거래 수정',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  SegmentedButton<TransactionType>(
+                    segments: const [
+                      ButtonSegment(
+                        value: TransactionType.expense,
+                        label: Text('지출'),
+                        icon: Icon(Icons.remove_circle_outline),
+                      ),
+                      ButtonSegment(
+                        value: TransactionType.income,
+                        label: Text('수입'),
+                        icon: Icon(Icons.add_circle_outline),
+                      ),
+                    ],
+                    selected: {typeValue},
+                    onSelectionChanged: (value) {
+                      setState(() => typeValue = value.first);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: amountController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: '금액',
+                      hintText: '0',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      final formatted = Formatters.formatNumberInput(value);
+                      if (formatted != value) {
+                        amountController.value = TextEditingValue(
+                          text: formatted,
+                          selection: TextSelection.collapsed(offset: formatted.length),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: categoryValue,
+                    decoration: const InputDecoration(
+                      labelText: '카테고리 (선택)',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: [
+                      if (categoryValue != null && !categories.contains(categoryValue))
+                        DropdownMenuItem(
+                          value: categoryValue,
+                          child: Text(categoryValue!),
+                        ),
+                      ...categories.map(
+                        (c) => DropdownMenuItem(
+                          value: c,
+                          child: Text(c),
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) => setState(() => categoryValue = value),
+                    hint: const Text('선택하세요'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: memoController,
+                    decoration: const InputDecoration(
+                      labelText: '메모 (선택)',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 2,
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: selectedDate,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (picked != null) {
+                        setState(() => selectedDate = picked);
+                      }
+                    },
+                    icon: const Icon(Icons.calendar_today),
+                    label: Text('날짜: ${Formatters.formatDateFull(Formatters.formatDateISO(selectedDate))}'),
+                  ),
+                  const SizedBox(height: 20),
+                  FilledButton(
+                    onPressed: () async {
+                      final amount = Formatters.parseFormattedNumber(amountController.text);
+                      if (amount <= 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('올바른 금액을 입력해주세요')),
+                        );
+                        return;
+                      }
+
+                      final updates = <String, dynamic>{
+                        'type': typeValue,
+                        'amount': amount,
+                        'date': Formatters.formatDateISO(selectedDate),
+                        'category': (categoryValue ?? '').isEmpty ? null : categoryValue,
+                        'memo': memoController.text.trim().isEmpty ? null : memoController.text.trim(),
+                      };
+
+                      await ref.read(transactionProvider.notifier).updateTransaction(
+                            transaction.id,
+                            updates,
+                          );
+
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('거래가 수정되었습니다')),
+                        );
+                      }
+                    },
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: const Text('수정 완료'),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
