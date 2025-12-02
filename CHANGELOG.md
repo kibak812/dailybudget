@@ -1,0 +1,145 @@
+# Changelog
+
+All notable changes to the Daily Pace project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+---
+
+## [Phase 5] - 2025-12-02
+
+### Summary
+Major improvements to budget calculation system, UI/UX enhancements, and statistics reorganization. The app now uses net spending (expenses - income) as the basis for budget calculations, providing more accurate daily budget recommendations.
+
+### Added
+
+#### Net Spending Calculation
+- Added `totalIncome` field to `DailyBudgetData` model for tracking income separately
+- Added `getIncomeUntilDate()` method in `DailyBudgetService` to calculate cumulative income
+- Added `getNetSpentUntilDate()` method in `DailyBudgetService` to calculate net spending (expenses - income)
+- Added detailed breakdown card in Statistics page showing total expenses and total income separately
+
+#### Statistics Page Enhancement
+- Added "순지출" (net spending) summary card replacing "총 지출"
+- Added detailed breakdown card with:
+  - 총 지출 (Total Expenses) with red indicator
+  - 총 수입 (Total Income) with green indicator
+- Statistics now properly organized in the Statistics tab instead of Transactions page
+
+#### Calendar UI Improvements
+- Income and expenses now displayed separately on calendar
+- Expenses shown with red background and "-" prefix
+- Income shown with green background and "+" prefix
+- Changed from horizontal to vertical marker layout for better readability
+- Increased row height from 52px to 60px
+- Increased font size from 7.5 to 10.0
+- Improved spacing and padding for better touch targets
+
+### Changed
+
+#### Budget Calculation Logic
+- **BREAKING**: Changed daily budget calculation from expense-only to net spending basis
+  - Old formula: `(monthlyBudget - totalExpenses) / remainingDays`
+  - New formula: `(monthlyBudget - netSpending) / remainingDays`
+  - Net spending = Total Expenses - Total Income
+- This change means income now increases available daily budget
+
+#### Statistics Display Location
+- Moved total spent/income/net spending statistics from Transactions page to Statistics page
+- Removed AppBar bottom section from Transactions page (freed up vertical space)
+- Changed "총 지출" card to "순지출" card in Statistics page
+- Remaining budget calculation now uses net spending
+
+#### Category Management
+- Fixed Riverpod state management pattern in category lists
+- Changed from `ref.watch(provider.notifier)` to `ref.watch(provider)` + `ref.read(provider.notifier)`
+- Categories now update immediately when added without requiring manual refresh
+
+### Removed
+
+- Removed graph legend (양수/0) from daily budget trend chart for cleaner UI
+- Removed statistics AppBar section from Transactions page
+- Removed unused calculation methods from TransactionsPage:
+  - `_calculateTotalSpent()`
+  - `_calculateTotalIncome()`
+  - `_calculateNetSpending()`
+
+### Fixed
+
+- Fixed category dropdown lists not updating immediately after adding new category
+  - Affected components: `CategoryManagementSection`, `AddTransactionSheet`, `TransactionEditModalSheet`
+  - Root cause: Watching notifier instead of state in Riverpod
+- Fixed calendar markers overlapping when both income and expense exist on same day
+  - Solution: Changed to vertical layout with proper spacing
+
+### Technical Details
+
+#### Files Modified
+
+**Core Business Logic:**
+- `lib/features/daily_budget/domain/models/daily_budget_data.dart`
+  - Added `totalIncome` field
+- `lib/features/daily_budget/domain/services/daily_budget_service.dart`
+  - Added income tracking methods
+  - Changed calculation basis to net spending
+- `lib/features/daily_budget/presentation/providers/daily_budget_provider.dart`
+  - Updated to use new calculation methods
+
+**UI Components:**
+- `lib/features/statistics/presentation/pages/statistics_page.dart`
+  - Added detailed breakdown card
+  - Changed summary card from expenses to net spending
+  - Updated layout to always use Column
+- `lib/features/transaction/presentation/pages/transactions_page.dart`
+  - Removed AppBar statistics section
+  - Simplified AppBar to title and actions only
+- `lib/features/transaction/presentation/widgets/transaction_calendar.dart`
+  - Increased rowHeight to 60px
+  - Changed marker layout from Row to Column
+  - Increased font size to 10.0
+  - Added income display with green styling
+
+**State Management Fixes:**
+- `lib/features/settings/presentation/widgets/category_management_section.dart`
+- `lib/features/transaction/presentation/widgets/add_transaction_sheet.dart`
+- `lib/features/transaction/presentation/widgets/transaction_edit_sheet.dart`
+
+**Visual Enhancements:**
+- `lib/features/daily_budget/presentation/widgets/daily_budget_trend_chart.dart`
+  - Removed legend display
+- `lib/features/daily_budget/presentation/pages/home_page.dart`
+  - Updated to work with new data model
+
+#### Migration Notes
+
+For users upgrading from Phase 4:
+- Daily budget values may differ due to new net spending calculation
+- If you have income transactions, your daily budget will now be higher (more accurate)
+- Statistics are now only visible in the Statistics tab, not in Transactions tab
+- Calendar now shows both income and expenses visually distinguished by color
+
+### Testing
+
+- ✓ Build successful: `flutter build apk --debug`
+- ✓ No compilation errors
+- ✓ Riverpod state management working correctly
+- ✓ Calendar displays both income and expenses without overlap
+- ✓ Statistics page shows all metrics correctly
+- ✓ Budget calculations accurate with net spending basis
+
+---
+
+## [Phase 4] - Previous
+
+- Added notification button removal
+- Added calendar date auto-input
+- Added graph period filtering
+
+---
+
+## [Initial Commit]
+
+- Initial Flutter project setup
+- Basic budget tracking functionality
+- Transaction management
+- Statistics and reporting
