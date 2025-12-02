@@ -195,11 +195,16 @@ class DailyBudgetService {
     final end = endDay ?? currentDay;
 
     for (int day = start; day <= end; day++) {
-      final dateStr = _formatDate(year, month, day);
-      final netSpentUntilDay = getNetSpentUntilDate(transactions, dateStr);
+      // Calculate daily budget based on spending until the PREVIOUS day
+      // This matches the new logic where today's budget doesn't include today's transactions
+      final previousDayStr = day > 1 ? _formatDate(year, month, day - 1) : null;
+      final netSpentUntilPreviousDay = previousDayStr != null
+          ? getNetSpentUntilDate(transactions, previousDayStr)
+          : 0;
+
       final dailyBudget = calculateDailyBudget(
         budget.amount,
-        netSpentUntilDay,
+        netSpentUntilPreviousDay,
         daysInMonth,
         day,
       );

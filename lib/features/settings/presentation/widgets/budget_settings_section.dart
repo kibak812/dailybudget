@@ -154,6 +154,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
                             ),
                           );
                         }
+                        setState(() {}); // Trigger rebuild to update button state
                       },
                     ),
                   ),

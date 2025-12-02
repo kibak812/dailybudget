@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/recurring/data/models/recurring_transaction_model.dart';
+import 'package:daily_pace/features/settings/presentation/providers/categories_provider.dart';
 
 /// Recurring Transaction Modal Widget
 /// Add or edit recurring transactions
@@ -147,11 +148,16 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
 
   @override
   Widget build(BuildContext context) {
-    final categories = ref.watch(categoriesProvider);
+    ref.watch(categoriesProvider);
 
-    // Set default category if not set
-    if (_category == null && categories.isNotEmpty) {
-      _category = categories.first;
+    // Get categories based on selected type
+    final categories = ref.read(categoriesProvider.notifier).getCategoriesByType(
+      _type == RecurringTransactionType.expense ? CategoryType.expense : CategoryType.income,
+    );
+
+    // Set default category if not set or if current category is not in filtered list
+    if (_category == null || !categories.contains(_category)) {
+      _category = categories.isNotEmpty ? categories.first : null;
     }
 
     return Dialog(
@@ -198,6 +204,8 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
                   onSelectionChanged: (Set<RecurringTransactionType> newSelection) {
                     setState(() {
                       _type = newSelection.first;
+                      // Reset category when type changes
+                      _category = null;
                     });
                   },
                 ),

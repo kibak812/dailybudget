@@ -6,6 +6,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 7] - 2025-12-02
+
+### Summary
+Bug fixes for budget settings, recurring transaction category filtering, daily budget trend chart calculation, and app name update.
+
+### Fixed
+
+#### Budget Settings
+- **Fixed save button activation issue** in budget settings
+  - Save button now activates immediately when monthly budget is entered
+  - Added `setState()` call in TextField's `onChanged` callback to trigger UI rebuild
+  - Location: `lib/features/settings/presentation/widgets/budget_settings_section.dart:157`
+
+#### Recurring Transaction Modal
+- **Fixed category dropdown filtering** in recurring transaction modal
+  - Category dropdown now shows only relevant categories based on selected type
+  - When "지출" is selected, only expense categories appear
+  - When "수입" is selected, only income categories appear
+  - Category selection resets when type is changed to prevent invalid category selection
+  - Added import for `CategoryType` enum
+  - Location: `lib/features/settings/presentation/widgets/recurring_modal.dart`
+
+#### Daily Budget Trend Chart
+- **Fixed calculation logic** in daily budget history chart
+  - Chart now uses the new calculation logic that excludes current day's transactions
+  - Each day's budget is calculated based on spending until the PREVIOUS day
+  - This matches the current logic where today's available budget doesn't include today's transactions
+  - Example: Day 3's budget = (Monthly budget - Day 1-2 spending) / Remaining days
+  - Location: `lib/features/daily_budget/domain/services/daily_budget_service.dart:197-213`
+
+### Changed
+
+#### App Name
+- **Updated app name** from "daily_pace" to "DailyPace"
+  - Android: Updated `android:label` in AndroidManifest.xml
+  - iOS: Updated `CFBundleDisplayName` and `CFBundleName` in Info.plist
+  - Provides more professional and consistent branding
+
+---
+
 ## [Phase 6] - 2025-12-02
 
 ### Summary
