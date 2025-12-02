@@ -98,16 +98,32 @@ Daily Pace uses **net spending** as the foundation for budget calculations:
 
 ```dart
 Net Spending = Total Expenses - Total Income
-Daily Budget = (Monthly Budget - Net Spent) / Remaining Days
+Daily Budget = (Monthly Budget - Net Spent Until Yesterday) / Remaining Days
 ```
 
-**Example:**
+**Important:** The app uses **yesterday's net spending** to calculate today's daily budget. This provides:
+- ✅ **Stable budget throughout the day** - Your daily budget doesn't change as you spend
+- ✅ **Predictable planning** - You know your budget target for the entire day
+- ✅ **Accurate comparison** - Yesterday's budget is calculated the same way (using the day before)
+
+**Example (Day 3):**
 - Monthly Budget: 1,000,000원
-- Expenses so far: 400,000원
-- Income so far: 100,000원
-- Net Spending: 300,000원
-- Days remaining: 15
-- Daily Budget: (1,000,000 - 300,000) / 15 = 46,666원
+- Net spending until Day 2: 300,000원 (expenses: 400,000원, income: 100,000원)
+- Days remaining: 28 (from Day 3 to Day 30)
+- **Today's Daily Budget: (1,000,000 - 300,000) / 28 = 25,000원**
+- This amount stays the same all day, regardless of today's spending
+
+**Why this approach?**
+
+If we used today's spending in real-time:
+- 10:00 AM: You spend 10,000원 → Daily budget changes immediately
+- 2:00 PM: You spend another 5,000원 → Daily budget changes again
+- Result: Confusing and unstable budget display
+
+With yesterday's data:
+- Your daily budget remains constant throughout the day
+- Tomorrow it will adjust based on today's actual spending
+- Provides a stable target to aim for
 
 ### Data Flow
 
@@ -123,10 +139,12 @@ Daily Budget = (Monthly Budget - Net Spent) / Remaining Days
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
 ### Phase 5 Highlights (2025-12-02)
-- ✅ Changed to net spending-based budget calculation
-- ✅ Moved statistics to proper Statistics page
-- ✅ Improved calendar UI with vertical layout
-- ✅ Fixed category list reactivity issues
+- ✅ Changed to net spending-based budget calculation (expenses - income)
+- ✅ **Improved calculation stability**: Uses yesterday's data to prevent real-time fluctuations
+- ✅ Moved statistics to proper Statistics page with detailed breakdown
+- ✅ Improved calendar UI with vertical layout and better readability
+- ✅ Fixed category list reactivity issues (Riverpod pattern)
+- ✅ Added chart period filtering (1주/2주/1달)
 - ✅ Removed graph legend for cleaner UI
 
 ## Getting Started

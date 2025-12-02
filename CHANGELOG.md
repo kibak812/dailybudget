@@ -44,6 +44,24 @@ Major improvements to budget calculation system, UI/UX enhancements, and statist
   - Net spending = Total Expenses - Total Income
 - This change means income now increases available daily budget
 
+- **CRITICAL**: Changed calculation timing to use previous day's data for stability
+  - **Today's daily budget** now calculated based on **net spending until yesterday**
+    - Prevents daily budget from fluctuating as you spend during the day
+    - Provides stable budget target that doesn't change throughout the day
+  - **Yesterday's daily budget** (for comparison) now calculated based on **net spending until day before yesterday**
+    - Ensures fair comparison between consecutive days
+    - Both use the same calculation methodology
+
+  **Example:**
+  - Day 3 at 10:00 AM: Daily budget shows based on Day 2's net spending
+  - Day 3 at 11:00 PM: Same daily budget (doesn't change with today's spending)
+  - Diff shows: (Day 3's budget based on Day 2) - (Day 2's budget based on Day 1)
+
+  **Benefits:**
+  - ✅ Stable daily budget throughout the day
+  - ✅ Accurate day-to-day comparison
+  - ✅ No confusing real-time fluctuations as you spend
+
 #### Statistics Display Location
 - Moved total spent/income/net spending statistics from Transactions page to Statistics page
 - Removed AppBar bottom section from Transactions page (freed up vertical space)
@@ -79,11 +97,21 @@ Major improvements to budget calculation system, UI/UX enhancements, and statist
 **Core Business Logic:**
 - `lib/features/daily_budget/domain/models/daily_budget_data.dart`
   - Added `totalIncome` field
+  - Added `ChartPeriod` enum for period filtering (week/2weeks/month)
 - `lib/features/daily_budget/domain/services/daily_budget_service.dart`
-  - Added income tracking methods
-  - Changed calculation basis to net spending
+  - Added `getIncomeUntilDate()` method for income tracking
+  - Added `getNetSpentUntilDate()` method for net spending calculation
+  - **Changed `calculateDailyBudget()` to use net spending instead of total expenses**
+  - **Modified calculation timing in `calculateDailyBudgetData()`:**
+    - Today's budget uses yesterday's net spending (line 134)
+    - Yesterday's budget uses day-before-yesterday's net spending (line 143)
+    - Prevents real-time fluctuations during the day
+  - Updated `getDailyBudgetHistory()` to support custom date ranges
+  - Changed all calculations to use net spending basis
 - `lib/features/daily_budget/presentation/providers/daily_budget_provider.dart`
-  - Updated to use new calculation methods
+  - Changed `dailyBudgetHistoryProvider` to `Provider.family<List<DailyBudgetHistoryItem>, ChartPeriod>`
+  - Added period-based filtering support (week/2weeks/month)
+  - Passes `startDay` and `endDay` to service based on selected period
 
 **UI Components:**
 - `lib/features/statistics/presentation/pages/statistics_page.dart`
@@ -98,6 +126,13 @@ Major improvements to budget calculation system, UI/UX enhancements, and statist
   - Changed marker layout from Row to Column
   - Increased font size to 10.0
   - Added income display with green styling
+- `lib/features/daily_budget/presentation/widgets/daily_budget_trend_chart.dart`
+  - Changed from `ConsumerWidget` to `ConsumerStatefulWidget` to support period filtering
+  - Added `SegmentedButton` for period selection (1주/2주/1달)
+  - Removed legend section (양수/음수/0)
+  - Chart now shows filtered data based on selected period
+- `lib/features/daily_budget/presentation/pages/home_page.dart`
+  - Removed notification button from AppBar (Phase 4)
 
 **State Management Fixes:**
 - `lib/features/settings/presentation/widgets/category_management_section.dart`
