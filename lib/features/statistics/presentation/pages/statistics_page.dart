@@ -82,6 +82,11 @@ class StatisticsPage extends ConsumerWidget {
     int netSpending,
     int remaining,
   ) {
+    // Determine if net is spending or income
+    final isNetIncome = netSpending < 0;
+    final netLabel = isNetIncome ? '순수입' : '순지출';
+    final netAmount = isNetIncome ? -netSpending : netSpending;
+
     return Column(
       children: [
         SummaryCard(
@@ -94,9 +99,9 @@ class StatisticsPage extends ConsumerWidget {
         SummaryCard(
           icon: Icons.swap_vert,
           iconColor: AppColors.warning,
-          label: '순지출',
-          amount: netSpending,
-          amountColor: netSpending >= 0 ? AppColors.danger : AppColors.success,
+          label: netLabel,
+          amount: netAmount,
+          amountColor: isNetIncome ? AppColors.success : AppColors.danger,
         ),
         const SizedBox(height: 12),
         SummaryCard(

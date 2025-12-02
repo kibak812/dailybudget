@@ -41,11 +41,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     // Group by date
     final grouped = _groupByDate(filteredTransactions);
 
-    // Calculate total spent
-    final totalSpent = _calculateTotalSpent(monthTransactions);
-
     return Scaffold(
-      appBar: _buildAppBar(context, totalSpent),
+      appBar: _buildAppBar(context),
       body: RefreshIndicator(
         onRefresh: () async {
           await ref.read(transactionProvider.notifier).loadTransactions();
@@ -59,25 +56,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, int totalSpent) {
-    final theme = Theme.of(context);
-
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       title: const Text('거래 내역'),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(48),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            '이번 달 총 지출: ${Formatters.formatCurrency(totalSpent)}',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
       actions: [
         IconButton(
           icon: const Icon(Icons.search),
@@ -96,10 +77,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     Map<String, List<TransactionModel>> grouped,
     List<TransactionModel> filteredTransactions,
   ) {
-    if (filteredTransactions.isEmpty) {
-      return _buildEmptyDateState(context);
-    }
-
     // Sort dates in descending order (newest first)
     final sortedDates = grouped.keys.toList()
       ..sort((a, b) => b.compareTo(a));
@@ -133,17 +110,19 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
         // Transaction list grouped by date
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: sortedDates.length,
-            itemBuilder: (context, index) {
-              final date = sortedDates[index];
-              final dateTransactions = grouped[date]!;
-              final dayTotal = _calculateDayTotal(dateTransactions);
+          child: filteredTransactions.isEmpty
+            ? _buildEmptyDateState(context)
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: sortedDates.length,
+                itemBuilder: (context, index) {
+                  final date = sortedDates[index];
+                  final dateTransactions = grouped[date]!;
+                  final dayTotal = _calculateDayTotal(dateTransactions);
 
-              return _buildDateSection(context, date, dateTransactions, dayTotal);
-            },
-          ),
+                  return _buildDateSection(context, date, dateTransactions, dayTotal);
+                },
+              ),
         ),
       ],
     );
