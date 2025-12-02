@@ -42,7 +42,7 @@ class TransactionCalendar extends StatelessWidget {
           startingDayOfWeek: StartingDayOfWeek.monday,
           onDaySelected: onDaySelected,
           onPageChanged: onPageChanged,
-          rowHeight: 60,
+          rowHeight: 75,
 
           // Styling
           calendarStyle: CalendarStyle(
