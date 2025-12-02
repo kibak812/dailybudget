@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
@@ -27,7 +28,7 @@ class TransactionCalendar extends StatelessWidget {
 
     return Card(
       elevation: 2,
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -49,7 +50,7 @@ class TransactionCalendar extends StatelessWidget {
             // Today
             todayDecoration: BoxDecoration(
               color: theme.colorScheme.primaryContainer,
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(8),
             ),
             todayTextStyle: TextStyle(
               color: theme.colorScheme.onPrimaryContainer,
@@ -59,7 +60,7 @@ class TransactionCalendar extends StatelessWidget {
             // Selected day
             selectedDecoration: BoxDecoration(
               color: theme.colorScheme.primary,
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(8),
             ),
             selectedTextStyle: const TextStyle(
               color: Colors.white,
@@ -139,43 +140,55 @@ class TransactionCalendar extends StatelessWidget {
 
               return Positioned(
                 bottom: 4,
+                left: 2,
+                right: 2,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // 지출 표시 (빨강)
                     if (spent > 0)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1.5),
-                        margin: const EdgeInsets.only(bottom: 1.5),
+                        constraints: const BoxConstraints(
+                          minWidth: 50,
+                          maxWidth: 80,
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        margin: const EdgeInsets.only(bottom: 2),
                         decoration: BoxDecoration(
                           color: Colors.red[100],
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(3),
                         ),
                         child: Text(
                           '-${_formatAmount(spent)}',
                           style: TextStyle(
-                            fontSize: 10.0,
+                            fontSize: 9.5,
                             fontWeight: FontWeight.bold,
                             color: Colors.red[700],
-                            height: 1.1,
+                            height: 1.0,
                           ),
                         ),
                       ),
                     // 수입 표시 (초록)
                     if (income > 0)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1.5),
+                        constraints: const BoxConstraints(
+                          minWidth: 50,
+                          maxWidth: 80,
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                         decoration: BoxDecoration(
                           color: Colors.green[100],
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(3),
                         ),
                         child: Text(
                           '+${_formatAmount(income)}',
                           style: TextStyle(
-                            fontSize: 10.0,
+                            fontSize: 9.5,
                             fontWeight: FontWeight.bold,
                             color: Colors.green[700],
-                            height: 1.1,
+                            height: 1.0,
                           ),
                         ),
                       ),
@@ -212,14 +225,8 @@ class TransactionCalendar extends StatelessWidget {
   /// Format amount for display on calendar
   String _formatAmount(int amount) {
     if (amount == 0) return '';
-    if (amount >= 10000) {
-      final man = (amount / 10000).floor();
-      return '$man만';
-    } else if (amount >= 1000) {
-      final cheon = (amount / 1000).floor();
-      return '$cheon천';
-    } else {
-      return amount.toString();
-    }
+    // Use NumberFormat to add thousand separators
+    final formatter = NumberFormat('#,###', 'ko_KR');
+    return formatter.format(amount);
   }
 }

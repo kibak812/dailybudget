@@ -6,6 +6,78 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 6] - 2025-12-02
+
+### Summary
+Major UI simplification of Transactions page by replacing complex calendar widget with simple date picker. This change improves maintainability, reduces UI complexity, and provides cleaner transaction browsing experience.
+
+### Changed
+
+#### Transactions Page UI Overhaul
+- **Removed complex calendar widget** (`TransactionCalendar`) from Transactions page
+- **Replaced with simple date picker button** using Flutter's native `showDatePicker`
+- **Restored original list-based UI** showing transactions grouped by date
+- **Added "이번 달 총 지출" display** in AppBar bottom section
+- **Changed default view** from single-date to all dates (grouped by date)
+- **Added date filter button** at top of transaction list
+  - Shows "날짜 선택" when no date selected
+  - Shows selected date in full format when filtered
+  - Clear button (X) appears when date is selected to return to full view
+
+#### Transaction List Improvements
+- Transactions now displayed grouped by date (descending order)
+- Each date section shows:
+  - Date header with day of week (e.g., "12월 2일 (월)")
+  - Daily total spending on the right
+  - All transactions for that date below
+- Smoother scrolling through multiple dates
+- Better use of screen space
+
+#### Calendar Widget Changes
+- Calendar widget file still exists but no longer used in Transactions page
+- Previous calendar improvements (amount display, layout fixes) preserved in widget
+- Widget can be reused elsewhere if needed in future
+
+### Removed
+- Calendar widget from Transactions page (`TransactionCalendar` component usage)
+- State variables: `_focusedDay`, `_selectedDay`
+- Calendar-based date selection UI
+- Selected date header display
+
+### Added
+- `_selectedDate` nullable state variable (null = show all dates)
+- `_buildDateFilterButton()` method for date selection UI
+- `_showDatePickerDialog()` method using native Flutter date picker
+- `_buildDateSection()` method for rendering date-grouped transactions
+- `_groupByDate()` helper method for grouping transactions
+- `_calculateTotalSpent()` method for monthly expense total
+- `_calculateDayTotal()` method for daily expense total
+
+### Technical Details
+
+**Files Modified:**
+- `lib/features/transaction/presentation/pages/transactions_page.dart`
+  - Removed calendar import
+  - Changed filtering logic to support optional date selection
+  - Restructured `_buildBody()` for list-based display
+  - Updated `_buildAppBar()` to include monthly total
+  - Added helper methods for grouping and calculations
+
+**Files Preserved (but unused):**
+- `lib/features/transaction/presentation/widgets/transaction_calendar.dart`
+  - Widget preserved for potential future use
+  - Contains all previous improvements (full amount display, better spacing, rounded rectangle indicators)
+
+**Benefits:**
+- Simpler codebase (less complex layout logic)
+- Easier maintenance (no calendar layout issues)
+- Better UX for browsing all transactions
+- Native date picker provides familiar experience
+- Faster navigation through transactions
+- Better screen space utilization
+
+---
+
 ## [Phase 5] - 2025-12-02
 
 ### Summary
