@@ -31,7 +31,9 @@ Major improvements to budget calculation system, UI/UX enhancements, and statist
 - Expenses shown with red background and "-" prefix
 - Income shown with green background and "+" prefix
 - Changed from horizontal to vertical marker layout for better readability
-- Increased row height from 52px to 60px
+- Increased row height: 52px → 60px → **75px (final)**
+  - First increase for vertical layout
+  - Second increase to prevent date number overlap on busy days
 - Increased font size from 7.5 to 10.0
 - Improved spacing and padding for better touch targets
 
@@ -89,6 +91,10 @@ Major improvements to budget calculation system, UI/UX enhancements, and statist
   - Root cause: Watching notifier instead of state in Riverpod
 - Fixed calendar markers overlapping when both income and expense exist on same day
   - Solution: Changed to vertical layout with proper spacing
+- Fixed date numbers being covered by markers on busy days
+  - Increased calendar rowHeight from 60px to 75px (+25%)
+  - Ensures date numbers remain visible even with both income and expense markers
+  - Commit: `5c6c306`
 
 ### Technical Details
 
@@ -122,10 +128,11 @@ Major improvements to budget calculation system, UI/UX enhancements, and statist
   - Removed AppBar statistics section
   - Simplified AppBar to title and actions only
 - `lib/features/transaction/presentation/widgets/transaction_calendar.dart`
-  - Increased rowHeight to 60px
-  - Changed marker layout from Row to Column
-  - Increased font size to 10.0
+  - Increased rowHeight: 52px (default) → 60px → **75px (final, commit 5c6c306)**
+  - Changed marker layout from Row to Column (vertical stacking)
+  - Increased font size: 7.5 → 10.0
   - Added income display with green styling
+  - Final height ensures date numbers visible even with both markers
 - `lib/features/daily_budget/presentation/widgets/daily_budget_trend_chart.dart`
   - Changed from `ConsumerWidget` to `ConsumerStatefulWidget` to support period filtering
   - Added `SegmentedButton` for period selection (1주/2주/1달)
