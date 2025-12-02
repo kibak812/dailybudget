@@ -147,8 +147,8 @@ class _CategorySectionState extends ConsumerState<_CategorySection> {
 
   @override
   Widget build(BuildContext context) {
-    final categoriesNotifier = ref.watch(categoriesProvider.notifier);
-    final categories = categoriesNotifier.getCategoriesByType(widget.type);
+    ref.watch(categoriesProvider);
+    final categories = ref.read(categoriesProvider.notifier).getCategoriesByType(widget.type);
 
     return Container(
       decoration: BoxDecoration(

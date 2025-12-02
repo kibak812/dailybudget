@@ -42,6 +42,7 @@ class TransactionCalendar extends StatelessWidget {
           startingDayOfWeek: StartingDayOfWeek.monday,
           onDaySelected: onDaySelected,
           onPageChanged: onPageChanged,
+          rowHeight: 60,
 
           // Styling
           calendarStyle: CalendarStyle(
@@ -131,23 +132,54 @@ class TransactionCalendar extends StatelessWidget {
 
               final dayStr = Formatters.formatDateISO(day);
               final spent = _getSpentForDay(dayStr);
+              final income = _getIncomeForDay(dayStr);
+
+              // 지출과 수입이 모두 없으면 마커 표시 안 함
+              if (spent == 0 && income == 0) return null;
 
               return Positioned(
-                bottom: 2,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: spent > 0 ? Colors.red[100] : Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    _formatAmount(spent),
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      color: spent > 0 ? Colors.red[700] : Colors.transparent,
-                    ),
-                  ),
+                bottom: 4,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 지출 표시 (빨강)
+                    if (spent > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1.5),
+                        margin: const EdgeInsets.only(bottom: 1.5),
+                        decoration: BoxDecoration(
+                          color: Colors.red[100],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '-${_formatAmount(spent)}',
+                          style: TextStyle(
+                            fontSize: 10.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red[700],
+                            height: 1.1,
+                          ),
+                        ),
+                      ),
+                    // 수입 표시 (초록)
+                    if (income > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: Colors.green[100],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '+${_formatAmount(income)}',
+                          style: TextStyle(
+                            fontSize: 10.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green[700],
+                            height: 1.1,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               );
             },
@@ -167,6 +199,13 @@ class TransactionCalendar extends StatelessWidget {
   int _getSpentForDay(String dateStr) {
     return transactions
         .where((t) => t.date == dateStr && t.type == TransactionType.expense)
+        .fold<int>(0, (sum, t) => sum + t.amount);
+  }
+
+  /// Get total income for a specific day
+  int _getIncomeForDay(String dateStr) {
+    return transactions
+        .where((t) => t.date == dateStr && t.type == TransactionType.income)
         .fold<int>(0, (sum, t) => sum + t.amount);
   }
 

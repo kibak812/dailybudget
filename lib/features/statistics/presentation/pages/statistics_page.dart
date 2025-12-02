@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/providers/providers.dart';
+import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/budget/presentation/providers/current_month_provider.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/statistics/presentation/widgets/summary_card.dart';
@@ -74,74 +75,130 @@ class StatisticsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryCards(int monthlyBudget, int totalSpent, int remaining) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Use column layout for narrow screens, row for wider screens
-        final useColumnLayout = constraints.maxWidth < 600;
+  Widget _buildSummaryCards(
+    int monthlyBudget,
+    int totalSpent,
+    int totalIncome,
+    int netSpending,
+    int remaining,
+  ) {
+    return Column(
+      children: [
+        SummaryCard(
+          icon: Icons.attach_money,
+          iconColor: AppColors.primary,
+          label: '이번 달 예산',
+          amount: monthlyBudget,
+        ),
+        const SizedBox(height: 12),
+        SummaryCard(
+          icon: Icons.swap_vert,
+          iconColor: AppColors.warning,
+          label: '순지출',
+          amount: netSpending,
+          amountColor: netSpending >= 0 ? AppColors.danger : AppColors.success,
+        ),
+        const SizedBox(height: 12),
+        SummaryCard(
+          icon: Icons.trending_up,
+          iconColor: AppColors.success,
+          label: '남은 예산',
+          amount: remaining,
+          amountColor: remaining >= 0 ? AppColors.success : AppColors.danger,
+        ),
+        const SizedBox(height: 12),
+        _buildDetailedBreakdown(totalSpent, totalIncome),
+      ],
+    );
+  }
 
-        if (useColumnLayout) {
-          return Column(
-            children: [
-              SummaryCard(
-                icon: Icons.attach_money,
-                iconColor: AppColors.primary,
-                label: '이번 달 예산',
-                amount: monthlyBudget,
-              ),
-              const SizedBox(height: 12),
-              SummaryCard(
-                icon: Icons.trending_down,
-                iconColor: AppColors.danger,
-                label: '총 지출',
-                amount: totalSpent,
-                amountColor: AppColors.danger,
-              ),
-              const SizedBox(height: 12),
-              SummaryCard(
-                icon: Icons.trending_up,
-                iconColor: AppColors.success,
-                label: '남은 예산',
-                amount: remaining,
-                amountColor: AppColors.success,
-              ),
-            ],
-          );
-        } else {
-          return Row(
-            children: [
-              Expanded(
-                child: SummaryCard(
-                  icon: Icons.attach_money,
-                  iconColor: AppColors.primary,
-                  label: '이번 달 예산',
-                  amount: monthlyBudget,
+  Widget _buildDetailedBreakdown(int totalSpent, int totalIncome) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.danger.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.trending_down,
+                        size: 16,
+                        color: AppColors.danger,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '총 지출',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SummaryCard(
-                  icon: Icons.trending_down,
-                  iconColor: AppColors.danger,
-                  label: '총 지출',
-                  amount: totalSpent,
-                  amountColor: AppColors.danger,
+                Text(
+                  Formatters.formatCurrency(totalSpent),
+                  style: TextStyle(
+                    color: AppColors.danger,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SummaryCard(
-                  icon: Icons.trending_up,
-                  iconColor: AppColors.success,
-                  label: '남은 예산',
-                  amount: remaining,
-                  amountColor: AppColors.success,
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.add_circle_outline,
+                        size: 16,
+                        color: AppColors.success,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '총 수입',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          );
-        }
-      },
+                Text(
+                  Formatters.formatCurrency(totalIncome),
+                  style: TextStyle(
+                    color: AppColors.success,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -197,6 +254,8 @@ class StatisticsPage extends ConsumerWidget {
               _buildSummaryCards(
                 budget.amount,
                 budgetData.totalSpent,
+                budgetData.totalIncome,
+                budgetData.totalSpent - budgetData.totalIncome,
                 budgetData.totalRemaining,
               ),
               const SizedBox(height: 16),

@@ -333,8 +333,8 @@ class _TransactionEditModalSheetState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final categoriesNotifier = ref.watch(categoriesProvider.notifier);
-    final categories = categoriesNotifier.getCategoriesByType(
+    ref.watch(categoriesProvider);
+    final categories = ref.read(categoriesProvider.notifier).getCategoriesByType(
       _typeValue == TransactionType.expense ? CategoryType.expense : CategoryType.income,
     );
 

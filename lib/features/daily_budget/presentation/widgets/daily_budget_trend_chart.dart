@@ -3,15 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
+import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 
 /// Daily budget trend chart widget
 /// Shows line chart of daily budget changes from day 1 to current day
-class DailyBudgetTrendChart extends ConsumerWidget {
+class DailyBudgetTrendChart extends ConsumerStatefulWidget {
   const DailyBudgetTrendChart({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final history = ref.watch(dailyBudgetHistoryProvider);
+  ConsumerState<DailyBudgetTrendChart> createState() => _DailyBudgetTrendChartState();
+}
+
+class _DailyBudgetTrendChartState extends ConsumerState<DailyBudgetTrendChart> {
+  ChartPeriod _selectedPeriod = ChartPeriod.week;
+
+  @override
+  Widget build(BuildContext context) {
+    final history = ref.watch(dailyBudgetHistoryProvider(_selectedPeriod));
     final theme = Theme.of(context);
 
     // If no data, show empty state
@@ -46,6 +54,33 @@ class DailyBudgetTrendChart extends ConsumerWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+
+            // Period selector
+            Center(
+              child: SegmentedButton<ChartPeriod>(
+                segments: const [
+                  ButtonSegment(
+                    value: ChartPeriod.week,
+                    label: Text('1주'),
+                  ),
+                  ButtonSegment(
+                    value: ChartPeriod.twoWeeks,
+                    label: Text('2주'),
+                  ),
+                  ButtonSegment(
+                    value: ChartPeriod.month,
+                    label: Text('1달'),
+                  ),
+                ],
+                selected: {_selectedPeriod},
+                onSelectionChanged: (Set<ChartPeriod> newSelection) {
+                  setState(() {
+                    _selectedPeriod = newSelection.first;
+                  });
+                },
+              ),
+            ),
             const SizedBox(height: 20),
 
             // Chart
@@ -55,11 +90,6 @@ class DailyBudgetTrendChart extends ConsumerWidget {
                 _buildLineChartData(history, theme),
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            // Legend
-            _buildLegend(context),
           ],
         ),
       ),
@@ -94,54 +124,6 @@ class DailyBudgetTrendChart extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildLegend(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildLegendItem(
-          context,
-          color: Colors.green,
-          label: '양수',
-        ),
-        const SizedBox(width: 24),
-        _buildLegendItem(
-          context,
-          color: Colors.red,
-          label: '음수',
-        ),
-        const SizedBox(width: 24),
-        _buildLegendItem(
-          context,
-          color: Colors.grey,
-          label: '0',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLegendItem(BuildContext context, {required Color color, required String label}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 16,
-          height: 3,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
-        ),
-      ],
     );
   }
 

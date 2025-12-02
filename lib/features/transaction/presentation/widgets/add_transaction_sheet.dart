@@ -7,7 +7,12 @@ import 'package:daily_pace/core/providers/providers.dart';
 
 /// Bottom sheet for adding a new transaction
 class AddTransactionSheet extends ConsumerStatefulWidget {
-  const AddTransactionSheet({super.key});
+  final DateTime? initialDate;
+
+  const AddTransactionSheet({
+    super.key,
+    this.initialDate,
+  });
 
   @override
   ConsumerState<AddTransactionSheet> createState() => _AddTransactionSheetState();
@@ -19,8 +24,14 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
 
   TransactionType _selectedType = TransactionType.expense;
   String? _selectedCategory;
-  DateTime _selectedDate = DateTime.now();
+  late DateTime _selectedDate;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialDate ?? DateTime.now();
+  }
 
   @override
   void dispose() {
@@ -87,8 +98,8 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final categoriesNotifier = ref.watch(categoriesProvider.notifier);
-    final currentCategories = categoriesNotifier.getCategoriesByType(
+    ref.watch(categoriesProvider);
+    final currentCategories = ref.read(categoriesProvider.notifier).getCategoriesByType(
       _selectedType == TransactionType.expense ? CategoryType.expense : CategoryType.income,
     );
 

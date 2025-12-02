@@ -40,11 +40,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     // Apply additional filters
     final filteredTransactions = _applyFilters(dateTransactions);
 
-    // Calculate total spent for the month
-    final totalSpent = _calculateTotalSpent(monthTransactions);
-
     return Scaffold(
-      appBar: _buildAppBar(context, totalSpent),
+      appBar: _buildAppBar(context),
       body: RefreshIndicator(
         onRefresh: () async {
           await ref.read(transactionProvider.notifier).loadTransactions();
@@ -58,25 +55,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, int totalSpent) {
-    final theme = Theme.of(context);
-
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       title: const Text('거래 내역'),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(48),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            '이번 달 총 지출: ${Formatters.formatCurrency(totalSpent)}',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
       actions: [
         IconButton(
           icon: const Icon(Icons.search),
@@ -215,13 +196,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       ..sort((a, b) => b.date.compareTo(a.date)); // Newest first
   }
 
-  /// Calculate total spent (expenses only)
-  int _calculateTotalSpent(List<TransactionModel> transactions) {
-    return transactions
-        .where((t) => t.type == TransactionType.expense)
-        .fold<int>(0, (sum, t) => sum + t.amount);
-  }
-
   /// Get day of week in Korean
   String _getDayOfWeek(String dateStr) {
     final date = DateTime.parse(dateStr);
@@ -238,7 +212,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => const AddTransactionSheet(),
+      builder: (context) => AddTransactionSheet(
+        initialDate: _selectedDay,
+      ),
     );
   }
 

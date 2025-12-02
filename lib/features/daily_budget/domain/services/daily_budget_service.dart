@@ -43,22 +43,41 @@ class DailyBudgetService {
         .fold<int>(0, (sum, t) => sum + t.amount);
   }
 
-  /// Calculate daily budget
+  /// Calculate total income until date (inclusive)
+  static int getIncomeUntilDate(List<TransactionModel> transactions, String date) {
+    final targetDate = DateTime.parse(date);
+    return transactions
+        .where((t) {
+          if (t.type != TransactionType.income) return false;
+          final txDate = DateTime.parse(t.date);
+          return txDate.isBefore(targetDate) || txDate.isAtSameMomentAs(targetDate);
+        })
+        .fold<int>(0, (sum, t) => sum + t.amount);
+  }
+
+  /// Calculate net spent until date (expenses - income)
+  static int getNetSpentUntilDate(List<TransactionModel> transactions, String date) {
+    final totalExpenses = getSpentUntilDate(transactions, date);
+    final totalIncome = getIncomeUntilDate(transactions, date);
+    return totalExpenses - totalIncome;
+  }
+
+  /// Calculate daily budget based on net spending
   /// Formula: floor((remainingBudget) / (remainingDays))
   ///
   /// @param budgetAmount Monthly budget
-  /// @param totalSpent Total spent so far
+  /// @param netSpent Net spent so far (expenses - income)
   /// @param daysInMonth Total days in month
   /// @param currentDay Current day (1-31)
   /// @returns Daily budget for today
   static int calculateDailyBudget(
     int budgetAmount,
-    int totalSpent,
+    int netSpent,
     int daysInMonth,
     int currentDay,
   ) {
     final remainingDays = daysInMonth - currentDay + 1;
-    final remainingBudget = budgetAmount - totalSpent;
+    final remainingBudget = budgetAmount - netSpent;
 
     if (remainingDays <= 0) return 0;
 
@@ -84,6 +103,7 @@ class DailyBudgetService {
         spentToday: 0,
         remainingToday: 0,
         totalSpent: 0,
+        totalIncome: 0,
         totalRemaining: 0,
         remainingDays: 0,
       );
@@ -91,29 +111,37 @@ class DailyBudgetService {
 
     final daysInMonth = getDaysInMonth(year, month);
     final todayStr = _formatDate(year, month, day);
+    final yesterdayStr = day > 1 ? _formatDate(year, month, day - 1) : null;
+    final dayBeforeYesterdayStr = day > 2 ? _formatDate(year, month, day - 2) : null;
 
-    // Total spent until today
+    // Total spent and income until today
     final totalSpent = getSpentUntilDate(transactions, todayStr);
+    final totalIncome = getIncomeUntilDate(transactions, todayStr);
+    final netSpent = getNetSpentUntilDate(transactions, todayStr);
+    final netSpentUntilYesterday = yesterdayStr != null
+        ? getNetSpentUntilDate(transactions, yesterdayStr)
+        : 0;
+    final netSpentUntilDayBeforeYesterday = dayBeforeYesterdayStr != null
+        ? getNetSpentUntilDate(transactions, dayBeforeYesterdayStr)
+        : 0;
 
     // Spent today
     final spentToday = getSpentForDate(transactions, todayStr);
 
-    // Daily budget as of today
+    // Daily budget as of today (based on spending until yesterday to avoid today's swings)
     final dailyBudgetNow = calculateDailyBudget(
       budget.amount,
-      totalSpent,
+      netSpentUntilYesterday,
       daysInMonth,
       day,
     );
 
     // Daily budget as of yesterday (if day > 1)
     int dailyBudgetYesterday = 0;
-    if (day > 1) {
-      final yesterdayStr = _formatDate(year, month, day - 1);
-      final spentUntilYesterday = getSpentUntilDate(transactions, yesterdayStr);
+    if (yesterdayStr != null) {
       dailyBudgetYesterday = calculateDailyBudget(
         budget.amount,
-        spentUntilYesterday,
+        netSpentUntilDayBeforeYesterday,
         daysInMonth,
         day - 1,
       );
@@ -125,8 +153,8 @@ class DailyBudgetService {
     // Remaining budget for today
     final remainingToday = dailyBudgetNow - spentToday;
 
-    // Total remaining budget
-    final totalRemaining = budget.amount - totalSpent;
+    // Total remaining budget (based on net spending)
+    final totalRemaining = budget.amount - netSpent;
 
     // Remaining days (including today)
     final remainingDays = daysInMonth - day + 1;
@@ -138,16 +166,18 @@ class DailyBudgetService {
       spentToday: spentToday,
       remainingToday: remainingToday,
       totalSpent: totalSpent,
+      totalIncome: totalIncome,
       totalRemaining: totalRemaining,
       remainingDays: remainingDays,
     );
   }
 
-  /// Get daily budget history from day 1 to current day
+  /// Get daily budget history from specified day range
   static List<DailyBudgetHistoryItem> getDailyBudgetHistory(
     BudgetModel? budget,
     List<TransactionModel> transactions,
     DateTime currentDate,
+    {int? startDay, int? endDay}
   ) {
     if (budget == null) return [];
 
@@ -160,12 +190,16 @@ class DailyBudgetService {
     final daysInMonth = getDaysInMonth(year, month);
     final history = <DailyBudgetHistoryItem>[];
 
-    for (int day = 1; day <= currentDay; day++) {
+    // Use provided start/end days or default to 1 and currentDay
+    final start = startDay ?? 1;
+    final end = endDay ?? currentDay;
+
+    for (int day = start; day <= end; day++) {
       final dateStr = _formatDate(year, month, day);
-      final spentUntilDay = getSpentUntilDate(transactions, dateStr);
+      final netSpentUntilDay = getNetSpentUntilDate(transactions, dateStr);
       final dailyBudget = calculateDailyBudget(
         budget.amount,
-        spentUntilDay,
+        netSpentUntilDay,
         daysInMonth,
         day,
       );

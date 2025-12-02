@@ -39,30 +39,39 @@ final dailyBudgetProvider = Provider<DailyBudgetData>((ref) {
   );
 });
 
-/// Provider for daily budget history (from day 1 to current day)
-/// Returns a list of DailyBudgetHistoryItem
-final dailyBudgetHistoryProvider = Provider<List<DailyBudgetHistoryItem>>((ref) {
-  final budgets = ref.watch(budgetProvider);
-  final transactions = ref.watch(transactionProvider);
-  final currentMonth = ref.watch(currentMonthProvider);
+/// Provider for daily budget history with period filter
+/// Parameter: ChartPeriod to determine the date range
+/// Returns a list of DailyBudgetHistoryItem for the selected period
+final dailyBudgetHistoryProvider = Provider.family<List<DailyBudgetHistoryItem>, ChartPeriod>(
+  (ref, period) {
+    final budgets = ref.watch(budgetProvider);
+    final transactions = ref.watch(transactionProvider);
+    final currentMonth = ref.watch(currentMonthProvider);
 
-  // Get budget for current month
-  final budget = budgets.where((b) =>
-    b.year == currentMonth.year && b.month == currentMonth.month
-  ).firstOrNull;
+    // Get budget for current month
+    final budget = budgets.where((b) =>
+      b.year == currentMonth.year && b.month == currentMonth.month
+    ).firstOrNull;
 
-  // Filter transactions for current month
-  final monthPrefix = '${currentMonth.year}-${currentMonth.month.toString().padLeft(2, '0')}';
-  final monthTransactions = transactions
-      .where((t) => t.date.startsWith(monthPrefix))
-      .toList();
+    // Filter transactions for current month
+    final monthPrefix = '${currentMonth.year}-${currentMonth.month.toString().padLeft(2, '0')}';
+    final monthTransactions = transactions
+        .where((t) => t.date.startsWith(monthPrefix))
+        .toList();
 
-  // Calculate history using the service
-  final currentDate = DateTime(currentMonth.year, currentMonth.month, DateTime.now().day);
+    // Calculate history using the service
+    final currentDate = DateTime(currentMonth.year, currentMonth.month, DateTime.now().day);
+    final currentDay = currentDate.day;
 
-  return DailyBudgetService.getDailyBudgetHistory(
-    budget,
-    monthTransactions,
-    currentDate,
-  );
-});
+    // Calculate start day based on period
+    final startDay = period.getStartDay(currentDay);
+
+    return DailyBudgetService.getDailyBudgetHistory(
+      budget,
+      monthTransactions,
+      currentDate,
+      startDay: startDay,
+      endDay: currentDay,
+    );
+  },
+);

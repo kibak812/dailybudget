@@ -38,13 +38,6 @@ class HomePage extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // TODO: Navigate to notifications
-            },
-            tooltip: '알림',
-          ),
-          IconButton(
             icon: const Icon(Icons.chevron_right),
             onPressed: () {
               // Navigate to next month
