@@ -43,6 +43,13 @@ class DailyBudgetService {
         .fold<int>(0, (sum, t) => sum + t.amount);
   }
 
+  /// Calculate income amount for a specific date
+  static int getIncomeForDate(List<TransactionModel> transactions, String date) {
+    return transactions
+        .where((t) => t.type == TransactionType.income && t.date == date)
+        .fold<int>(0, (sum, t) => sum + t.amount);
+  }
+
   /// Calculate total income until date (inclusive)
   static int getIncomeUntilDate(List<TransactionModel> transactions, String date) {
     final targetDate = DateTime.parse(date);

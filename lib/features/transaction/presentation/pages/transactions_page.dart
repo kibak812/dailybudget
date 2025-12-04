@@ -6,6 +6,9 @@ import 'package:daily_pace/features/transaction/data/models/transaction_model.da
 import 'package:daily_pace/features/transaction/presentation/widgets/transaction_list_item.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/transaction_edit_sheet.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/add_transaction_sheet.dart';
+import 'package:daily_pace/features/transaction/presentation/widgets/month_navigation_bar.dart';
+import 'package:daily_pace/features/transaction/presentation/widgets/monthly_pace_mosaic.dart';
+import 'package:daily_pace/features/transaction/presentation/widgets/mosaic_summary_bar.dart';
 
 /// Transactions page
 /// Displays list of all transactions grouped by date with filtering and management
@@ -19,12 +22,20 @@ class TransactionsPage extends ConsumerStatefulWidget {
 class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   String _searchKeyword = '';
   TransactionType? _typeFilter;
-  DateTime? _selectedDate;  // null = show all dates
+  String? _selectedDate;  // null = show all dates (YYYY-MM-DD format)
 
   @override
   Widget build(BuildContext context) {
     final currentMonth = ref.watch(currentMonthProvider);
     final transactions = ref.watch(transactionProvider);
+    final mosaicData = ref.watch(monthlyMosaicProvider);
+
+    // Listen for month changes and reset date selection
+    ref.listen(currentMonthProvider, (previous, next) {
+      if (previous != next && _selectedDate != null) {
+        setState(() => _selectedDate = null);
+      }
+    });
 
     // Filter transactions for current month
     final monthTransactions = _filterByMonth(transactions, currentMonth);
@@ -32,8 +43,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     // Filter by selected date (if any)
     final dateFilteredTransactions = _selectedDate == null
       ? monthTransactions
-      : monthTransactions.where((t) =>
-          t.date == Formatters.formatDateISO(_selectedDate!)).toList();
+      : monthTransactions.where((t) => t.date == _selectedDate).toList();
 
     // Apply search/type filters
     final filteredTransactions = _applyFilters(dateFilteredTransactions);
@@ -47,7 +57,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         onRefresh: () async {
           await ref.read(transactionProvider.notifier).loadTransactions();
         },
-        child: _buildBody(context, grouped, filteredTransactions),
+        child: _buildBody(context, mosaicData, grouped, filteredTransactions),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddTransactionSheet(context),
@@ -74,6 +84,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
   Widget _buildBody(
     BuildContext context,
+    dynamic mosaicData,
     Map<String, List<TransactionModel>> grouped,
     List<TransactionModel> filteredTransactions,
   ) {
@@ -81,65 +92,102 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final sortedDates = grouped.keys.toList()
       ..sort((a, b) => b.compareTo(a));
 
-    return Column(
-      children: [
-        // Date filter button
-        _buildDateFilterButton(context),
+    return CustomScrollView(
+      slivers: [
+        // Month navigation
+        const SliverToBoxAdapter(
+          child: MonthNavigationBar(),
+        ),
+
+        // Monthly pace mosaic
+        SliverToBoxAdapter(
+          child: MonthlyPaceMosaic(
+            data: mosaicData,
+            selectedDate: _selectedDate,
+            onDateTap: _onMosaicDateTap,
+          ),
+        ),
+
+        // Summary bar
+        SliverToBoxAdapter(
+          child: MosaicSummaryBar(
+            summary: mosaicData.summary,
+            selectedDate: _selectedDate,
+            selectedDateNetSpent: _getSelectedDateNetSpent(filteredTransactions),
+            onReset: _selectedDate != null
+                ? () => setState(() => _selectedDate = null)
+                : null,
+          ),
+        ),
 
         // Active filters chips
         if (_hasActiveFilters)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                if (_searchKeyword.isNotEmpty)
-                  InputChip(
-                    label: Text('검색: $_searchKeyword'),
-                    onDeleted: () => setState(() => _searchKeyword = ''),
-                  ),
-                if (_typeFilter != null)
-                  InputChip(
-                    label: Text(_typeFilter == TransactionType.expense ? '필터: 지출' : '필터: 수입'),
-                    onDeleted: () => setState(() => _typeFilter = null),
-                  ),
-              ],
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (_searchKeyword.isNotEmpty)
+                    InputChip(
+                      label: Text('검색: $_searchKeyword'),
+                      onDeleted: () => setState(() => _searchKeyword = ''),
+                    ),
+                  if (_typeFilter != null)
+                    InputChip(
+                      label: Text(_typeFilter == TransactionType.expense
+                          ? '필터: 지출'
+                          : '필터: 수입'),
+                      onDeleted: () => setState(() => _typeFilter = null),
+                    ),
+                ],
+              ),
             ),
           ),
 
-        // Transaction list grouped by date
-        Expanded(
-          child: filteredTransactions.isEmpty
-            ? _buildEmptyDateState(context)
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: sortedDates.length,
-                itemBuilder: (context, index) {
-                  final date = sortedDates[index];
-                  final dateTransactions = grouped[date]!;
-                  final dayTotal = _calculateDayTotal(dateTransactions);
+        // Transaction list
+        if (filteredTransactions.isEmpty)
+          SliverFillRemaining(
+            child: _buildEmptyState(context),
+          )
+        else
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final date = sortedDates[index];
+                final dateTransactions = grouped[date]!;
+                final dayTotal = _calculateDayTotal(dateTransactions);
 
-                  return _buildDateSection(context, date, dateTransactions, dayTotal);
-                },
-              ),
-        ),
+                return _buildDateSection(
+                    context, date, dateTransactions, dayTotal);
+              },
+              childCount: sortedDates.length,
+            ),
+          ),
       ],
     );
   }
 
-  Widget _buildEmptyDateState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
+
+    String message;
+    if (_selectedDate != null) {
+      message = '이 날은 거래 내역이 없어요!';
+    } else if (_hasActiveFilters) {
+      message = '검색 결과가 없습니다.';
+    } else {
+      message = '거래 내역 없음';
+    }
 
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Center(
-          child: Text(
-            '거래 내역 없음',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.outline,
-            ),
+        child: Text(
+          message,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.outline,
           ),
         ),
       ),
@@ -188,48 +236,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     return transactions
         .where((t) => t.type == TransactionType.expense)
         .fold<int>(0, (sum, t) => sum + t.amount);
-  }
-
-  /// Build date filter button
-  Widget _buildDateFilterButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              icon: const Icon(Icons.calendar_today),
-              label: Text(_selectedDate == null
-                ? '날짜 선택'
-                : Formatters.formatDateFull(Formatters.formatDateISO(_selectedDate!))),
-              onPressed: () => _showDatePickerDialog(context),
-            ),
-          ),
-          if (_selectedDate != null) ...[
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.clear),
-              tooltip: '전체 보기',
-              onPressed: () => setState(() => _selectedDate = null),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  /// Show date picker dialog
-  Future<void> _showDatePickerDialog(BuildContext context) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
-
-    if (picked != null) {
-      setState(() => _selectedDate = picked);
-    }
   }
 
   /// Build date section with transactions
@@ -288,7 +294,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) => AddTransactionSheet(
-        initialDate: _selectedDate ?? DateTime.now(),
+        initialDate: _selectedDate != null
+            ? DateTime.parse(_selectedDate!)
+            : DateTime.now(),
       ),
     );
   }
@@ -346,6 +354,32 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   }
 
   bool get _hasActiveFilters => _searchKeyword.isNotEmpty || _typeFilter != null;
+
+  void _onMosaicDateTap(String dateStr) {
+    setState(() {
+      if (_selectedDate == dateStr) {
+        // Re-tapping same date - deselect
+        _selectedDate = null;
+      } else {
+        // Select new date
+        _selectedDate = dateStr;
+      }
+    });
+  }
+
+  int? _getSelectedDateNetSpent(List<TransactionModel> transactions) {
+    if (_selectedDate == null) return null;
+
+    final dayTx = transactions.where((t) => t.date == _selectedDate).toList();
+    final expenses = dayTx
+        .where((t) => t.type == TransactionType.expense)
+        .fold<int>(0, (sum, t) => sum + t.amount);
+    final income = dayTx
+        .where((t) => t.type == TransactionType.income)
+        .fold<int>(0, (sum, t) => sum + t.amount);
+
+    return expenses - income;
+  }
 
   bool _matchesSearch(TransactionModel transaction, String keyword) {
     final query = keyword.toLowerCase();

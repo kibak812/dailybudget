@@ -137,7 +137,7 @@ class StatisticsPage extends ConsumerWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.trending_down,
+                        Icons.remove_circle_outline,
                         size: 16,
                         color: AppColors.danger,
                       ),

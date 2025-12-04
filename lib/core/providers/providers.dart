@@ -11,6 +11,7 @@ export 'package:daily_pace/features/budget/presentation/providers/current_month_
 
 // Transaction providers
 export 'package:daily_pace/features/transaction/presentation/providers/transaction_provider.dart';
+export 'package:daily_pace/features/transaction/presentation/providers/monthly_mosaic_provider.dart';
 
 // Recurring transaction providers
 export 'package:daily_pace/features/recurring/presentation/providers/recurring_provider.dart';
