@@ -40,13 +40,6 @@ Added Monthly Pace Mosaic - a color-coded calendar visualization in Transactions
   - Other tiles fade to 50% opacity when date selected
   - Today indicator: subtle border on current date
 
-#### Summary Bar
-- **Added dynamic summary bar** below calendar
-  - When no date selected: "이번 달: 퍼펙트 X일, 과소비 Y일"
-  - When date selected: "M월 D일 (요일) • 순지출 XX,XXX원" with reset button
-  - No budget case: "이번 달 예산이 설정되지 않았습니다."
-  - Location: `lib/features/transaction/presentation/widgets/mosaic_summary_bar.dart`
-
 #### Data Layer
 - **Added `getIncomeForDate()` method** to DailyBudgetService
   - Calculates income for specific date (complementing existing `getSpentForDate`)
@@ -87,7 +80,6 @@ Added Monthly Pace Mosaic - a color-coded calendar visualization in Transactions
 - **Updated date selection state** from `DateTime?` to `String?` (YYYY-MM-DD format)
   - Matches transaction date format for efficient filtering
   - Added `_onMosaicDateTap()` handler for tap interactions
-  - Added `_getSelectedDateNetSpent()` helper for summary bar
 
 - **Enhanced empty state messages**
   - No date selected + no filters: "거래 내역 없음"
@@ -110,16 +102,29 @@ Added Monthly Pace Mosaic - a color-coded calendar visualization in Transactions
   - Expense: Icons.remove_circle_outline (-)
   - Location: `lib/features/statistics/presentation/pages/statistics_page.dart:140`
 
+#### Mosaic Calendar Refinements
+- **Adjusted calendar spacing and layout**
+  - Increased container height from 320px to 350px for better visual balance
+  - Increased spacing between weekday header and grid from 6px to 12px
+  - Fixed scale animation overlap issue when selecting dates (1.05x scale no longer overlaps weekday headers)
+  - Location: `lib/features/transaction/presentation/widgets/monthly_pace_mosaic.dart:24,30`
+
+### Removed
+- **Removed MosaicSummaryBar component** for cleaner, simplified UI
+  - Removed summary text showing monthly statistics (perfect/warning/danger days)
+  - Removed date-specific summary bar with reset button
+  - Calendar now stands as primary interaction point without redundant summary
+  - Location: `lib/features/transaction/presentation/widgets/mosaic_summary_bar.dart` (deleted)
+
 ### Technical Details
 
-#### New Files (7)
+#### New Files (6)
 1. `lib/features/transaction/domain/models/day_status.dart` - Day status enum
 2. `lib/features/transaction/domain/models/monthly_mosaic_data.dart` - Data models
 3. `lib/features/transaction/presentation/providers/monthly_mosaic_provider.dart` - Provider
 4. `lib/features/transaction/presentation/widgets/mosaic_colors.dart` - Color constants
 5. `lib/features/transaction/presentation/widgets/month_navigation_bar.dart` - Month nav widget
 6. `lib/features/transaction/presentation/widgets/monthly_pace_mosaic.dart` - Calendar widget
-7. `lib/features/transaction/presentation/widgets/mosaic_summary_bar.dart` - Summary widget
 
 #### Modified Files (3)
 1. `lib/features/daily_budget/domain/services/daily_budget_service.dart` - Added getIncomeForDate
@@ -143,8 +148,7 @@ For each day D in the month:
 ```
 CustomScrollView
 ├── SliverToBoxAdapter: MonthNavigationBar
-├── SliverToBoxAdapter: MonthlyPaceMosaic (7×5 grid, 320px height)
-├── SliverToBoxAdapter: MosaicSummaryBar
+├── SliverToBoxAdapter: MonthlyPaceMosaic (7×5 grid, 350px height)
 ├── SliverToBoxAdapter: Filter chips (search/type)
 └── SliverList/SliverFillRemaining: Transaction list
 ```
