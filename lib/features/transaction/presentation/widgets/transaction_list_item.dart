@@ -43,7 +43,7 @@ class TransactionListItem extends StatelessWidget {
     final categoryColor = _getCategoryColor(transaction.category);
 
     Widget itemWidget = Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -161,7 +161,7 @@ class TransactionListItem extends StatelessWidget {
         background: Container(
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
-          margin: const EdgeInsets.symmetric(vertical: 4),
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
           decoration: BoxDecoration(
             color: theme.colorScheme.error,
             borderRadius: BorderRadius.circular(12),

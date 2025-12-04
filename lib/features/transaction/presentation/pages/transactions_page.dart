@@ -8,7 +8,6 @@ import 'package:daily_pace/features/transaction/presentation/widgets/transaction
 import 'package:daily_pace/features/transaction/presentation/widgets/add_transaction_sheet.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/month_navigation_bar.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/monthly_pace_mosaic.dart';
-import 'package:daily_pace/features/transaction/presentation/widgets/mosaic_summary_bar.dart';
 
 /// Transactions page
 /// Displays list of all transactions grouped by date with filtering and management
@@ -105,18 +104,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             data: mosaicData,
             selectedDate: _selectedDate,
             onDateTap: _onMosaicDateTap,
-          ),
-        ),
-
-        // Summary bar
-        SliverToBoxAdapter(
-          child: MosaicSummaryBar(
-            summary: mosaicData.summary,
-            selectedDate: _selectedDate,
-            selectedDateNetSpent: _getSelectedDateNetSpent(filteredTransactions),
-            onReset: _selectedDate != null
-                ? () => setState(() => _selectedDate = null)
-                : null,
           ),
         ),
 
@@ -252,7 +239,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       children: [
         // Date header with total
         Padding(
-          padding: const EdgeInsets.only(top: 16, bottom: 8),
+          padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
           child: Row(
             children: [
               Text(
@@ -365,20 +352,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         _selectedDate = dateStr;
       }
     });
-  }
-
-  int? _getSelectedDateNetSpent(List<TransactionModel> transactions) {
-    if (_selectedDate == null) return null;
-
-    final dayTx = transactions.where((t) => t.date == _selectedDate).toList();
-    final expenses = dayTx
-        .where((t) => t.type == TransactionType.expense)
-        .fold<int>(0, (sum, t) => sum + t.amount);
-    final income = dayTx
-        .where((t) => t.type == TransactionType.income)
-        .fold<int>(0, (sum, t) => sum + t.amount);
-
-    return expenses - income;
   }
 
   bool _matchesSearch(TransactionModel transaction, String keyword) {

@@ -13,11 +13,11 @@ class MosaicColors {
   static const Color safe = Color(0xFFA5B4FC); // Indigo-300
   static const Color safeText = Color(0xFF4338CA); // Indigo-700
 
-  static const Color warning = Color(0xFFF59E0B); // Amber-500
-  static const Color warningText = Color(0xFF000000); // Dark
+  static const Color warning = Color(0xFFE2E8F0); // Slate-200 (light grey for warning)
+  static const Color warningText = Color(0xFF475569); // Slate-600
 
-  static const Color danger = Color(0xFFF43F5E); // Rose-500
-  static const Color dangerText = Color(0xFFFFFFFF); // White
+  static const Color danger = Color(0xFFCBD5E1); // Slate-300 (darker grey for danger)
+  static const Color dangerText = Color(0xFF334155); // Slate-700
 
   static const Color future = Color(0xFFF1F5F9); // Slate-100
   static const Color futureText = Color(0xFF9E9E9E); // Grey

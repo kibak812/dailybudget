@@ -21,13 +21,13 @@ class MonthlyPaceMosaic extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      height: 320, // Fixed height ~300-350px as per PRD
+      height: 350, // Fixed height ~300-350px as per PRD
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           // Week day headers (Sun-Sat)
           _buildWeekdayHeaders(theme),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
 
           // Calendar grid
           Expanded(
@@ -85,7 +85,7 @@ class MonthlyPaceMosaic extends StatelessWidget {
 
     return GridView.count(
       crossAxisCount: 7,
-      mainAxisSpacing: 4,
+      mainAxisSpacing: 8,
       crossAxisSpacing: 4,
       physics: const NeverScrollableScrollPhysics(),
       children: gridItems,
