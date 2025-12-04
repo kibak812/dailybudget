@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 8] - 2025-12-04
+
+### Summary
+Improved UX in Statistics tab by increasing pie chart size for better visibility.
+
+### Changed
+
+#### Statistics Page
+- **Increased pie chart size** in category spending chart (2x larger)
+  - Chart container height: 240px → 480px
+  - Pie chart radius: 60/65 → 120/130 (normal/touched state)
+  - Provides better visibility of category breakdown and percentages
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart:57, 96`
+
+---
+
 ## [Phase 7] - 2025-12-02
 
 ### Summary

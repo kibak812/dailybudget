@@ -54,7 +54,7 @@ class _CategoryChartCardState extends State<CategoryChartCard> {
       final category = entry.value;
       final isTouched = index == _touchedIndex;
       final fontSize = isTouched ? 16.0 : 14.0;
-      final radius = isTouched ? 65.0 : 60.0;
+      final radius = isTouched ? 130.0 : 120.0;
       final percent = widget.totalSpent > 0
           ? (category.amount / widget.totalSpent) * 100
           : 0.0;
@@ -93,7 +93,7 @@ class _CategoryChartCardState extends State<CategoryChartCard> {
             // Pie chart
             if (widget.categoryData.isNotEmpty)
               SizedBox(
-                height: 240,
+                height: 480,
                 child: PieChart(
                   PieChartData(
                     sections: _buildPieChartSections(),
