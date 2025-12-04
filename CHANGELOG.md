@@ -6,6 +6,189 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 9] - 2025-12-04
+
+### Summary
+Added Monthly Pace Mosaic - a color-coded calendar visualization in Transactions tab that shows daily spending status vs daily budget. Users can tap dates to filter transactions, providing intuitive one-step date selection UX.
+
+### Added
+
+#### Monthly Pace Mosaic Feature
+- **Added interactive monthly calendar** to Transactions page
+  - 7-column grid layout (Sunday to Saturday)
+  - Color-coded day tiles based on net spending vs daily budget:
+    - **Perfect** (Indigo-700): Net income or break-even (net spending ≤ 0)
+    - **Safe** (Indigo-300): Within daily budget (0 < spending ≤ budget)
+    - **Warning** (Amber-500): Over budget but within 1.5x (budget < spending ≤ 1.5x budget)
+    - **Danger** (Rose-500): Significantly over budget (spending > 1.5x budget)
+    - **Future** (Grey): Days after today
+    - **No Budget** (Light Grey): No budget set or budget ≤ 0
+  - Location: `lib/features/transaction/presentation/widgets/monthly_pace_mosaic.dart`
+
+#### Month Navigation
+- **Added month navigation bar** with left/right arrows
+  - Navigate between months with arrow buttons
+  - Displays current month as "YYYY년 M월"
+  - Month change automatically resets date selection
+  - Location: `lib/features/transaction/presentation/widgets/month_navigation_bar.dart`
+
+#### Interactive Date Filtering
+- **Tap date to filter transactions** to that specific day
+  - Single tap selects date and filters transaction list
+  - Re-tapping same date deselects and shows all transactions
+  - Selected tile highlighted with border and 1.05x scale
+  - Other tiles fade to 50% opacity when date selected
+  - Today indicator: subtle border on current date
+
+#### Summary Bar
+- **Added dynamic summary bar** below calendar
+  - When no date selected: "이번 달: 퍼펙트 X일, 과소비 Y일"
+  - When date selected: "M월 D일 (요일) • 순지출 XX,XXX원" with reset button
+  - No budget case: "이번 달 예산이 설정되지 않았습니다."
+  - Location: `lib/features/transaction/presentation/widgets/mosaic_summary_bar.dart`
+
+#### Data Layer
+- **Added `getIncomeForDate()` method** to DailyBudgetService
+  - Calculates income for specific date (complementing existing `getSpentForDate`)
+  - Used for net spending calculation: expenses - income
+  - Location: `lib/features/daily_budget/domain/services/daily_budget_service.dart:46-51`
+
+- **Created `DayStatus` enum** for day categorization
+  - Values: future, perfect, safe, warning, danger, noBudget
+  - Location: `lib/features/transaction/domain/models/day_status.dart`
+
+- **Created `MonthlyMosaicData` model**
+  - `DayData`: Individual day information (date, day, isToday, isFuture, netSpent, dailyBudget, status)
+  - `MonthlyMosaicSummary`: Month statistics (perfect, safe, warning, danger counts)
+  - Location: `lib/features/transaction/domain/models/monthly_mosaic_data.dart`
+
+- **Created `monthlyMosaicProvider`** for mosaic data calculation
+  - Calculates day-by-day status for entire month
+  - Logic: For each day D, calculate daily budget based on previous day's net spending
+  - Determines status by comparing day's net spending vs its daily budget
+  - Reactive to budget/transaction/month changes via Riverpod
+  - Location: `lib/features/transaction/presentation/providers/monthly_mosaic_provider.dart`
+
+### Changed
+
+#### Transactions Page Migration
+- **Migrated from Column to Sliver-based layout** for better scrolling UX
+  - Old: Column + Expanded ListView
+  - New: CustomScrollView with multiple Sliver components
+  - Mosaic scrolls naturally with transaction list
+  - Better performance for long transaction lists
+  - Location: `lib/features/transaction/presentation/pages/transactions_page.dart:85-170`
+
+- **Removed date picker button** (replaced by mosaic tap interaction)
+  - Removed `_buildDateFilterButton()` method
+  - Removed `_showDatePickerDialog()` method
+  - Simplified date selection to direct tap on calendar
+
+- **Updated date selection state** from `DateTime?` to `String?` (YYYY-MM-DD format)
+  - Matches transaction date format for efficient filtering
+  - Added `_onMosaicDateTap()` handler for tap interactions
+  - Added `_getSelectedDateNetSpent()` helper for summary bar
+
+- **Enhanced empty state messages**
+  - No date selected + no filters: "거래 내역 없음"
+  - Date selected but no transactions: "이 날은 거래 내역이 없어요!"
+  - Search with no results: "검색 결과가 없습니다."
+
+#### Color Theme
+- **Added mosaic-specific color palette** coordinated with existing Indigo theme
+  - Perfect: #4338CA (Indigo-700) - consistent with app primary dark
+  - Safe: #A5B4FC (Indigo-300) - light indigo for normal status
+  - Warning: #F59E0B (Amber-500) - existing warning color
+  - Danger: #F43F5E (Rose-500) - existing danger color
+  - Future/NoBudget: Grey tones for inactive states
+  - Location: `lib/features/transaction/presentation/widgets/mosaic_colors.dart`
+
+#### Statistics Page
+- **Updated expense icon** to minus symbol (Icons.remove_circle_outline)
+  - Changed from trending_down to match symmetry with income's plus symbol
+  - Income: Icons.add_circle_outline (+)
+  - Expense: Icons.remove_circle_outline (-)
+  - Location: `lib/features/statistics/presentation/pages/statistics_page.dart:140`
+
+### Technical Details
+
+#### New Files (7)
+1. `lib/features/transaction/domain/models/day_status.dart` - Day status enum
+2. `lib/features/transaction/domain/models/monthly_mosaic_data.dart` - Data models
+3. `lib/features/transaction/presentation/providers/monthly_mosaic_provider.dart` - Provider
+4. `lib/features/transaction/presentation/widgets/mosaic_colors.dart` - Color constants
+5. `lib/features/transaction/presentation/widgets/month_navigation_bar.dart` - Month nav widget
+6. `lib/features/transaction/presentation/widgets/monthly_pace_mosaic.dart` - Calendar widget
+7. `lib/features/transaction/presentation/widgets/mosaic_summary_bar.dart` - Summary widget
+
+#### Modified Files (3)
+1. `lib/features/daily_budget/domain/services/daily_budget_service.dart` - Added getIncomeForDate
+2. `lib/features/transaction/presentation/pages/transactions_page.dart` - Sliver migration + mosaic integration
+3. `lib/core/providers/providers.dart` - Export monthlyMosaicProvider
+
+#### Calculation Logic
+For each day D in the month:
+1. Calculate `dailyBudgetForDay` using net spending until day D-1
+   - Formula: `(monthlyBudget - netSpentUntilPrevDay) / remainingDays`
+2. Calculate `netSpentThatDay` = expenses - income for day D
+3. Determine status:
+   - Future: day > today
+   - Perfect: netSpentThatDay ≤ 0
+   - Safe: 0 < netSpentThatDay ≤ dailyBudgetForDay
+   - Warning: dailyBudgetForDay < netSpentThatDay ≤ 1.5 × dailyBudgetForDay
+   - Danger: netSpentThatDay > 1.5 × dailyBudgetForDay
+   - NoBudget: no budget OR dailyBudgetForDay ≤ 0
+
+#### UI Components Structure
+```
+CustomScrollView
+├── SliverToBoxAdapter: MonthNavigationBar
+├── SliverToBoxAdapter: MonthlyPaceMosaic (7×5 grid, 320px height)
+├── SliverToBoxAdapter: MosaicSummaryBar
+├── SliverToBoxAdapter: Filter chips (search/type)
+└── SliverList/SliverFillRemaining: Transaction list
+```
+
+#### State Management
+- Month change listener: `ref.listen(currentMonthProvider)` resets date selection
+- Date tap handler: Toggle selection on tap
+- Provider reactivity: Mosaic recalculates on budget/transaction/month changes
+- Filter pipeline: Month → Date → Search/Type → Display
+
+### Benefits
+
+**User Experience:**
+- ✅ Visual overview of spending patterns at a glance
+- ✅ One-tap date filtering (no popup dialogs)
+- ✅ Color-coded status helps identify problematic days
+- ✅ Summary statistics provide quick insights
+- ✅ Smooth scrolling with mosaic integrated in content flow
+
+**Technical:**
+- ✅ Reactive calculation with Riverpod providers
+- ✅ Efficient date filtering using string comparison
+- ✅ Sliver-based layout for better performance
+- ✅ Modular widget structure for maintainability
+- ✅ Coordinated color scheme with existing theme
+
+### Testing Checklist
+
+- [x] Date tap selects and filters transaction list
+- [x] Re-tap deselects and shows all transactions
+- [x] Month navigation resets selection
+- [x] Summary bar shows correct statistics
+- [x] Selected date info displays net spending
+- [x] Reset button clears selection
+- [x] Status colors accurate vs daily budget
+- [x] Today indicator visible
+- [x] Future days show grey
+- [x] No budget month shows grey tiles
+- [x] Empty state messages appropriate
+- [x] Search/type filters work with date filter
+- [x] Sliver scrolling smooth
+
+---
+
 ## [Phase 8] - 2025-12-04
 
 ### Summary
