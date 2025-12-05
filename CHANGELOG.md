@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 10] - 2025-12-05
+
+### Summary
+Refined incentive structure for mosaic calendar and improved pie chart label readability.
+
+### Changed
+
+#### Mosaic Calendar Logic Refinement
+- **Updated Perfect status threshold** from no spending to ≤50% of daily budget
+  - Previous: Perfect status for net spending ≤ 0 (no spending or net income)
+  - New: Perfect status for net spending ≤ 50% of daily budget
+  - Rationale: Creates more granular incentive by rewarding low spending, not just zero spending
+  - Days spending 51-100% of budget now show Safe (Indigo-300) instead of Perfect (Indigo-700)
+  - Location: `lib/features/transaction/presentation/providers/monthly_mosaic_provider.dart:100`
+  - Documentation: Updated `DayStatus.perfect` comment in `lib/features/transaction/domain/models/day_status.dart:6`
+
+#### Pie Chart Label Improvements
+- **Moved percentage labels outside pie segments** to prevent text overflow
+  - Added `titlePositionPercentageOffset: 1.4` parameter (positions labels 40% beyond segment edge)
+  - Changed label color from white to black87 for better visibility on white background
+  - Increased decimal precision from 0 to 1 decimal place (e.g., "45.3%" instead of "45%")
+  - Increased chart height from 480 to 520 pixels to accommodate outside labels
+  - Fixes overflow issues with narrow segments (small percentages)
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart`
+
+---
+
 ## [Phase 9] - 2025-12-04
 
 ### Summary
