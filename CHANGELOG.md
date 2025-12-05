@@ -6,6 +6,51 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 11] - 2025-12-05
+
+### Summary
+Migrated from fl_chart to Syncfusion Flutter Charts to add connector lines and enhanced labels to pie chart while preserving all existing functionality.
+
+### Changed
+
+#### Chart Library Migration
+- **Migrated from fl_chart to Syncfusion Flutter Charts**
+  - Package: Added `syncfusion_flutter_charts: ^31.2.16` to dependencies
+  - Reason: fl_chart lacks native support for connector lines (leader lines) from pie segments to labels
+  - Scope: 2 chart files only (PieChart and LineChart)
+  - License: Syncfusion Community License (free for <$1M revenue, no registration key required for v18.3.0+)
+
+#### PieChart Enhancements (Priority 1)
+- **Added curved connector lines** from pie segments to outside labels
+  - Implemented with `ConnectorLineSettings(type: ConnectorType.curve, length: '20%')`
+  - Improves visual clarity by connecting labels to their corresponding segments
+- **Enhanced labels to show category name + percentage**
+  - Previous: Labels showed only percentage (e.g., "45.3%")
+  - New: Labels show category name and percentage (e.g., "식비\n45.3%")
+  - More informative at a glance without needing to reference the legend
+- **Preserved all existing features**
+  - Touch interaction (tap to explode segment)
+  - Color cycling for 10+ categories
+  - Category list below chart with amounts and percentages
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart`
+
+#### LineChart Migration (Priority 2)
+- **Migrated to Syncfusion while preserving all features**
+  - Changed from `LineChart` (fl_chart) to `SfCartesianChart` (Syncfusion)
+  - Used `SplineAreaSeries` to maintain gradient fill below line
+  - Korean Y-axis formatting preserved (만, 천 notation)
+  - Color-coded markers maintained (green/red/grey for positive/negative/zero values)
+  - Implemented via `onMarkerRender` callback for per-point marker colors
+  - Smooth curve rendering with `splineType: SplineType.natural`
+  - Location: `lib/features/daily_budget/presentation/widgets/daily_budget_trend_chart.dart`
+
+#### Integration Updates
+- **Updated widget references** in page files
+  - Statistics page: Updated to `CategoryChartCardSyncfusion`
+  - Home page: Updated to `DailyBudgetTrendChartSyncfusion`
+
+---
+
 ## [Phase 10] - 2025-12-05
 
 ### Summary
