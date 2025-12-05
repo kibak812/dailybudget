@@ -97,16 +97,20 @@ final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
       // Determine status based on net spent vs daily budget
       if (dailyBudget <= 0) {
         status = DayStatus.noBudget;
-      } else if (netSpent <= 0) {
+      } else if (netSpent <= dailyBudget * 0.5) {
+        // Perfect: spending at or below 50% of daily budget
         status = DayStatus.perfect;
         perfectCount++;
       } else if (netSpent <= dailyBudget) {
+        // Safe: spending between 50% and 100% of daily budget
         status = DayStatus.safe;
         safeCount++;
       } else if (netSpent <= dailyBudget * 1.5) {
+        // Warning: over budget but within 1.5x
         status = DayStatus.warning;
         warningCount++;
       } else {
+        // Danger: significantly over budget
         status = DayStatus.danger;
         dangerCount++;
       }

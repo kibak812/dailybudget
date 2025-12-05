@@ -62,13 +62,14 @@ class _CategoryChartCardState extends State<CategoryChartCard> {
       return PieChartSectionData(
         color: _getColorForIndex(index),
         value: category.amount.toDouble(),
-        title: '${percent.toStringAsFixed(0)}%',
+        title: '${percent.toStringAsFixed(1)}%',
         radius: radius,
         titleStyle: TextStyle(
           fontSize: fontSize,
           fontWeight: FontWeight.bold,
-          color: Colors.white,
+          color: Colors.black87,
         ),
+        titlePositionPercentageOffset: 1.4,
       );
     }).toList();
   }
@@ -93,7 +94,7 @@ class _CategoryChartCardState extends State<CategoryChartCard> {
             // Pie chart
             if (widget.categoryData.isNotEmpty)
               SizedBox(
-                height: 480,
+                height: 520,
                 child: PieChart(
                   PieChartData(
                     sections: _buildPieChartSections(),

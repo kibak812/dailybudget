@@ -3,7 +3,7 @@ enum DayStatus {
   /// Future day (after today)
   future,
 
-  /// Perfect day: net spent <= 0 (net income or break-even)
+  /// Perfect day: net spent <= 50% of daily budget
   perfect,
 
   /// Safe day: 0 < net spent <= daily budget
