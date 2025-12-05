@@ -274,7 +274,7 @@ class StatisticsPage extends ConsumerWidget {
 
               // Category pie chart
               if (categoryData.isNotEmpty)
-                CategoryChartCard(
+                CategoryChartCardSyncfusion(
                   categoryData: categoryData,
                   totalSpent: budgetData.totalSpent,
                 )

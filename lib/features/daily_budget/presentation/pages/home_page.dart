@@ -93,7 +93,7 @@ class HomePage extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // Daily Budget Trend Chart
-          const DailyBudgetTrendChart(),
+          const DailyBudgetTrendChartSyncfusion(),
           const SizedBox(height: 16),
 
           // Budget Info

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 
@@ -11,23 +11,25 @@ class CategorySpending {
   CategorySpending({required this.name, required this.amount});
 }
 
-/// Category chart card widget
-/// Shows pie chart and list of category spending
-class CategoryChartCard extends StatefulWidget {
+/// Category chart card widget (Syncfusion version)
+/// Shows pie chart with connector lines and enhanced labels
+class CategoryChartCardSyncfusion extends StatefulWidget {
   final List<CategorySpending> categoryData;
   final int totalSpent;
 
-  const CategoryChartCard({
+  const CategoryChartCardSyncfusion({
     super.key,
     required this.categoryData,
     required this.totalSpent,
   });
 
   @override
-  State<CategoryChartCard> createState() => _CategoryChartCardState();
+  State<CategoryChartCardSyncfusion> createState() =>
+      _CategoryChartCardSyncfusionState();
 }
 
-class _CategoryChartCardState extends State<CategoryChartCard> {
+class _CategoryChartCardSyncfusionState
+    extends State<CategoryChartCardSyncfusion> {
   int _touchedIndex = -1;
 
   // Category colors matching the web app
@@ -46,32 +48,6 @@ class _CategoryChartCardState extends State<CategoryChartCard> {
 
   Color _getColorForIndex(int index) {
     return categoryColors[index % categoryColors.length];
-  }
-
-  List<PieChartSectionData> _buildPieChartSections() {
-    return widget.categoryData.asMap().entries.map((entry) {
-      final index = entry.key;
-      final category = entry.value;
-      final isTouched = index == _touchedIndex;
-      final fontSize = isTouched ? 16.0 : 14.0;
-      final radius = isTouched ? 130.0 : 120.0;
-      final percent = widget.totalSpent > 0
-          ? (category.amount / widget.totalSpent) * 100
-          : 0.0;
-
-      return PieChartSectionData(
-        color: _getColorForIndex(index),
-        value: category.amount.toDouble(),
-        title: '${percent.toStringAsFixed(1)}%',
-        radius: radius,
-        titleStyle: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
-        ),
-        titlePositionPercentageOffset: 1.4,
-      );
-    }).toList();
   }
 
   @override
@@ -95,26 +71,57 @@ class _CategoryChartCardState extends State<CategoryChartCard> {
             if (widget.categoryData.isNotEmpty)
               SizedBox(
                 height: 520,
-                child: PieChart(
-                  PieChartData(
-                    sections: _buildPieChartSections(),
-                    centerSpaceRadius: 0,
-                    sectionsSpace: 2,
-                    pieTouchData: PieTouchData(
-                      touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                        setState(() {
-                          if (!event.isInterestedForInteractions ||
-                              pieTouchResponse == null ||
-                              pieTouchResponse.touchedSection == null) {
-                            _touchedIndex = -1;
-                            return;
-                          }
-                          _touchedIndex = pieTouchResponse
-                              .touchedSection!.touchedSectionIndex;
-                        });
+                child: SfCircularChart(
+                  legend: Legend(isVisible: false),
+                  series: <CircularSeries>[
+                    PieSeries<CategorySpending, String>(
+                      dataSource: widget.categoryData,
+                      xValueMapper: (data, _) => data.name,
+                      yValueMapper: (data, _) => data.amount.toDouble(),
+                      pointColorMapper: (data, index) =>
+                          _getColorForIndex(index),
+
+                      // CRITICAL: Category name + percentage
+                      dataLabelMapper: (data, index) {
+                        final percent = widget.totalSpent > 0
+                            ? (data.amount / widget.totalSpent) * 100
+                            : 0.0;
+                        return '${data.name}\n${percent.toStringAsFixed(1)}%';
                       },
+
+                      // CRITICAL: Connector lines and enhanced labels
+                      dataLabelSettings: DataLabelSettings(
+                        isVisible: true,
+                        labelPosition: ChartDataLabelPosition.outside,
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                        connectorLineSettings: const ConnectorLineSettings(
+                          type: ConnectorType.curve,
+                          length: '20%',
+                          width: 1.5,
+                          color: Colors.black38,
+                        ),
+                        labelIntersectAction: LabelIntersectAction.shift,
+                      ),
+
+                      // Touch interaction
+                      selectionBehavior: SelectionBehavior(
+                        enable: true,
+                      ),
+                      radius: '120',
+                      explode: true,
+                      explodeIndex: _touchedIndex,
+                      explodeOffset: '10',
                     ),
-                  ),
+                  ],
+                  onSelectionChanged: (SelectionArgs args) {
+                    setState(() {
+                      _touchedIndex = args.pointIndex;
+                    });
+                  },
                 ),
               ),
             const SizedBox(height: 24),
