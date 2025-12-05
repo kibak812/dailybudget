@@ -136,8 +136,8 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
     final double yMax;
 
     if (minBudget >= 0 && maxBudget >= 0) {
-      // All positive
-      yMin = 0;
+      // All positive - zoom into data range for better visual impact
+      yMin = (minBudget * 0.8).floorToDouble();
       yMax = (maxBudget * 1.2).ceilToDouble();
     } else if (minBudget < 0 && maxBudget <= 0) {
       // All negative

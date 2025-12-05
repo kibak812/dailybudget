@@ -6,6 +6,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 12] - 2025-12-05
+
+### Summary
+Enhanced chart visualizations with dynamic y-axis scaling and refined pie chart appearance.
+
+### Changed
+
+#### Line Chart Y-Axis Enhancement
+- **Implemented dynamic y-axis scaling for positive values**
+  - Previous: Y-axis always started at 0 for positive values, making small variations appear flat
+  - New: Y-axis zooms into actual data range (min * 0.8 to max * 1.2) when all values are positive
+  - Impact: ~2.6x increase in visual impact for small budget variations
+  - Example: Budget range ₩45K-₩50K now displays in y-axis ₩36K-₩60K instead of 0-₩60K
+  - Preserves current behavior for negative/mixed values (centered at 0)
+  - Location: `lib/features/daily_budget/presentation/widgets/daily_budget_trend_chart.dart:140`
+
+#### Pie Chart Visual Refinement
+- **Added subtle spacing between pie chart slices**
+  - Implemented using `strokeWidth: 2` and `strokeColor: Colors.white`
+  - Creates 2-pixel white border between slices for visual separation
+  - Result: More refined and premium appearance without looking tacky
+  - Matches the visual quality of the previous fl_chart implementation (`sectionsSpace: 2`)
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart:90-91`
+
+---
+
 ## [Phase 11] - 2025-12-05
 
 ### Summary

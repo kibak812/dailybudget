@@ -87,6 +87,8 @@ class _CategoryChartCardSyncfusionState
                         yValueMapper: (data, _) => data.amount.toDouble(),
                         pointColorMapper: (data, index) =>
                             _getColorForIndex(index),
+                        strokeWidth: 2,
+                        strokeColor: Colors.white,
 
                         // CRITICAL: Category name + percentage
                         dataLabelMapper: (data, index) {
