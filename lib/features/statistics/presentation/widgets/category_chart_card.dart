@@ -69,59 +69,67 @@ class _CategoryChartCardSyncfusionState
 
             // Pie chart
             if (widget.categoryData.isNotEmpty)
-              SizedBox(
-                height: 520,
-                child: SfCircularChart(
-                  legend: Legend(isVisible: false),
-                  series: <CircularSeries>[
-                    PieSeries<CategorySpending, String>(
-                      dataSource: widget.categoryData,
-                      xValueMapper: (data, _) => data.name,
-                      yValueMapper: (data, _) => data.amount.toDouble(),
-                      pointColorMapper: (data, index) =>
-                          _getColorForIndex(index),
+              GestureDetector(
+                onTapUp: (_) {
+                  // Collapse when touch is released (like fl_chart)
+                  setState(() {
+                    _touchedIndex = -1;
+                  });
+                },
+                child: SizedBox(
+                  height: 520,
+                  child: SfCircularChart(
+                    legend: Legend(isVisible: false),
+                    series: <CircularSeries>[
+                      PieSeries<CategorySpending, String>(
+                        dataSource: widget.categoryData,
+                        xValueMapper: (data, _) => data.name,
+                        yValueMapper: (data, _) => data.amount.toDouble(),
+                        pointColorMapper: (data, index) =>
+                            _getColorForIndex(index),
 
-                      // CRITICAL: Category name + percentage
-                      dataLabelMapper: (data, index) {
-                        final percent = widget.totalSpent > 0
-                            ? (data.amount / widget.totalSpent) * 100
-                            : 0.0;
-                        return '${data.name}\n${percent.toStringAsFixed(1)}%';
-                      },
+                        // CRITICAL: Category name + percentage
+                        dataLabelMapper: (data, index) {
+                          final percent = widget.totalSpent > 0
+                              ? (data.amount / widget.totalSpent) * 100
+                              : 0.0;
+                          return '${data.name}\n${percent.toStringAsFixed(1)}%';
+                        },
 
-                      // CRITICAL: Connector lines and enhanced labels
-                      dataLabelSettings: DataLabelSettings(
-                        isVisible: true,
-                        labelPosition: ChartDataLabelPosition.outside,
-                        textStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                        // CRITICAL: Connector lines and enhanced labels
+                        dataLabelSettings: DataLabelSettings(
+                          isVisible: true,
+                          labelPosition: ChartDataLabelPosition.outside,
+                          textStyle: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                          connectorLineSettings: const ConnectorLineSettings(
+                            type: ConnectorType.curve,
+                            length: '20%',
+                            width: 1.5,
+                            color: Colors.black38,
+                          ),
+                          labelIntersectAction: LabelIntersectAction.shift,
                         ),
-                        connectorLineSettings: const ConnectorLineSettings(
-                          type: ConnectorType.curve,
-                          length: '20%',
-                          width: 1.5,
-                          color: Colors.black38,
-                        ),
-                        labelIntersectAction: LabelIntersectAction.shift,
-                      ),
 
-                      // Touch interaction
-                      selectionBehavior: SelectionBehavior(
-                        enable: true,
+                        // Touch interaction
+                        selectionBehavior: SelectionBehavior(
+                          enable: true,
+                        ),
+                        radius: '120',
+                        explode: true,
+                        explodeIndex: _touchedIndex,
+                        explodeOffset: '10',
                       ),
-                      radius: '120',
-                      explode: true,
-                      explodeIndex: _touchedIndex,
-                      explodeOffset: '10',
-                    ),
-                  ],
-                  onSelectionChanged: (SelectionArgs args) {
-                    setState(() {
-                      _touchedIndex = args.pointIndex;
-                    });
-                  },
+                    ],
+                    onSelectionChanged: (SelectionArgs args) {
+                      setState(() {
+                        _touchedIndex = args.pointIndex;
+                      });
+                    },
+                  ),
                 ),
               ),
             const SizedBox(height: 24),
