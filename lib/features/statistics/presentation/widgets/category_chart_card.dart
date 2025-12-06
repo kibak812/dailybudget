@@ -53,6 +53,44 @@ class _CategoryChartCardSyncfusionState
     return categoryColors[index % categoryColors.length];
   }
 
+  /// 차트용 색상 (기타는 회색)
+  Color _getColorForChartItem(String name, int index) {
+    if (name == '기타') {
+      return const Color(0xFF9CA3AF); // Gray-400
+    }
+    return categoryColors[index % categoryColors.length];
+  }
+
+  /// 차트용 데이터 전처리: 정렬 + 기타 합산
+  List<CategorySpending> _preprocessChartData(
+      List<CategorySpending> data, int total) {
+    if (data.isEmpty || total <= 0) return data;
+
+    const double threshold = 5.0; // 5% 미만은 기타로
+
+    final List<CategorySpending> majorItems = [];
+    int etcAmount = 0;
+
+    for (final item in data) {
+      final percent = (item.amount / total) * 100;
+      if (percent >= threshold) {
+        majorItems.add(item);
+      } else {
+        etcAmount += item.amount;
+      }
+    }
+
+    // 내림차순 정렬
+    majorItems.sort((a, b) => b.amount.compareTo(a.amount));
+
+    // 기타 항목 추가 (있는 경우)
+    if (etcAmount > 0) {
+      majorItems.add(CategorySpending(name: '기타', amount: etcAmount));
+    }
+
+    return majorItems;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -81,7 +119,10 @@ class _CategoryChartCardSyncfusionState
                   // Responsive calculations - use available width for split panel support
                   final chartHeight = (screenHeight * 0.28).clamp(200.0, 300.0);
                   final baseFontSize = (availableWidth * 0.028).clamp(7.5, 10.0);
-                  final chartRadius = (chartHeight * 0.26).clamp(55.0, 85.0);
+
+                  // 차트용 전처리 데이터 (5% 미만 기타 합산, 내림차순)
+                  final chartData = _preprocessChartData(
+                      widget.categoryData, widget.totalSpent);
 
                   return SizedBox(
                     height: chartHeight,
@@ -89,11 +130,11 @@ class _CategoryChartCardSyncfusionState
                       legend: Legend(isVisible: false),
                       series: <CircularSeries>[
                         DoughnutSeries<CategorySpending, String>(
-                          dataSource: widget.categoryData,
+                          dataSource: chartData,
                           xValueMapper: (data, _) => data.name,
                           yValueMapper: (data, _) => data.amount.toDouble(),
                           pointColorMapper: (data, index) =>
-                              _getColorForIndex(index),
+                              _getColorForChartItem(data.name, index),
                           strokeWidth: 2,
                           strokeColor: Colors.white,
 
@@ -115,17 +156,19 @@ class _CategoryChartCardSyncfusionState
                               color: Colors.black87,
                             ),
                             connectorLineSettings: const ConnectorLineSettings(
-                              type: ConnectorType.line,
-                              length: '12%',
-                              width: 1.5,
+                              type: ConnectorType.curve,
+                              length: '8%',
+                              width: 1.0,
                               color: Colors.black38,
                             ),
                             labelIntersectAction: LabelIntersectAction.shift,
                             overflowMode: OverflowMode.trim,
                           ),
 
-                          radius: chartRadius.toString(),
-                          innerRadius: '60%',
+                          radius: '70%',
+                          innerRadius: '55%',
+                          startAngle: 270, // 12시 방향에서 시작
+                          endAngle: 630,
                         ),
                       ],
                     ),

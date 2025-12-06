@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 17] - 2025-12-07
+
+### Summary
+Improved donut chart visualization with data preprocessing and optimized connector line settings to prevent label overlap and improve readability.
+
+### Added
+
+#### Data Preprocessing for Chart
+- **'기타' category grouping**: Items below 5% threshold are merged into '기타'
+- **Descending sort**: Chart data sorted by amount (largest first)
+- **Separate chart/list data**: Chart shows preprocessed data, bottom list shows original
+
+### Changed
+
+#### Syncfusion Donut Chart Optimization
+- **Connector line**: Changed from `line` to `curve` type, length set to `8%`
+- **Start angle**: Changed to 270° (12 o'clock position) for better label distribution
+- **'기타' color**: Gray-400 (#9CA3AF) for visual distinction
+- **Radius**: Changed from pixel-based to percentage-based (`70%`)
+- Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart`
+
+---
+
 ## [Phase 16] - 2025-12-06
 
 ### Summary
