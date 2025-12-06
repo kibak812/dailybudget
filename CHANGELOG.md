@@ -6,6 +6,50 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 15] - 2025-12-06
+
+### Summary
+Improved responsive design for calendar mosaic and category chart to prevent overflow and text truncation on various screen sizes.
+
+### Changed
+
+#### Calendar Mosaic - Overflow Prevention
+- **Added cell size maximum limit**
+  - Previous: Cell size grew unbounded on large screens
+  - New: `cellSize.clamp(0.0, 48.0)` limits max cell size to 48px
+  - Prevents calendar from overflowing container on large screens/tablets
+  - Location: `lib/features/transaction/presentation/widgets/monthly_pace_mosaic.dart:32`
+
+- **Added ClipBehavior to GridView**
+  - Added `clipBehavior: Clip.hardEdge` to prevent content from rendering outside bounds
+  - Location: `lib/features/transaction/presentation/widgets/monthly_pace_mosaic.dart:115`
+
+#### Category Chart - Small Screen Text Visibility
+- **Reduced chart dimensions**
+  - Chart height: `(screenHeight * 0.35).clamp(280, 400)` → `(screenHeight * 0.28).clamp(200, 300)`
+  - Chart radius: `(chartHeight * 0.28).clamp(70, 110)` → `(chartHeight * 0.26).clamp(55, 85)`
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart:81-83`
+
+- **Reduced font sizes**
+  - Base font: `(screenWidth * 0.028).clamp(9, 11)` → `(screenWidth * 0.022).clamp(7.5, 9)`
+  - Prevents text truncation with "(..)" on small screens
+
+- **Removed bold styling from labels**
+  - Chart labels: `FontWeight.bold` → `FontWeight.normal`
+  - Category list name: `FontWeight.w500` → `FontWeight.normal`
+  - Category list amount: `FontWeight.bold` → `FontWeight.w500`
+  - Reduces text width, allowing more characters to fit
+
+- **Changed overflow handling**
+  - `overflowMode: OverflowMode.hide` → `OverflowMode.trim`
+  - Removes "(..)" truncation indicator for cleaner appearance
+
+- **Shortened connector lines**
+  - Length: `18%` → `12%`
+  - Provides more space for label text
+
+---
+
 ## [Phase 14] - 2025-12-06
 
 ### Summary

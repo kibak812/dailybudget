@@ -77,10 +77,10 @@ class _CategoryChartCardSyncfusionState
                   final screenHeight = MediaQuery.of(context).size.height;
                   final screenWidth = MediaQuery.of(context).size.width;
 
-                  // Responsive calculations - Reduced chart size to prevent label overflow
-                  final chartHeight = (screenHeight * 0.35).clamp(280.0, 400.0);
-                  final baseFontSize = (screenWidth * 0.028).clamp(9.0, 11.0);
-                  final chartRadius = (chartHeight * 0.28).clamp(70.0, 110.0);
+                  // Responsive calculations - Smaller chart and fonts for small screens
+                  final chartHeight = (screenHeight * 0.28).clamp(200.0, 300.0);
+                  final baseFontSize = (screenWidth * 0.022).clamp(7.5, 9.0);
+                  final chartRadius = (chartHeight * 0.26).clamp(55.0, 85.0);
 
                   return SizedBox(
                     height: chartHeight,
@@ -110,17 +110,17 @@ class _CategoryChartCardSyncfusionState
                             labelPosition: ChartDataLabelPosition.outside,
                             textStyle: TextStyle(
                               fontSize: baseFontSize,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.normal,
                               color: Colors.black87,
                             ),
                             connectorLineSettings: const ConnectorLineSettings(
                               type: ConnectorType.line,
-                              length: '18%',
+                              length: '12%',
                               width: 1.5,
                               color: Colors.black38,
                             ),
                             labelIntersectAction: LabelIntersectAction.shift,
-                            overflowMode: OverflowMode.hide,
+                            overflowMode: OverflowMode.trim,
                           ),
 
                           radius: chartRadius.toString(),
@@ -175,7 +175,7 @@ class _CategoryChartCardSyncfusionState
                             category.name,
                             style:
                                 Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.normal,
                                     ),
                           ),
                         ),
@@ -190,7 +190,7 @@ class _CategoryChartCardSyncfusionState
                                   .textTheme
                                   .bodyMedium
                                   ?.copyWith(
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w500,
                                   ),
                             ),
                             Text(

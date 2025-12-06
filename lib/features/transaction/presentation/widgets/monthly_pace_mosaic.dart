@@ -29,7 +29,7 @@ class MonthlyPaceMosaic extends StatelessWidget {
     final numRows = (totalCells / 7).ceil(); // 4, 5, or 6 rows
 
     // Calculate responsive height based on available space
-    final cellSize = (screenWidth - 32 - (6 * 4)) / 7; // Account for padding and spacing
+    final cellSize = ((screenWidth - 32 - (6 * 4)) / 7).clamp(0.0, 48.0); // Account for padding and spacing, max 48px
     final headerHeight = 24.0; // Approximate height of weekday headers
     final spacingHeight = 12.0; // SizedBox between header and grid
     final gridSpacing = 8.0 * (numRows - 1); // mainAxisSpacing between rows
@@ -112,6 +112,7 @@ class MonthlyPaceMosaic extends StatelessWidget {
       mainAxisSpacing: 8,
       crossAxisSpacing: 4,
       physics: const NeverScrollableScrollPhysics(),
+      clipBehavior: Clip.hardEdge,
       children: gridItems,
     );
   }
