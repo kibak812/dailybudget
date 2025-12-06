@@ -6,6 +6,83 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 14] - 2025-12-06
+
+### Summary
+Fixed responsive design issues across Statistics, Home, and Transactions tabs to improve UX on various screen sizes (phones, tablets, foldables).
+
+### Changed
+
+#### Statistics Tab - Donut Chart Responsive Sizing
+- **Implemented responsive chart sizing with LayoutBuilder**
+  - Previous: Fixed 520px height causing overflow on small screens
+  - New: Dynamic sizing based on screen dimensions
+  - Chart height: `(screenHeight * 0.35).clamp(280.0, 400.0)`
+  - Chart radius: `(chartHeight * 0.28).clamp(70.0, 110.0)`
+  - Font size: `(screenWidth * 0.028).clamp(9.0, 11.0)`
+  - Result: Chart scales appropriately, preventing label truncation with "..."
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart:75-83`
+
+- **Reduced vertical spacing around chart**
+  - Changed top/bottom spacing from 24px to 12px
+  - Provides more room for chart content
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart:71, 135`
+
+- **Reduced connector line length**
+  - Changed from 20% to 18% to prevent clipping on small screens
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart:118`
+
+- **Added overflow protection**
+  - Added `overflowMode: OverflowMode.hide` to hide labels that don't fit
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart:123`
+
+#### Home Tab - Line Chart Touch Interaction & Tooltips
+- **Replaced TooltipBehavior with TrackballBehavior**
+  - Previous: Required precise touch on data points, showed "Series 0" prefix
+  - New: Vertical trackball line for wider touch area, clean tooltips
+  - Users can tap anywhere near data points to see values
+  - Location: `lib/features/daily_budget/presentation/widgets/daily_budget_trend_chart.dart:165-182`
+
+- **Implemented Korean currency formatting in tooltips**
+  - Added `onTrackballPositionChanging` callback with `Formatters.formatCurrency()`
+  - Previous: "3일\n50000" (raw number)
+  - New: "3일\n50,000원" (formatted with commas and currency symbol)
+  - Created `_TooltipData` helper class for type safety
+  - Location: `lib/features/daily_budget/presentation/widgets/daily_budget_trend_chart.dart:8-13, 161, 185-195`
+
+- **Reduced warning text font size**
+  - Changed "내일부터 일별 예산이 줄어듭니다" from 11pt to 10pt
+  - Location: `lib/features/daily_budget/presentation/widgets/today_spent_card.dart:89`
+
+#### Transactions Tab - Calendar Responsive Height
+- **Implemented dynamic calendar height calculation**
+  - Previous: Fixed 350px height causing bottom dates to be cut off on large screens
+  - New: Calculates height based on number of calendar weeks (4-6 rows) and screen size
+  - Formula: Accounts for cell size, header, spacing, and grid gaps
+  - Constraints: `min 280px, max 50% of screen height`
+  - Result: Adapts to different month layouts and device types
+  - Location: `lib/features/transaction/presentation/widgets/monthly_pace_mosaic.dart:22-48`
+
+### Technical Details
+
+- **Type Safety Improvements**
+  - Created `_TooltipData` class to handle Syncfusion's `num` vs `int` type conflicts
+  - Added `.toInt()` conversions where needed for list indexing
+
+- **Responsive Design Patterns**
+  - Used `MediaQuery` for screen dimensions
+  - Used `LayoutBuilder` for constraint-based sizing
+  - Used `.clamp()` for min/max bounds
+  - Percentage-based sizing with pixel constraints
+
+### Files Modified
+1. `lib/features/statistics/presentation/widgets/category_chart_card.dart`
+2. `lib/features/daily_budget/presentation/widgets/daily_budget_trend_chart.dart`
+3. `lib/features/daily_budget/presentation/widgets/today_spent_card.dart`
+4. `lib/features/transaction/presentation/widgets/monthly_pace_mosaic.dart`
+
+---
+
 ## [Phase 13] - 2025-12-06
 
 ### Summary

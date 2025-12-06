@@ -19,9 +19,33 @@ class MonthlyPaceMosaic extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Calculate number of weeks needed for this month's calendar
+    final firstDayDate = DateTime.parse(data.days.first.date);
+    final firstWeekday = firstDayDate.weekday % 7; // 0=Sun, 1=Mon, ..., 6=Sat
+    final totalCells = firstWeekday + data.days.length;
+    final numRows = (totalCells / 7).ceil(); // 4, 5, or 6 rows
+
+    // Calculate responsive height based on available space
+    final cellSize = (screenWidth - 32 - (6 * 4)) / 7; // Account for padding and spacing
+    final headerHeight = 24.0; // Approximate height of weekday headers
+    final spacingHeight = 12.0; // SizedBox between header and grid
+    final gridSpacing = 8.0 * (numRows - 1); // mainAxisSpacing between rows
+
+    final calculatedHeight = 16.0 + // Top padding
+                            headerHeight +
+                            spacingHeight +
+                            (cellSize * numRows) +
+                            gridSpacing +
+                            16.0; // Bottom padding
+
+    // Constrain height: min 280px, max 50% of screen
+    final constrainedHeight = calculatedHeight.clamp(280.0, screenHeight * 0.5);
 
     return Container(
-      height: 350, // Fixed height ~300-350px as per PRD
+      height: constrainedHeight,
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [

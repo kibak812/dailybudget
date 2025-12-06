@@ -86,7 +86,7 @@ class TodaySpentCard extends StatelessWidget {
                       '내일부터 일별 예산이 줄어듭니다',
                       style: TextStyle(
                         color: Colors.grey[500],
-                        fontSize: 11,
+                        fontSize: 10,
                       ),
                     ),
                   ],

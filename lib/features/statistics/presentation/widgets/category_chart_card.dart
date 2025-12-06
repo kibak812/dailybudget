@@ -68,58 +68,71 @@ class _CategoryChartCardSyncfusionState
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
 
             // Pie chart
             if (widget.categoryData.isNotEmpty)
-              SizedBox(
-                height: 520,
-                child: SfCircularChart(
-                    legend: Legend(isVisible: false),
-                    series: <CircularSeries>[
-                      DoughnutSeries<CategorySpending, String>(
-                        dataSource: widget.categoryData,
-                        xValueMapper: (data, _) => data.name,
-                        yValueMapper: (data, _) => data.amount.toDouble(),
-                        pointColorMapper: (data, index) =>
-                            _getColorForIndex(index),
-                        strokeWidth: 2,
-                        strokeColor: Colors.white,
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final screenHeight = MediaQuery.of(context).size.height;
+                  final screenWidth = MediaQuery.of(context).size.width;
 
-                        // CRITICAL: Category name + percentage
-                        dataLabelMapper: (data, index) {
-                          final percent = widget.totalSpent > 0
-                              ? (data.amount / widget.totalSpent) * 100
-                              : 0.0;
-                          return '${data.name}(${percent.toStringAsFixed(1)}%)';
-                        },
+                  // Responsive calculations - Reduced chart size to prevent label overflow
+                  final chartHeight = (screenHeight * 0.35).clamp(280.0, 400.0);
+                  final baseFontSize = (screenWidth * 0.028).clamp(9.0, 11.0);
+                  final chartRadius = (chartHeight * 0.28).clamp(70.0, 110.0);
 
-                        // CRITICAL: Connector lines and enhanced labels
-                        dataLabelSettings: DataLabelSettings(
-                          isVisible: true,
-                          labelPosition: ChartDataLabelPosition.outside,
-                          textStyle: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                  return SizedBox(
+                    height: chartHeight,
+                    child: SfCircularChart(
+                      legend: Legend(isVisible: false),
+                      series: <CircularSeries>[
+                        DoughnutSeries<CategorySpending, String>(
+                          dataSource: widget.categoryData,
+                          xValueMapper: (data, _) => data.name,
+                          yValueMapper: (data, _) => data.amount.toDouble(),
+                          pointColorMapper: (data, index) =>
+                              _getColorForIndex(index),
+                          strokeWidth: 2,
+                          strokeColor: Colors.white,
+
+                          // CRITICAL: Category name + percentage
+                          dataLabelMapper: (data, index) {
+                            final percent = widget.totalSpent > 0
+                                ? (data.amount / widget.totalSpent) * 100
+                                : 0.0;
+                            return '${data.name}(${percent.toStringAsFixed(1)}%)';
+                          },
+
+                          // CRITICAL: Connector lines and enhanced labels
+                          dataLabelSettings: DataLabelSettings(
+                            isVisible: true,
+                            labelPosition: ChartDataLabelPosition.outside,
+                            textStyle: TextStyle(
+                              fontSize: baseFontSize,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                            connectorLineSettings: const ConnectorLineSettings(
+                              type: ConnectorType.line,
+                              length: '18%',
+                              width: 1.5,
+                              color: Colors.black38,
+                            ),
+                            labelIntersectAction: LabelIntersectAction.shift,
+                            overflowMode: OverflowMode.hide,
                           ),
-                          connectorLineSettings: const ConnectorLineSettings(
-                            type: ConnectorType.line,
-                            length: '20%',
-                            width: 1.5,
-                            color: Colors.black38,
-                          ),
-                          labelIntersectAction: LabelIntersectAction.shift,
+
+                          radius: chartRadius.toString(),
+                          innerRadius: '60%',
                         ),
+                      ],
+                    ),
+                  );
+                },
+              ),
 
-                        radius: '100',
-                        innerRadius: '60%',
-                      ),
-                    ],
-                  ),
-                ),
-
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
 
             // Category list
             if (widget.categoryData.isNotEmpty)

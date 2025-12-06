@@ -5,6 +5,13 @@ import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 
+/// Tooltip data class for type safety
+class _TooltipData {
+  final int day;
+  final int budget;
+  _TooltipData(this.day, this.budget);
+}
+
 /// Daily budget trend chart widget (Syncfusion version)
 /// Shows line chart of daily budget changes from day 1 to current day
 class DailyBudgetTrendChartSyncfusion extends ConsumerStatefulWidget {
@@ -150,19 +157,42 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
       yMax = absMax * 1.2;
     }
 
+    // Pre-extract tooltip data to avoid type inference issues in callback
+    final tooltipData = history.map((item) => _TooltipData(item.day, item.dailyBudget)).toList();
+
     return SfCartesianChart(
-      tooltipBehavior: TooltipBehavior(
+      // Use trackball for better touch interaction
+      trackballBehavior: TrackballBehavior(
         enable: true,
-        format: 'point.x일\npoint.y',
-        borderColor: Colors.transparent,
-        color: theme.colorScheme.inverseSurface,
-        textStyle: TextStyle(
-          color: theme.colorScheme.onInverseSurface,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
+        activationMode: ActivationMode.singleTap,
+        lineType: TrackballLineType.vertical,
+        lineColor: theme.colorScheme.primary.withOpacity(0.3),
+        lineWidth: 2,
+        tooltipSettings: InteractiveTooltip(
+          enable: true,
+          color: theme.colorScheme.inverseSurface,
+          textStyle: TextStyle(
+            color: theme.colorScheme.onInverseSurface,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+          borderColor: Colors.transparent,
+          format: 'point.x일\npoint.y',
         ),
-        canShowMarker: false,
       ),
+
+      // CRITICAL: Format trackball tooltip with Korean currency
+      onTrackballPositionChanging: (TrackballArgs args) {
+        final pointInfo = args.chartPointInfo;
+        final dataIndex = pointInfo.dataPointIndex;
+        if (dataIndex != null && dataIndex < tooltipData.length) {
+          final idx = dataIndex.toInt();
+          final data = tooltipData[idx];
+          final day = data.day.toInt();
+          final budget = data.budget.toInt();
+          pointInfo.label = '$day일\n${Formatters.formatCurrency(budget)}';
+        }
+      },
 
       // CRITICAL: Custom marker colors based on value
       onMarkerRender: (MarkerRenderArgs args) {
@@ -234,8 +264,8 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
         ),
       ),
 
-      series: <CartesianSeries<DailyBudgetHistoryItem, num>>[
-        SplineAreaSeries<DailyBudgetHistoryItem, num>(
+      series: <CartesianSeries<DailyBudgetHistoryItem, int>>[
+        SplineAreaSeries<DailyBudgetHistoryItem, int>(
           dataSource: history,
           xValueMapper: (DailyBudgetHistoryItem item, _) => item.day,
           yValueMapper: (DailyBudgetHistoryItem item, _) => item.dailyBudget,
