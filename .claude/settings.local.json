@@ -7,7 +7,21 @@
       "Bash(git commit:*)",
       "Bash(flutter analyze:*)",
       "Bash(flutter build:*)",
-      "Bash(flutter test:*)"
+      "Bash(flutter test:*)",
+      "Bash(/c/src/flutter/bin/flutter build:*)",
+      "Bash(/c/src/flutter/bin/flutter clean:*)",
+      "WebSearch",
+      "Bash(/c/src/flutter/bin/flutter analyze)",
+      "WebFetch(domain:pub.dev)",
+      "WebFetch(domain:help.syncfusion.com)",
+      "Bash(find:*)",
+      "Bash(git checkout -b feature/migrate-to-syncfusion-charts)",
+      "Bash(git tag checkpoint/before-migration)",
+      "Bash(flutter pub add:*)",
+      "Bash(/c/src/flutter/bin/flutter pub:*)",
+      "Bash(dart analyze:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)"
     ],
     "deny": [],
     "ask": []

@@ -6,6 +6,89 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 13] - 2025-12-06
+
+### Summary
+Refined donut chart UX by removing unnecessary touch interactions and improving label visibility, plus added new category detail page for drilling down into transaction details.
+
+### Changed
+
+#### Donut Chart UX Refinements
+- **Removed touch interaction/explode functionality**
+  - Previous: Tapping chart segments triggered explode/collapse animation
+  - New: Removed all touch interactions (GestureDetector, selectionBehavior, explode properties)
+  - Reason: Touch behavior was unnatural on mobile; feature was not essential
+  - Impact: Cleaner, simpler user experience
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart`
+
+- **Changed connector lines from curved to straight**
+  - Changed `ConnectorType.curve` to `ConnectorType.line`
+  - Result: More professional and clean appearance
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart:102`
+
+- **Compact single-line labels with reduced font size**
+  - Previous: Two-line format "쇼핑\n25.5%" with 14pt font
+  - New: Single-line format "쇼핑(25.5%)" with 11pt font
+  - Result: All labels fit within container, no overflow issues
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart:85-99`
+
+- **Reduced chart radius for better label visibility**
+  - Changed radius from '120' to '100'
+  - Provides more space for outside labels and connector lines
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart:110`
+
+### Added
+
+#### Category Detail Page
+- **New category detail page with drill-down navigation**
+  - Created new page: `lib/features/statistics/presentation/pages/category_detail_page.dart`
+  - Shows all transactions for selected category in current month
+  - Features:
+    - Summary card with total spending, transaction count, and color-coded header
+    - Filtered transaction list sorted by date (newest first)
+    - Transaction details: date (with day of week), amount, memo
+    - Empty state when no transactions exist
+    - Back navigation to statistics page
+  - Navigation: Tap any category in the category list to view details
+  - Route: `/statistics/category-detail` (child route of statistics)
+
+- **Made category list items tappable**
+  - Wrapped category items with InkWell for touch feedback
+  - Added chevron icon to indicate tappability
+  - Passes category name, color, year, and month to detail page
+  - Location: `lib/features/statistics/presentation/widgets/category_chart_card.dart:133-203`
+
+- **Updated router configuration**
+  - Added category detail route as child of statistics route
+  - Accepts parameters: categoryName, categoryColor, year, month
+  - Uses MaterialPage for standard page transition
+  - Location: `lib/app/router/app_router.dart:64-79`
+
+### Technical Details
+
+#### Modified Files
+1. `lib/features/statistics/presentation/widgets/category_chart_card.dart`
+   - Added year/month parameters to CategoryChartCardSyncfusion
+   - Removed touch interaction code
+   - Updated label formatting and styling
+   - Added InkWell with navigation to category list items
+
+2. `lib/features/statistics/presentation/pages/statistics_page.dart`
+   - Passed year/month parameters to CategoryChartCardSyncfusion
+   - Location: Line 280-281
+
+3. `lib/app/router/app_router.dart`
+   - Added category detail child route under statistics branch
+   - Added import for CategoryDetailPage
+
+#### New Files
+1. `lib/features/statistics/presentation/pages/category_detail_page.dart`
+   - ConsumerWidget for category transaction details
+   - Filters transactions by category, month, and expense type
+   - Formatted date display with Korean day-of-week labels
+
+---
+
 ## [Phase 12] - 2025-12-05
 
 ### Summary

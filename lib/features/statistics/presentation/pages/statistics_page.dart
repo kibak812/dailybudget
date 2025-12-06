@@ -277,6 +277,8 @@ class StatisticsPage extends ConsumerWidget {
                 CategoryChartCardSyncfusion(
                   categoryData: categoryData,
                   totalSpent: budgetData.totalSpent,
+                  year: currentMonth.year,
+                  month: currentMonth.month,
                 )
               else
                 Card(

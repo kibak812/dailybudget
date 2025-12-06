@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 
-/// Daily budget trend chart widget (Syncfusion version)
+/// Daily budget trend chart widget
 /// Shows line chart of daily budget changes from day 1 to current day
-class DailyBudgetTrendChartSyncfusion extends ConsumerStatefulWidget {
-  const DailyBudgetTrendChartSyncfusion({super.key});
+class DailyBudgetTrendChart extends ConsumerStatefulWidget {
+  const DailyBudgetTrendChart({super.key});
 
   @override
-  ConsumerState<DailyBudgetTrendChartSyncfusion> createState() => _DailyBudgetTrendChartSyncfusionState();
+  ConsumerState<DailyBudgetTrendChart> createState() => _DailyBudgetTrendChartState();
 }
 
-class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTrendChartSyncfusion> {
+class _DailyBudgetTrendChartState extends ConsumerState<DailyBudgetTrendChart> {
   ChartPeriod _selectedPeriod = ChartPeriod.week;
 
   @override
@@ -86,7 +86,9 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
             // Chart
             SizedBox(
               height: 200,
-              child: _buildSyncfusionChart(history, theme),
+              child: LineChart(
+                _buildLineChartData(history, theme),
+              ),
             ),
           ],
         ),
@@ -125,7 +127,15 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
     );
   }
 
-  Widget _buildSyncfusionChart(List<DailyBudgetHistoryItem> history, ThemeData theme) {
+  LineChartData _buildLineChartData(List history, ThemeData theme) {
+    // Create spots from history data
+    final spots = history.map((item) {
+      return FlSpot(
+        item.day.toDouble(),
+        item.dailyBudget.toDouble(),
+      );
+    }).toList();
+
     // Find min and max values for Y axis
     final budgetValues = history.map((item) => item.dailyBudget).toList();
     final minBudget = budgetValues.reduce((a, b) => a < b ? a : b);
@@ -136,9 +146,9 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
     final double yMax;
 
     if (minBudget >= 0 && maxBudget >= 0) {
-      // All positive - tight zoom for maximum visual impact
-      yMin = (minBudget * 0.9).floorToDouble();
-      yMax = (maxBudget * 1.1).ceilToDouble();
+      // All positive
+      yMin = 0;
+      yMax = (maxBudget * 1.2).ceilToDouble();
     } else if (minBudget < 0 && maxBudget <= 0) {
       // All negative
       yMin = (minBudget * 1.2).floorToDouble();
@@ -150,125 +160,141 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
       yMax = absMax * 1.2;
     }
 
-    return SfCartesianChart(
-      tooltipBehavior: TooltipBehavior(
-        enable: true,
-        format: 'point.x일\npoint.y',
-        borderColor: Colors.transparent,
-        color: theme.colorScheme.inverseSurface,
-        textStyle: TextStyle(
-          color: theme.colorScheme.onInverseSurface,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-        canShowMarker: false,
-      ),
-
-      // CRITICAL: Custom marker colors based on value
-      onMarkerRender: (MarkerRenderArgs args) {
-        final index = args.pointIndex;
-        if (index != null && index < history.length) {
-          final value = history[index].dailyBudget;
-          if (value > 0) {
-            args.color = Colors.green;
-          } else if (value < 0) {
-            args.color = Colors.red;
-          } else {
-            args.color = Colors.grey;
-          }
-        }
-      },
-
-      primaryXAxis: NumericAxis(
-        minimum: history.first.day.toDouble(),
-        maximum: history.last.day.toDouble(),
-        interval: _calculateXInterval(history.length),
-
-        axisLabelFormatter: (AxisLabelRenderDetails args) {
-          // Skip min and max labels to match fl_chart behavior
-          if (args.value == history.first.day.toDouble() ||
-              args.value == history.last.day.toDouble()) {
-            return ChartAxisLabel('', const TextStyle());
-          }
-          return ChartAxisLabel(
-            '${args.value.toInt()}일',
-            TextStyle(
-              color: Colors.grey[600],
-              fontSize: 11,
-            ),
+    return LineChartData(
+      gridData: FlGridData(
+        show: true,
+        drawVerticalLine: false,
+        horizontalInterval: (yMax - yMin) / 4,
+        getDrawingHorizontalLine: (value) {
+          return FlLine(
+            color: Colors.grey[200]!,
+            strokeWidth: 1,
           );
         },
-
-        axisLine: AxisLine(
-          color: Colors.grey[300],
-          width: 1,
-        ),
-        majorTickLines: const MajorTickLines(width: 0),
-        majorGridLines: const MajorGridLines(width: 0),
       ),
-
-      primaryYAxis: NumericAxis(
-        minimum: yMin,
-        maximum: yMax,
-        interval: (yMax - yMin) / 4,
-
-        // CRITICAL: Korean formatting
-        axisLabelFormatter: (AxisLabelRenderDetails args) {
-          return ChartAxisLabel(
-            _formatYAxisValue(args.value.toInt()),
-            TextStyle(
-              color: Colors.grey[600],
-              fontSize: 10,
+      titlesData: FlTitlesData(
+        show: true,
+        rightTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        topTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: 30,
+            interval: _calculateXInterval(history.length),
+            getTitlesWidget: (value, meta) {
+              if (value == meta.min || value == meta.max) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  '${value.toInt()}일',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 11,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: 50,
+            interval: (yMax - yMin) / 4,
+            getTitlesWidget: (value, meta) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Text(
+                  _formatYAxisValue(value.toInt()),
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 10,
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+      borderData: FlBorderData(
+        show: true,
+        border: Border(
+          left: BorderSide(color: Colors.grey[300]!),
+          bottom: BorderSide(color: Colors.grey[300]!),
+        ),
+      ),
+      minX: history.first.day.toDouble(),
+      maxX: history.last.day.toDouble(),
+      minY: yMin,
+      maxY: yMax,
+      lineBarsData: [
+        LineChartBarData(
+          spots: spots,
+          isCurved: true,
+          curveSmoothness: 0.3,
+          color: theme.colorScheme.primary,
+          barWidth: 3,
+          isStrokeCapRound: true,
+          dotData: FlDotData(
+            show: true,
+            getDotPainter: (spot, percent, barData, index) {
+              final value = spot.y.toInt();
+              final color = value > 0
+                  ? Colors.green
+                  : value < 0
+                      ? Colors.red
+                      : Colors.grey;
+              return FlDotCirclePainter(
+                radius: 3,
+                color: color,
+                strokeWidth: 2,
+                strokeColor: Colors.white,
+              );
+            },
+          ),
+          belowBarData: BarAreaData(
+            show: true,
+            gradient: LinearGradient(
+              colors: [
+                theme.colorScheme.primary.withOpacity(0.3),
+                theme.colorScheme.primary.withOpacity(0.05),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-          );
-        },
-
-        axisLine: AxisLine(
-          color: Colors.grey[300],
-          width: 1,
-        ),
-        majorTickLines: const MajorTickLines(width: 0),
-        majorGridLines: MajorGridLines(
-          width: 1,
-          color: Colors.grey[200],
-        ),
-      ),
-
-      series: <CartesianSeries<DailyBudgetHistoryItem, num>>[
-        SplineAreaSeries<DailyBudgetHistoryItem, num>(
-          dataSource: history,
-          xValueMapper: (DailyBudgetHistoryItem item, _) => item.day,
-          yValueMapper: (DailyBudgetHistoryItem item, _) => item.dailyBudget,
-
-          borderColor: theme.colorScheme.primary,
-          borderWidth: 3,
-
-          // CRITICAL: Smooth curves
-          splineType: SplineType.natural,
-
-          // CRITICAL: Gradient fill
-          gradient: LinearGradient(
-            colors: [
-              theme.colorScheme.primary.withOpacity(0.3),
-              theme.colorScheme.primary.withOpacity(0.05),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
           ),
-
-          // CRITICAL: Color-coded markers (colors set via onMarkerRender)
-          markerSettings: MarkerSettings(
-            isVisible: true,
-            height: 6,
-            width: 6,
-            shape: DataMarkerType.circle,
-            borderWidth: 2,
-            borderColor: Colors.white,
-          ),
-
-          enableTooltip: true,
         ),
       ],
+      lineTouchData: LineTouchData(
+        enabled: true,
+        touchTooltipData: LineTouchTooltipData(
+          getTooltipColor: (touchedSpot) => theme.colorScheme.inverseSurface,
+          tooltipRoundedRadius: 8,
+          tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          getTooltipItems: (touchedSpots) {
+            return touchedSpots.map((spot) {
+              final day = spot.x.toInt();
+              final budget = spot.y.toInt();
+              return LineTooltipItem(
+                '$day일\n${Formatters.formatCurrency(budget)}',
+                TextStyle(
+                  color: theme.colorScheme.onInverseSurface,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              );
+            }).toList();
+          },
+        ),
+        handleBuiltInTouches: true,
+      ),
     );
   }
 

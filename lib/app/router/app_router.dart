@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:daily_pace/features/daily_budget/presentation/pages/home_page.dart';
 import 'package:daily_pace/features/transaction/presentation/pages/transactions_page.dart';
 import 'package:daily_pace/features/statistics/presentation/pages/statistics_page.dart';
+import 'package:daily_pace/features/statistics/presentation/pages/category_detail_page.dart';
 import 'package:daily_pace/features/settings/presentation/pages/settings_page.dart';
 
 /// GoRouter configuration for Daily Pace app
@@ -60,6 +61,23 @@ class AppRouter {
                     pageBuilder: (context, state) => const NoTransitionPage(
                       child: StatisticsPage(),
                     ),
+                    routes: [
+                      // Child route for category detail
+                      GoRoute(
+                        path: 'category-detail',
+                        pageBuilder: (context, state) {
+                          final extra = state.extra as Map<String, dynamic>;
+                          return MaterialPage(
+                            child: CategoryDetailPage(
+                              categoryName: extra['categoryName'] as String,
+                              categoryColor: extra['categoryColor'] as Color,
+                              year: extra['year'] as int,
+                              month: extra['month'] as int,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),

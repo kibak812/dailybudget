@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 
@@ -16,11 +17,15 @@ class CategorySpending {
 class CategoryChartCardSyncfusion extends StatefulWidget {
   final List<CategorySpending> categoryData;
   final int totalSpent;
+  final int year;
+  final int month;
 
   const CategoryChartCardSyncfusion({
     super.key,
     required this.categoryData,
     required this.totalSpent,
+    required this.year,
+    required this.month,
   });
 
   @override
@@ -30,8 +35,6 @@ class CategoryChartCardSyncfusion extends StatefulWidget {
 
 class _CategoryChartCardSyncfusionState
     extends State<CategoryChartCardSyncfusion> {
-  int _touchedIndex = -1;
-
   // Category colors matching the web app
   static const List<Color> categoryColors = [
     Color(0xFF4F46E5), // Indigo
@@ -69,19 +72,12 @@ class _CategoryChartCardSyncfusionState
 
             // Pie chart
             if (widget.categoryData.isNotEmpty)
-              GestureDetector(
-                onTapUp: (_) {
-                  // Collapse when touch is released (like fl_chart)
-                  setState(() {
-                    _touchedIndex = -1;
-                  });
-                },
-                child: SizedBox(
-                  height: 520,
-                  child: SfCircularChart(
+              SizedBox(
+                height: 520,
+                child: SfCircularChart(
                     legend: Legend(isVisible: false),
                     series: <CircularSeries>[
-                      PieSeries<CategorySpending, String>(
+                      DoughnutSeries<CategorySpending, String>(
                         dataSource: widget.categoryData,
                         xValueMapper: (data, _) => data.name,
                         yValueMapper: (data, _) => data.amount.toDouble(),
@@ -95,7 +91,7 @@ class _CategoryChartCardSyncfusionState
                           final percent = widget.totalSpent > 0
                               ? (data.amount / widget.totalSpent) * 100
                               : 0.0;
-                          return '${data.name}\n${percent.toStringAsFixed(1)}%';
+                          return '${data.name}(${percent.toStringAsFixed(1)}%)';
                         },
 
                         // CRITICAL: Connector lines and enhanced labels
@@ -103,12 +99,12 @@ class _CategoryChartCardSyncfusionState
                           isVisible: true,
                           labelPosition: ChartDataLabelPosition.outside,
                           textStyle: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 11,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
                           connectorLineSettings: const ConnectorLineSettings(
-                            type: ConnectorType.curve,
+                            type: ConnectorType.line,
                             length: '20%',
                             width: 1.5,
                             color: Colors.black38,
@@ -116,24 +112,13 @@ class _CategoryChartCardSyncfusionState
                           labelIntersectAction: LabelIntersectAction.shift,
                         ),
 
-                        // Touch interaction
-                        selectionBehavior: SelectionBehavior(
-                          enable: true,
-                        ),
-                        radius: '120',
-                        explode: true,
-                        explodeIndex: _touchedIndex,
-                        explodeOffset: '10',
+                        radius: '100',
+                        innerRadius: '60%',
                       ),
                     ],
-                    onSelectionChanged: (SelectionArgs args) {
-                      setState(() {
-                        _touchedIndex = args.pointIndex;
-                      });
-                    },
                   ),
                 ),
-              ),
+
             const SizedBox(height: 24),
 
             // Category list
@@ -145,55 +130,75 @@ class _CategoryChartCardSyncfusionState
                     ? (category.amount / widget.totalSpent) * 100
                     : 0.0;
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    children: [
-                      // Color indicator
-                      Container(
-                        width: 16,
-                        height: 16,
-                        decoration: BoxDecoration(
-                          color: _getColorForIndex(index),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-
-                      // Category name
-                      Expanded(
-                        child: Text(
-                          category.name,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                        ),
-                      ),
-
-                      // Amount and percentage
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            Formatters.formatCurrency(category.amount),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                return InkWell(
+                  onTap: () {
+                    // Navigate to category detail page
+                    context.push('/statistics/category-detail', extra: {
+                      'categoryName': category.name,
+                      'categoryColor': _getColorForIndex(index),
+                      'year': widget.year,
+                      'month': widget.month,
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                    child: Row(
+                      children: [
+                        // Color indicator
+                        Container(
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: _getColorForIndex(index),
+                            borderRadius: BorderRadius.circular(4),
                           ),
-                          Text(
-                            '${percent.toStringAsFixed(1)}%',
+                        ),
+                        const SizedBox(width: 12),
+
+                        // Category name
+                        Expanded(
+                          child: Text(
+                            category.name,
                             style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: AppColors.textSecondary,
+                                Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w500,
                                     ),
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+
+                        // Amount and percentage
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              Formatters.formatCurrency(category.amount),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            Text(
+                              '${percent.toStringAsFixed(1)}%',
+                              style:
+                                  Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 8),
+
+                        // Chevron icon to indicate tappability
+                        Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: Colors.grey[400],
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }).toList(),
