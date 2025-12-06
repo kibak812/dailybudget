@@ -23,6 +23,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   TransactionType? _typeFilter;
   String? _selectedDate;  // null = show all dates (YYYY-MM-DD format)
 
+  // Breakpoint for wide layout (Galaxy Fold inner display)
+  static const double _wideBreakpoint = 600.0;
+
   @override
   Widget build(BuildContext context) {
     final currentMonth = ref.watch(currentMonthProvider);
@@ -52,16 +55,182 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     return Scaffold(
       appBar: _buildAppBar(context),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await ref.read(transactionProvider.notifier).loadTransactions();
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= _wideBreakpoint;
+
+          if (isWide) {
+            return _buildWideLayout(context, mosaicData, grouped, filteredTransactions);
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              await ref.read(transactionProvider.notifier).loadTransactions();
+            },
+            child: _buildBody(context, mosaicData, grouped, filteredTransactions),
+          );
         },
-        child: _buildBody(context, mosaicData, grouped, filteredTransactions),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddTransactionSheet(context),
-        child: const Icon(Icons.add),
+      // FAB only shown in narrow layout (wide layout has FAB in left panel)
+      floatingActionButton: LayoutBuilder(
+        builder: (context, constraints) {
+          // Check if we're in wide mode by getting the parent constraints
+          final screenWidth = MediaQuery.of(context).size.width;
+          if (screenWidth >= _wideBreakpoint) {
+            return const SizedBox.shrink();
+          }
+          return FloatingActionButton(
+            onPressed: () => _showAddTransactionSheet(context),
+            child: const Icon(Icons.add),
+          );
+        },
       ),
+    );
+  }
+
+  /// Wide layout for foldable devices (2-column split)
+  Widget _buildWideLayout(
+    BuildContext context,
+    dynamic mosaicData,
+    Map<String, List<TransactionModel>> grouped,
+    List<TransactionModel> filteredTransactions,
+  ) {
+    return Row(
+      children: [
+        // Left panel: Calendar with FAB
+        SizedBox(
+          width: 380,
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  const MonthNavigationBar(),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: MonthlyPaceMosaic(
+                        data: mosaicData,
+                        selectedDate: _selectedDate,
+                        onDateTap: _onMosaicDateTap,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              // FAB positioned at bottom-left of left panel
+              Positioned(
+                left: 16,
+                bottom: 16,
+                child: FloatingActionButton(
+                  onPressed: () => _showAddTransactionSheet(context),
+                  child: const Icon(Icons.add),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Vertical divider
+        const VerticalDivider(width: 1, thickness: 1),
+        // Right panel: Transaction list
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              await ref.read(transactionProvider.notifier).loadTransactions();
+            },
+            child: _buildTransactionList(context, grouped, filteredTransactions),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Transaction list for right panel in wide layout
+  Widget _buildTransactionList(
+    BuildContext context,
+    Map<String, List<TransactionModel>> grouped,
+    List<TransactionModel> filteredTransactions,
+  ) {
+    // Sort dates in descending order (newest first)
+    final sortedDates = grouped.keys.toList()
+      ..sort((a, b) => b.compareTo(a));
+
+    return CustomScrollView(
+      slivers: [
+        // Active filters chips
+        if (_hasActiveFilters)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (_searchKeyword.isNotEmpty)
+                    InputChip(
+                      label: Text('검색: $_searchKeyword'),
+                      onDeleted: () => setState(() => _searchKeyword = ''),
+                    ),
+                  if (_typeFilter != null)
+                    InputChip(
+                      label: Text(_typeFilter == TransactionType.expense
+                          ? '필터: 지출'
+                          : '필터: 수입'),
+                      onDeleted: () => setState(() => _typeFilter = null),
+                    ),
+                ],
+              ),
+            ),
+          ),
+
+        // Selected date indicator
+        if (_selectedDate != null)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${Formatters.formatDate(_selectedDate!)} 거래',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () => setState(() => _selectedDate = null),
+                    child: const Text('전체 보기'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+        // Transaction list
+        if (filteredTransactions.isEmpty)
+          SliverFillRemaining(
+            child: _buildEmptyState(context),
+          )
+        else
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final date = sortedDates[index];
+                final dateTransactions = grouped[date]!;
+                final dayTotal = _calculateDayTotal(dateTransactions);
+
+                return _buildDateSection(
+                    context, date, dateTransactions, dayTotal);
+              },
+              childCount: sortedDates.length,
+            ),
+          ),
+      ],
     );
   }
 

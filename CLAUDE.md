@@ -21,11 +21,11 @@ Daily Pace (데일리 페이스) is a smart daily budget management Flutter appl
 
 ### Building
 ```bash
-# Debug build
-/c/src/flutter/bin/flutter build apk --debug
+# Release build (default for testing, always use --split-per-abi)
+/c/src/flutter/bin/flutter build apk --release --split-per-abi
 
-# Release build
-/c/src/flutter/bin/flutter build apk --release
+# Debug build (only when debugging is needed)
+/c/src/flutter/bin/flutter build apk --debug --split-per-abi
 ```
 
 ### Testing & Analysis
@@ -248,3 +248,18 @@ The `.notifier` pattern is only for reading/mutations, never for watching state 
 - **Danger**: Rose-500
 
 See: `lib/app/theme/app_colors.dart` and `lib/features/transaction/presentation/widgets/mosaic_colors.dart`
+
+## Development Workflow
+
+When completing a feature or fix request:
+
+1. **Implement** - Complete the requested changes
+2. **Build** - Always run `flutter build apk --release --split-per-abi` after implementation
+3. **Wait for Confirm** - User will install and test the APK on device
+4. **After User Confirms** - Proceed with:
+   - Update CHANGELOG.md with the changes
+   - `git add` relevant files
+   - `git commit` with descriptive message
+   - `git push` to remote
+
+Do NOT commit or push until user explicitly confirms the changes work correctly.

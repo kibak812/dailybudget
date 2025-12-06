@@ -6,6 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 16] - 2025-12-06
+
+### Summary
+Added Galaxy Fold optimization with 2-column split layout for Transactions and Statistics tabs when using the inner display (width >= 600dp).
+
+### Added
+
+#### Foldable Device Support
+- **Transactions Tab - Split Layout**
+  - Left panel (380px): Month navigation + Calendar mosaic
+  - Right panel: Transaction list with filters
+  - FAB positioned at bottom-left of left panel
+  - Location: `lib/features/transaction/presentation/pages/transactions_page.dart`
+
+- **Statistics Tab - Split Layout**
+  - Left panel: Summary cards + Budget usage bar
+  - Right panel: Category pie chart
+  - Location: `lib/features/statistics/presentation/pages/statistics_page.dart`
+
+- **Responsive Widget Updates**
+  - MonthlyPaceMosaic: Added LayoutBuilder for width-based sizing in split panels
+  - CategoryChartCard: Uses constraint-based width for font sizing
+  - Breakpoint: 600dp (Material Design tablet threshold)
+
+### Changed
+
+#### Development Workflow (CLAUDE.md)
+- Default build changed to release (`--release --split-per-abi`)
+- Added workflow: Implement → Build → User Confirm → Commit → Push
+
+---
+
 ## [Phase 15] - 2025-12-06
 
 ### Summary

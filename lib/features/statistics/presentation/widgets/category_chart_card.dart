@@ -74,12 +74,13 @@ class _CategoryChartCardSyncfusionState
             if (widget.categoryData.isNotEmpty)
               LayoutBuilder(
                 builder: (context, constraints) {
+                  // Use constraints for responsive sizing in split panels
+                  final availableWidth = constraints.maxWidth;
                   final screenHeight = MediaQuery.of(context).size.height;
-                  final screenWidth = MediaQuery.of(context).size.width;
 
-                  // Responsive calculations - Smaller chart and fonts for small screens
+                  // Responsive calculations - use available width for split panel support
                   final chartHeight = (screenHeight * 0.28).clamp(200.0, 300.0);
-                  final baseFontSize = (screenWidth * 0.022).clamp(7.5, 9.0);
+                  final baseFontSize = (availableWidth * 0.028).clamp(7.5, 10.0);
                   final chartRadius = (chartHeight * 0.26).clamp(55.0, 85.0);
 
                   return SizedBox(

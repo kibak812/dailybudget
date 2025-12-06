@@ -14,6 +14,9 @@ import 'package:daily_pace/app/theme/app_colors.dart';
 class StatisticsPage extends ConsumerWidget {
   const StatisticsPage({super.key});
 
+  // Breakpoint for wide layout (Galaxy Fold inner display)
+  static const double _wideBreakpoint = 600.0;
+
   /// Filter transactions by current month
   List<TransactionModel> _filterByMonth(
     List<TransactionModel> transactions,
@@ -243,70 +246,152 @@ class StatisticsPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('통계'),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          // Refresh providers
-          ref.invalidate(transactionProvider);
-          ref.invalidate(budgetProvider);
-          await Future.delayed(const Duration(milliseconds: 500));
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= _wideBreakpoint;
+
+          if (isWide) {
+            return _buildWideLayout(
+              context,
+              ref,
+              budget,
+              budgetData,
+              categoryData,
+              currentMonth,
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(transactionProvider);
+              ref.invalidate(budgetProvider);
+              await Future.delayed(const Duration(milliseconds: 500));
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  // Summary cards
+                  _buildSummaryCards(
+                    budget.amount,
+                    budgetData.totalSpent,
+                    budgetData.totalIncome,
+                    budgetData.totalSpent - budgetData.totalIncome,
+                    budgetData.totalRemaining,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Budget usage bar
+                  BudgetUsageCard(
+                    totalBudget: budget.amount,
+                    totalSpent: budgetData.totalSpent,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Category pie chart
+                  _buildCategorySection(context, categoryData, budgetData, currentMonth),
+                ],
+              ),
+            ),
+          );
         },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
+  /// Wide layout for foldable devices (2-column split)
+  Widget _buildWideLayout(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic budget,
+    dynamic budgetData,
+    List<CategorySpending> categoryData,
+    CurrentMonth currentMonth,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left panel: Summary cards + Budget usage
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(transactionProvider);
+              ref.invalidate(budgetProvider);
+              await Future.delayed(const Duration(milliseconds: 500));
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildSummaryCards(
+                    budget.amount,
+                    budgetData.totalSpent,
+                    budgetData.totalIncome,
+                    budgetData.totalSpent - budgetData.totalIncome,
+                    budgetData.totalRemaining,
+                  ),
+                  const SizedBox(height: 16),
+                  BudgetUsageCard(
+                    totalBudget: budget.amount,
+                    totalSpent: budgetData.totalSpent,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Vertical divider
+        const VerticalDivider(width: 1, thickness: 1),
+        // Right panel: Category chart
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: _buildCategorySection(context, categoryData, budgetData, currentMonth),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Category section widget (reusable for both layouts)
+  Widget _buildCategorySection(
+    BuildContext context,
+    List<CategorySpending> categoryData,
+    dynamic budgetData,
+    CurrentMonth currentMonth,
+  ) {
+    if (categoryData.isNotEmpty) {
+      return CategoryChartCardSyncfusion(
+        categoryData: categoryData,
+        totalSpent: budgetData.totalSpent,
+        year: currentMonth.year,
+        month: currentMonth.month,
+      );
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Center(
           child: Column(
             children: [
-              // Summary cards
-              _buildSummaryCards(
-                budget.amount,
-                budgetData.totalSpent,
-                budgetData.totalIncome,
-                budgetData.totalSpent - budgetData.totalIncome,
-                budgetData.totalRemaining,
+              Icon(
+                Icons.pie_chart_outline,
+                size: 48,
+                color: AppColors.textTertiary,
               ),
-              const SizedBox(height: 16),
-
-              // Budget usage bar
-              BudgetUsageCard(
-                totalBudget: budget.amount,
-                totalSpent: budgetData.totalSpent,
-              ),
-              const SizedBox(height: 16),
-
-              // Category pie chart
-              if (categoryData.isNotEmpty)
-                CategoryChartCardSyncfusion(
-                  categoryData: categoryData,
-                  totalSpent: budgetData.totalSpent,
-                  year: currentMonth.year,
-                  month: currentMonth.month,
-                )
-              else
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.pie_chart_outline,
-                            size: 48,
-                            color: AppColors.textTertiary,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            '아직 거래 내역이 없습니다',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                          ),
-                        ],
-                      ),
+              const SizedBox(height: 12),
+              Text(
+                '아직 거래 내역이 없습니다',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(
+                      color: AppColors.textSecondary,
                     ),
-                  ),
-                ),
+              ),
             ],
           ),
         ),
