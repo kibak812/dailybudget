@@ -199,4 +199,32 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
     state = defaultCategories;
     await _saveCategories();
   }
+
+  /// Reorder categories within a specific type
+  /// [oldIndex] and [newIndex] are indices within the filtered list of that type
+  Future<void> reorderCategory(CategoryType type, int oldIndex, int newIndex) async {
+    final prefix = type == CategoryType.expense ? _expensePrefix : _incomePrefix;
+
+    // Get all categories of this type (maintaining their order in state)
+    final categoriesOfType = state.where((cat) => cat.startsWith(prefix)).toList();
+
+    // Perform the reorder within the type's list
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final item = categoriesOfType.removeAt(oldIndex);
+    categoriesOfType.insert(newIndex, item);
+
+    // Rebuild the full state: other type's categories + reordered categories
+    final otherCategories = state.where((cat) => !cat.startsWith(prefix)).toList();
+
+    // Keep expense categories first, then income
+    if (type == CategoryType.expense) {
+      state = [...categoriesOfType, ...otherCategories];
+    } else {
+      state = [...otherCategories, ...categoriesOfType];
+    }
+
+    await _saveCategories();
+  }
 }

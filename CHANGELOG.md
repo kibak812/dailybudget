@@ -6,6 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 18] - 2025-12-07
+
+### Summary
+Unified category management into transaction add/edit flow. Users can now select, add, delete, and reorder categories directly when adding or editing transactions, eliminating the need to navigate to settings.
+
+### Added
+
+#### CategorySelectorSheet Widget
+- **New widget**: `lib/features/transaction/presentation/widgets/category_selector_sheet.dart`
+- **List-style UI**: Categories displayed as a scrollable list (not chips)
+- **Selection mode**: Tap category to select and close sheet
+- **Edit mode**: Toggle via pencil icon (✏️) in header
+  - Add new category via input field at top
+  - Delete category via × button on each item
+- **Drag & drop reorder**: Long-press to drag and reorder categories
+- **Visual feedback**: Selected category shows checkmark (✓), elevation on drag
+
+### Changed
+
+#### Transaction Sheets
+- **add_transaction_sheet.dart**: Replaced `DropdownButtonFormField` with tap-to-open `CategorySelectorSheet`
+- **transaction_edit_sheet.dart**: Same change applied
+
+#### Settings Page
+- **Removed**: Category management section from settings page
+- Categories are now managed exclusively through the transaction flow
+
+### Removed
+- Category management section from settings tab (functionality moved to transaction flow)
+
+---
+
 ## [Phase 17] - 2025-12-07
 
 ### Summary

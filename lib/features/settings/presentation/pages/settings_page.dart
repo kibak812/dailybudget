@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/features/settings/presentation/widgets/budget_settings_section.dart';
-import 'package:daily_pace/features/settings/presentation/widgets/category_management_section.dart';
 import 'package:daily_pace/features/settings/presentation/widgets/recurring_section.dart';
 import 'package:daily_pace/features/settings/presentation/widgets/data_management_section.dart';
 
@@ -23,10 +22,6 @@ class SettingsPage extends ConsumerWidget {
           children: [
             // Budget Settings Section
             const BudgetSettingsSection(),
-            const SizedBox(height: 24),
-
-            // Category Management Section
-            const CategoryManagementSection(),
             const SizedBox(height: 24),
 
             // Recurring Transactions Section

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
+import 'package:daily_pace/features/transaction/presentation/widgets/category_selector_sheet.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 
@@ -95,13 +96,28 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     }
   }
 
+  void _showCategorySelector() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => CategorySelectorSheet(
+        type: _selectedType == TransactionType.expense
+            ? CategoryType.expense
+            : CategoryType.income,
+        selectedCategory: _selectedCategory,
+        onSelected: (category) {
+          setState(() => _selectedCategory = category);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    ref.watch(categoriesProvider);
-    final currentCategories = ref.read(categoriesProvider.notifier).getCategoriesByType(
-      _selectedType == TransactionType.expense ? CategoryType.expense : CategoryType.income,
-    );
 
     return Container(
       padding: EdgeInsets.only(
@@ -195,23 +211,33 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
               const SizedBox(height: 16),
 
               // Category selector
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                decoration: const InputDecoration(
-                  labelText: '카테고리',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.category),
+              InkWell(
+                onTap: () => _showCategorySelector(),
+                borderRadius: BorderRadius.circular(4),
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: '카테고리',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.category),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _selectedCategory ?? '선택하세요',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: _selectedCategory == null
+                              ? theme.colorScheme.onSurfaceVariant
+                              : null,
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_drop_down,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
                 ),
-                hint: const Text('선택하세요'),
-                items: currentCategories
-                    .map((category) => DropdownMenuItem(
-                          value: category,
-                          child: Text(category),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() => _selectedCategory = value);
-                },
               ),
               const SizedBox(height: 16),
 
