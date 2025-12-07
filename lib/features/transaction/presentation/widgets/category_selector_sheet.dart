@@ -94,58 +94,39 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
   }
 
   Future<void> _handleEditCategory(String category) async {
-    final editController = TextEditingController(text: category);
-
     final newName = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('카테고리 수정'),
-        content: TextField(
-          controller: editController,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: '카테고리 이름',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          onSubmitted: (value) => Navigator.pop(context, value.trim()),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, null),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, editController.text.trim()),
-            child: const Text('저장'),
-          ),
-        ],
-      ),
+      builder: (context) => _CategoryEditDialog(initialName: category),
     );
 
-    editController.dispose();
-
     if (newName != null && newName.isNotEmpty && newName != category) {
+      // Wait for dialog dispose to complete before modifying state
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      if (!mounted) return;
+
       final success = await ref.read(categoriesProvider.notifier).updateCategory(
             category,
             newName,
             widget.type,
           );
 
-      if (mounted) {
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('카테고리가 수정되었습니다')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('이미 존재하는 카테고리 이름입니다'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+      if (!mounted) return;
+
+      if (success) {
+        // Refresh transaction provider to reflect category name changes
+        ref.invalidate(transactionProvider);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('카테고리가 수정되었습니다')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('이미 존재하는 카테고리 이름입니다'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -401,6 +382,60 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
           SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
         ],
       ),
+    );
+  }
+}
+
+/// Separate dialog widget to properly manage TextEditingController lifecycle
+class _CategoryEditDialog extends StatefulWidget {
+  final String initialName;
+
+  const _CategoryEditDialog({required this.initialName});
+
+  @override
+  State<_CategoryEditDialog> createState() => _CategoryEditDialogState();
+}
+
+class _CategoryEditDialogState extends State<_CategoryEditDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialName);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('카테고리 수정'),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: '카테고리 이름',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onSubmitted: (value) => Navigator.pop(context, value.trim()),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, null),
+          child: const Text('취소'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, _controller.text.trim()),
+          child: const Text('저장'),
+        ),
+      ],
     );
   }
 }

@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:daily_pace/core/providers/isar_provider.dart';
+import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 
 /// Category type enum
 enum CategoryType {
@@ -10,12 +13,14 @@ enum CategoryType {
 /// StateNotifierProvider for managing categories
 /// Categories are stored in SharedPreferences with type prefix (expense:/income:)
 final categoriesProvider = StateNotifierProvider<CategoriesNotifier, List<String>>((ref) {
-  return CategoriesNotifier();
+  return CategoriesNotifier(ref);
 });
 
 /// Notifier for managing category state
 class CategoriesNotifier extends StateNotifier<List<String>> {
-  CategoriesNotifier() : super([]) {
+  final Ref _ref;
+
+  CategoriesNotifier(this._ref) : super([]) {
     // Load categories when notifier is created
     loadCategories();
   }
@@ -165,6 +170,7 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
   }
 
   /// Update a category name
+  /// Also updates all transactions that use this category
   /// Returns true if successful
   Future<bool> updateCategory(String oldDisplayName, String newDisplayName, CategoryType type) async {
     final oldFullName = getFullName(oldDisplayName, type);
@@ -181,13 +187,52 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
       return false;
     }
 
-    // Update category
+    // Update category in list
     state = state.map((category) {
       return category == oldFullName ? newFullName : category;
     }).toList();
 
     await _saveCategories();
+
+    // Update all transactions that use this category
+    await _updateTransactionsCategory(oldDisplayName, trimmedNewName, type);
+
     return true;
+  }
+
+  /// Update category name in all transactions that use the old category name
+  Future<void> _updateTransactionsCategory(
+    String oldCategoryName,
+    String newCategoryName,
+    CategoryType type,
+  ) async {
+    try {
+      final isar = await _ref.read(isarProvider.future);
+
+      // Find all transactions with the old category name and matching type
+      final transactionType = type == CategoryType.expense
+          ? TransactionType.expense
+          : TransactionType.income;
+
+      final transactions = await isar.transactionModels
+          .filter()
+          .categoryEqualTo(oldCategoryName)
+          .typeEqualTo(transactionType)
+          .findAll();
+
+      if (transactions.isEmpty) return;
+
+      // Update all matching transactions
+      await isar.writeTxn(() async {
+        for (final transaction in transactions) {
+          transaction.category = newCategoryName;
+          transaction.updatedAt = DateTime.now();
+          await isar.transactionModels.put(transaction);
+        }
+      });
+    } catch (e) {
+      print('Error updating transactions category: $e');
+    }
   }
 
   /// Reset categories to default

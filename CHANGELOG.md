@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 20] - 2025-12-07
+
+### Summary
+Category rename now updates all existing transactions with that category. Previously, renaming a category only changed the category list, leaving transactions with the old name disconnected.
+
+### Changed
+
+#### Category Rename with Transaction Sync
+- **Bulk transaction update**: When renaming a category, all transactions using that category are automatically updated
+- **Consistent data**: No more orphaned transactions with old category names
+- **Statistics accuracy**: Category-based statistics now correctly reflect renamed categories
+
+### Technical Details
+- `CategoriesNotifier._updateTransactionsCategory()`: New method to update transactions in Isar DB
+- `_CategoryEditDialog`: Separate StatefulWidget for proper TextEditingController lifecycle management
+- 50ms delay after dialog close to prevent Flutter build cycle conflicts
+- `ref.invalidate(transactionProvider)` called from UI layer for safe state refresh
+
+### Files Modified
+- `lib/features/settings/presentation/providers/categories_provider.dart`
+- `lib/features/settings/presentation/widgets/category_management_section.dart`
+- `lib/features/transaction/presentation/widgets/category_selector_sheet.dart`
+
+---
+
 ## [Phase 19] - 2025-12-07
 
 ### Summary
