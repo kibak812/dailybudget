@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 21] - 2025-12-07
+
+### Summary
+Added custom app icon using flutter_launcher_icons package.
+
+### Added
+
+#### App Icon
+- **Custom app icon**: Chart/graph icon with indigo background matching app theme
+- **flutter_launcher_icons**: Added package for automatic icon generation
+- **Multi-platform support**: Icons generated for Android (all densities + adaptive icon), iOS, and Windows
+
+### Technical Details
+- Package: `flutter_launcher_icons: ^0.14.3`
+- Source image: `assets/icon/app_icon.png`
+- Adaptive icon background: `#5C6BC0` (Indigo-400)
+
+---
+
 ## [Phase 20] - 2025-12-07
 
 ### Summary
