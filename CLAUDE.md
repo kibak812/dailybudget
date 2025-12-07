@@ -251,7 +251,16 @@ See: `lib/app/theme/app_colors.dart` and `lib/features/transaction/presentation/
 
 ## Development Workflow
 
-When completing a feature or fix request:
+### Workflow 선택 기준
+
+| 작업 유형 | 방식 | 예시 |
+|----------|------|------|
+| 간단한 수정 | Direct Push | 버그 픽스, 설정 변경, 오타 수정 |
+| 새 기능 / 큰 변경 | PR 방식 | 새 화면 추가, 아키텍처 변경, 리팩토링 |
+| AI 병렬 작업 | PR 방식 | 여러 Agent가 동시 작업 시 |
+| 실험적 변경 | PR 방식 | 결과가 불확실한 시도 |
+
+### Direct Push 방식 (간단한 수정)
 
 1. **Implement** - Complete the requested changes
 2. **Build** - Always run `flutter build apk --release --split-per-abi` after implementation
@@ -262,4 +271,48 @@ When completing a feature or fix request:
    - `git commit` with descriptive message
    - `git push` to remote
 
-Do NOT commit or push until user explicitly confirms the changes work correctly.
+### PR 방식 (새 기능 / 큰 변경)
+
+1. **Branch** - 새 브랜치 생성
+   ```bash
+   git checkout -b feature/기능명   # 새 기능
+   git checkout -b fix/버그명       # 버그 수정
+   git checkout -b refactor/내용   # 리팩토링
+   ```
+
+2. **Implement & Build** - 작업 완료 후 빌드 확인
+
+3. **Push & PR** - 원격에 Push하고 PR 생성
+   ```bash
+   git push -u origin 브랜치명
+   gh pr create --title "제목" --body "설명"
+   ```
+
+4. **Review** - 리뷰 진행 (다른 세션에서 또는 사용자가)
+   ```bash
+   gh pr view PR번호 --comments   # 리뷰 확인
+   ```
+
+5. **Feedback** - 피드백 반영 시 추가 커밋 후 Push
+   ```bash
+   git commit -m "리뷰 반영 내용"
+   git push
+   ```
+
+6. **Merge** - 승인 후 Merge
+   ```bash
+   gh pr merge PR번호
+   ```
+
+7. **Sync** - 로컬 동기화 및 브랜치 정리
+   ```bash
+   git checkout master && git pull
+   git branch -d 브랜치명                    # 로컬 삭제
+   git push origin --delete 브랜치명         # 원격 삭제 (선택)
+   ```
+
+### 공통 주의사항
+
+- Do NOT commit or push until user explicitly confirms the changes work correctly
+- PR 방식에서는 master에 직접 커밋하지 않음
+- GitHub CLI (`gh`) 사용하여 PR 생성/관리
