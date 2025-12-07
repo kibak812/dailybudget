@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,7 +22,7 @@ final isarProvider = FutureProvider<Isar>((ref) async {
     ],
     directory: dir.path,
     name: 'daily_pace_db',
-    inspector: true, // Enable Isar Inspector for debugging
+    inspector: kDebugMode, // Enable Isar Inspector for debugging only in debug mode
   );
 
   return isar;

@@ -63,7 +63,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
     super.dispose();
   }
 
-  void _handleSave() {
+  Future<void> _handleSave() async {
     final amount = Formatters.parseFormattedNumber(_amountController.text);
     final day = int.tryParse(_dayController.text);
 
@@ -98,52 +98,70 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
       return;
     }
 
-    if (widget.recurring != null) {
-      // Update existing
-      ref.read(recurringProvider.notifier).updateRecurringTransaction(
-        widget.recurring!.id,
-        {
-          'type': _type,
-          'amount': amount,
-          'dayOfMonth': day,
-          'category': _category,
-          'memo': _memoController.text.isEmpty ? null : _memoController.text,
-          'isActive': _isActive,
-          'startMonth': _startMonth,
-          'endMonth': _endMonth,
-        },
-      );
+    try {
+      if (widget.recurring != null) {
+        // Update existing - create updated model with all fields
+        final updatedRecurring = RecurringTransactionModel(
+          type: _type,
+          amount: amount,
+          dayOfMonth: day,
+          category: _category,
+          memo: _memoController.text.isEmpty ? null : _memoController.text,
+          isActive: _isActive,
+          startMonth: _startMonth ?? widget.recurring!.startMonth,
+          endMonth: _endMonth,
+          createdAt: widget.recurring!.createdAt,
+          updatedAt: DateTime.now(),
+        )..id = widget.recurring!.id;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('반복 지출이 수정되었습니다.'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      // Add new
-      final newRecurring = RecurringTransactionModel.create(
-        type: _type,
-        amount: amount,
-        dayOfMonth: day,
-        category: _category,
-        memo: _memoController.text.isEmpty ? null : _memoController.text,
-        isActive: _isActive,
-        startMonth: _startMonth!,
-        endMonth: _endMonth,
-      );
+        await ref.read(recurringProvider.notifier).updateRecurringTransaction(updatedRecurring);
 
-      ref.read(recurringProvider.notifier).addRecurringTransaction(newRecurring);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('반복 지출이 수정되었습니다.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        // Add new
+        final newRecurring = RecurringTransactionModel.create(
+          type: _type,
+          amount: amount,
+          dayOfMonth: day,
+          category: _category,
+          memo: _memoController.text.isEmpty ? null : _memoController.text,
+          isActive: _isActive,
+          startMonth: _startMonth!,
+          endMonth: _endMonth,
+        );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('반복 지출이 추가되었습니다.'),
-          backgroundColor: Colors.green,
-        ),
-      );
+        await ref.read(recurringProvider.notifier).addRecurringTransaction(newRecurring);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('반복 지출이 추가되었습니다.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('오류가 발생했습니다: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
-
-    Navigator.pop(context);
   }
 
   @override

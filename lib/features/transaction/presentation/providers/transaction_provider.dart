@@ -1,109 +1,78 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
 import 'package:daily_pace/core/providers/isar_provider.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
+import 'package:daily_pace/features/transaction/domain/repositories/transaction_repository.dart';
+import 'package:daily_pace/features/transaction/data/repositories/isar_transaction_repository.dart';
 
 /// StateNotifierProvider for managing transaction data
 /// Manages CRUD operations for transactions and maintains state
 final transactionProvider = StateNotifierProvider<TransactionNotifier, List<TransactionModel>>((ref) {
-  return TransactionNotifier(ref);
+  final isar = ref.watch(isarProvider).value; // Access the Isar instance from the FutureProvider
+  if (isar == null) {
+    throw Exception('Isar database not initialized');
+  }
+  final repository = IsarTransactionRepository(isar);
+  return TransactionNotifier(repository);
 });
 
 /// Notifier for managing transaction state
 class TransactionNotifier extends StateNotifier<List<TransactionModel>> {
-  TransactionNotifier(this.ref) : super([]) {
+  final TransactionRepository _repository;
+
+  TransactionNotifier(this._repository) : super([]) {
     // Load transactions when notifier is created
     loadTransactions();
   }
-
-  final Ref ref;
 
   /// Load all transactions from Isar database
   /// Sorted by date descending (newest first)
   Future<void> loadTransactions() async {
     try {
-      final isar = await ref.read(isarProvider.future);
-      final transactions = await isar.transactionModels
-          .where()
-          .sortByDateDesc()
-          .findAll();
-      state = transactions;
+      state = await _repository.getTransactions();
     } catch (e) {
       debugPrint('Error loading transactions: $e');
-      state = [];
+      rethrow; // Re-throw to allow UI to handle
     }
   }
 
   /// Add a new transaction
   Future<void> addTransaction(TransactionModel transaction) async {
     try {
-      final isar = await ref.read(isarProvider.future);
-
-      await isar.writeTxn(() async {
-        await isar.transactionModels.put(transaction);
-      });
-
-      // Reload transactions to update state
-      await loadTransactions();
+      await _repository.addTransaction(transaction);
+      // Optimistically update state instead of reloading all
+      state = [...state, transaction];
     } catch (e) {
       debugPrint('Error adding transaction: $e');
+      rethrow; // Re-throw to allow UI to handle
     }
   }
 
   /// Update an existing transaction
   /// The updates map can contain any of the transaction fields
-  Future<void> updateTransaction(int id, Map<String, dynamic> updates) async {
+  Future<void> updateTransaction(TransactionModel updatedTransaction) async {
     try {
-      final isar = await ref.read(isarProvider.future);
-
-      await isar.writeTxn(() async {
-        final transaction = await isar.transactionModels.get(id);
-        if (transaction != null) {
-          // Update fields based on the updates map
-          if (updates.containsKey('type')) {
-            transaction.type = updates['type'] as TransactionType;
-          }
-          if (updates.containsKey('amount')) {
-            transaction.amount = updates['amount'] as int;
-          }
-          if (updates.containsKey('date')) {
-            transaction.date = updates['date'] as String;
-          }
-          if (updates.containsKey('category')) {
-            transaction.category = updates['category'] as String?;
-          }
-          if (updates.containsKey('memo')) {
-            transaction.memo = updates['memo'] as String?;
-          }
-
-          // Always update the updatedAt timestamp
-          transaction.updatedAt = DateTime.now();
-
-          await isar.transactionModels.put(transaction);
-        }
-      });
-
-      // Reload transactions to update state
-      await loadTransactions();
+      await _repository.updateTransaction(updatedTransaction);
+      // Optimistically update state instead of reloading all
+      state = [
+        for (final transaction in state)
+          if (transaction.id == updatedTransaction.id) updatedTransaction else transaction,
+      ];
     } catch (e) {
       debugPrint('Error updating transaction: $e');
+      rethrow; // Re-throw to allow UI to handle
     }
   }
 
   /// Delete a transaction by ID
   Future<void> deleteTransaction(int id) async {
     try {
-      final isar = await ref.read(isarProvider.future);
-
-      await isar.writeTxn(() async {
-        await isar.transactionModels.delete(id);
-      });
-
-      // Reload transactions to update state
-      await loadTransactions();
+      await _repository.deleteTransaction(id);
+      // Optimistically update state instead of reloading all
+      state = state.where((transaction) => transaction.id != id).toList();
     } catch (e) {
       debugPrint('Error deleting transaction: $e');
+      rethrow; // Re-throw to allow UI to handle
     }
   }
 

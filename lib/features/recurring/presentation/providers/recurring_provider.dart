@@ -51,51 +51,21 @@ class RecurringNotifier extends StateNotifier<List<RecurringTransactionModel>> {
   }
 
   /// Update an existing recurring transaction
-  /// The updates map can contain any of the recurring transaction fields
-  Future<void> updateRecurringTransaction(int id, Map<String, dynamic> updates) async {
+  /// Accepts the full updated RecurringTransactionModel for type safety
+  Future<void> updateRecurringTransaction(RecurringTransactionModel transaction) async {
     try {
       final isar = await ref.read(isarProvider.future);
 
       await isar.writeTxn(() async {
-        final recurring = await isar.recurringTransactionModels.get(id);
-        if (recurring != null) {
-          // Update fields based on the updates map
-          if (updates.containsKey('type')) {
-            recurring.type = updates['type'] as RecurringTransactionType;
-          }
-          if (updates.containsKey('amount')) {
-            recurring.amount = updates['amount'] as int;
-          }
-          if (updates.containsKey('dayOfMonth')) {
-            recurring.dayOfMonth = updates['dayOfMonth'] as int;
-          }
-          if (updates.containsKey('category')) {
-            recurring.category = updates['category'] as String?;
-          }
-          if (updates.containsKey('memo')) {
-            recurring.memo = updates['memo'] as String?;
-          }
-          if (updates.containsKey('isActive')) {
-            recurring.isActive = updates['isActive'] as bool;
-          }
-          if (updates.containsKey('startMonth')) {
-            recurring.startMonth = updates['startMonth'] as String;
-          }
-          if (updates.containsKey('endMonth')) {
-            recurring.endMonth = updates['endMonth'] as String?;
-          }
-
-          // Always update the updatedAt timestamp
-          recurring.updatedAt = DateTime.now();
-
-          await isar.recurringTransactionModels.put(recurring);
-        }
+        transaction.updatedAt = DateTime.now();
+        await isar.recurringTransactionModels.put(transaction);
       });
 
       // Reload recurring transactions to update state
       await loadRecurringTransactions();
     } catch (e) {
       debugPrint('Error updating recurring transaction: $e');
+      rethrow;
     }
   }
 

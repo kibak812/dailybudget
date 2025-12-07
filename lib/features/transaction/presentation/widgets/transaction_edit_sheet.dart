@@ -301,20 +301,21 @@ class _TransactionEditModalSheetState
         return;
       }
 
-      final updates = <String, dynamic>{
-        'type': _typeValue,
-        'amount': amount,
-        'date': Formatters.formatDateISO(_selectedDate),
-        'category': (_categoryValue ?? '').isEmpty ? null : _categoryValue,
-        'memo': _memoController.text.trim().isEmpty
+      // Create updated transaction model with all fields
+      final updatedTransaction = TransactionModel(
+        type: _typeValue,
+        amount: amount,
+        date: Formatters.formatDateISO(_selectedDate),
+        category: (_categoryValue ?? '').isEmpty ? null : _categoryValue,
+        memo: _memoController.text.trim().isEmpty
             ? null
             : _memoController.text.trim(),
-      };
+        createdAt: widget.transaction.createdAt,
+        updatedAt: DateTime.now(),
+        recurringId: widget.transaction.recurringId,
+      )..id = widget.transaction.id;
 
-      await ref.read(transactionProvider.notifier).updateTransaction(
-            widget.transaction.id,
-            updates,
-          );
+      await ref.read(transactionProvider.notifier).updateTransaction(updatedTransaction);
 
       if (mounted) {
         Navigator.of(context).pop();
