@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 
 /// Today's spent and remaining budget card
 /// Shows two-column layout with spent and remaining amounts
@@ -33,7 +34,7 @@ class TodaySpentCard extends StatelessWidget {
                   Text(
                     '오늘 지출',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: AppColors.textSecondary,
                       fontSize: 13,
                     ),
                   ),
@@ -67,7 +68,7 @@ class TodaySpentCard extends StatelessWidget {
                   Text(
                     isOverBudget ? '오늘 예산 초과' : '오늘 남은 예산',
                     style: TextStyle(
-                      color: isOverBudget ? Colors.red[700] : Colors.grey[600],
+                      color: isOverBudget ? Colors.red[700] : AppColors.textSecondary,
                       fontSize: 13,
                     ),
                   ),
@@ -85,7 +86,7 @@ class TodaySpentCard extends StatelessWidget {
                     Text(
                       '내일부터 일별 예산이 줄어듭니다',
                       style: TextStyle(
-                        color: Colors.grey[500],
+                        color: AppColors.textSecondary,
                         fontSize: 10,
                       ),
                     ),

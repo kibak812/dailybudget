@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/recurring/data/models/recurring_transaction_model.dart';
@@ -115,7 +116,7 @@ class RecurringSection extends ConsumerWidget {
                 '반복 지출',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
+                      color: AppColors.textSecondary,
                       letterSpacing: 1.2,
                     ),
               ),
@@ -155,7 +156,7 @@ class RecurringSection extends ConsumerWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[200]!),
+            border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -173,7 +174,7 @@ class RecurringSection extends ConsumerWidget {
                     child: Text(
                       '등록된 반복 지출이 없습니다',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[400],
+                            color: AppColors.textTertiary,
                           ),
                     ),
                   ),
@@ -186,7 +187,7 @@ class RecurringSection extends ConsumerWidget {
                   return Column(
                     children: [
                       if (index > 0)
-                        Divider(height: 1, color: Colors.grey[100]),
+                        Divider(height: 1, color: AppColors.borderLight),
                       InkWell(
                         onTap: null,
                         child: Padding(
@@ -202,7 +203,7 @@ class RecurringSection extends ConsumerWidget {
                                       ? Theme.of(context)
                                           .colorScheme
                                           .primaryContainer
-                                      : Colors.grey[100],
+                                      : AppColors.surfaceVariant,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Center(
@@ -217,7 +218,7 @@ class RecurringSection extends ConsumerWidget {
                                               ? Theme.of(context)
                                                   .colorScheme
                                                   .primary
-                                              : Colors.grey[400],
+                                              : AppColors.textTertiary,
                                         ),
                                   ),
                                 ),
@@ -240,8 +241,8 @@ class RecurringSection extends ConsumerWidget {
                                                 ?.copyWith(
                                                   fontWeight: FontWeight.w500,
                                                   color: recurring.isActive
-                                                      ? Colors.grey[900]
-                                                      : Colors.grey[400],
+                                                      ? AppColors.textPrimary
+                                                      : AppColors.textTertiary,
                                                 ),
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -254,7 +255,7 @@ class RecurringSection extends ConsumerWidget {
                                               vertical: 2,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: Colors.grey[100],
+                                              color: AppColors.surfaceVariant,
                                               borderRadius:
                                                   BorderRadius.circular(4),
                                             ),
@@ -266,7 +267,7 @@ class RecurringSection extends ConsumerWidget {
                                                   ?.copyWith(
                                                     fontSize: 10,
                                                     fontWeight: FontWeight.bold,
-                                                    color: Colors.grey[500],
+                                                    color: AppColors.textSecondary,
                                                   ),
                                             ),
                                           ),
@@ -280,7 +281,7 @@ class RecurringSection extends ConsumerWidget {
                                           .textTheme
                                           .bodySmall
                                           ?.copyWith(
-                                            color: Colors.grey[500],
+                                            color: AppColors.textSecondary,
                                           ),
                                     ),
                                   ],
@@ -302,7 +303,7 @@ class RecurringSection extends ConsumerWidget {
                                       size: 28,
                                       color: recurring.isActive
                                           ? Theme.of(context).colorScheme.primary
-                                          : Colors.grey[400],
+                                          : AppColors.textTertiary,
                                     ),
                                   ),
 
@@ -313,7 +314,7 @@ class RecurringSection extends ConsumerWidget {
                                     icon: Icon(
                                       Icons.edit,
                                       size: 20,
-                                      color: Colors.grey[400],
+                                      color: AppColors.textTertiary,
                                     ),
                                   ),
 
@@ -324,7 +325,7 @@ class RecurringSection extends ConsumerWidget {
                                     icon: Icon(
                                       Icons.delete,
                                       size: 20,
-                                      color: Colors.grey[400],
+                                      color: AppColors.textTertiary,
                                     ),
                                   ),
                                 ],
@@ -340,7 +341,7 @@ class RecurringSection extends ConsumerWidget {
               // Regenerate Button
               if (recurringTransactions.isNotEmpty) ...[
                 Container(
-                  color: Colors.grey[50]?.withOpacity(0.5),
+                  color: AppColors.surfaceVariant.withOpacity(0.5),
                   padding: const EdgeInsets.all(8),
                   child: TextButton(
                     onPressed: () => _handleRegenerate(ref, context),
@@ -351,7 +352,7 @@ class RecurringSection extends ConsumerWidget {
                       '이번 달 반복 지출 다시 생성하기',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w500,
-                            color: Colors.grey[500],
+                            color: AppColors.textSecondary,
                           ),
                     ),
                   ),

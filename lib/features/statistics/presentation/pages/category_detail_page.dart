@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 
 class CategoryDetailPage extends ConsumerWidget {
   final String categoryName;
@@ -83,7 +84,7 @@ class CategoryDetailPage extends ConsumerWidget {
                 Text(
                   '총 지출',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.textSecondary,
                       ),
                 ),
                 const SizedBox(height: 4),
@@ -98,7 +99,7 @@ class CategoryDetailPage extends ConsumerWidget {
                 Text(
                   '${categoryTransactions.length}건',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.textSecondary,
                       ),
                 ),
               ],
@@ -115,13 +116,13 @@ class CategoryDetailPage extends ConsumerWidget {
                         Icon(
                           Icons.receipt_long_outlined,
                           size: 64,
-                          color: Colors.grey[400],
+                          color: AppColors.textTertiary,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           '이 카테고리의 지출 내역이 없습니다',
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                             fontSize: 16,
                           ),
                         ),
@@ -198,7 +199,7 @@ class CategoryDetailPage extends ConsumerWidget {
           child: Text(
             _formatDate(transaction.date),
             style: TextStyle(
-              color: Colors.grey[600],
+              color: AppColors.textSecondary,
               fontSize: 13,
             ),
           ),

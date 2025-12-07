@@ -252,7 +252,7 @@ class _CategoryChartCardSyncfusionState
                         Icon(
                           Icons.chevron_right,
                           size: 20,
-                          color: Colors.grey[400],
+                          color: AppColors.textTertiary,
                         ),
                       ],
                     ),

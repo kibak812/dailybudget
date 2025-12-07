@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/data_backup.dart';
 import 'package:file_picker/file_picker.dart';
@@ -192,7 +193,7 @@ class DataManagementSection extends ConsumerWidget {
             '데이터 관리',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                   letterSpacing: 1.2,
                 ),
           ),
@@ -202,7 +203,7 @@ class DataManagementSection extends ConsumerWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[200]!),
+            border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -259,7 +260,7 @@ class DataManagementSection extends ConsumerWidget {
                                   .textTheme
                                   .bodySmall
                                   ?.copyWith(
-                                    color: Colors.grey[500],
+                                    color: AppColors.textSecondary,
                                   ),
                             ),
                           ],
@@ -270,7 +271,7 @@ class DataManagementSection extends ConsumerWidget {
                 ),
               ),
 
-              Divider(height: 1, color: Colors.grey[100]),
+              Divider(height: 1, color: AppColors.borderLight),
 
               // Restore
               InkWell(
@@ -312,7 +313,7 @@ class DataManagementSection extends ConsumerWidget {
                                   .textTheme
                                   .bodySmall
                                   ?.copyWith(
-                                    color: Colors.grey[500],
+                                    color: AppColors.textSecondary,
                                   ),
                             ),
                           ],
@@ -323,7 +324,7 @@ class DataManagementSection extends ConsumerWidget {
                 ),
               ),
 
-              Divider(height: 1, color: Colors.grey[100]),
+              Divider(height: 1, color: AppColors.borderLight),
 
               // Delete All
               InkWell(
@@ -388,7 +389,7 @@ class DataManagementSection extends ConsumerWidget {
           child: Text(
             '데이터는 기기에 안전하게 저장됩니다. 앱 삭제 시 데이터가 사라지므로 정기적으로 백업하세요.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[400],
+                  color: AppColors.textTertiary,
                 ),
           ),
         ),

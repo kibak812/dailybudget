@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 
@@ -71,7 +72,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
             '예산 설정',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                   letterSpacing: 1.2,
                 ),
           ),
@@ -81,7 +82,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[200]!),
+            border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -100,7 +101,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
                     '현재 월 예산',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
-                          color: Colors.grey[700],
+                          color: AppColors.textSecondary,
                         ),
                   ),
                   Text(
@@ -126,11 +127,11 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
                         hintText: '새 예산 금액 입력',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
+                          borderSide: BorderSide(color: AppColors.border),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
+                          borderSide: BorderSide(color: AppColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),

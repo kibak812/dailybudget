@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:daily_pace/core/providers/isar_provider.dart';
@@ -29,7 +30,7 @@ class TransactionNotifier extends StateNotifier<List<TransactionModel>> {
           .findAll();
       state = transactions;
     } catch (e) {
-      print('Error loading transactions: $e');
+      debugPrint('Error loading transactions: $e');
       state = [];
     }
   }
@@ -46,7 +47,7 @@ class TransactionNotifier extends StateNotifier<List<TransactionModel>> {
       // Reload transactions to update state
       await loadTransactions();
     } catch (e) {
-      print('Error adding transaction: $e');
+      debugPrint('Error adding transaction: $e');
     }
   }
 
@@ -86,7 +87,7 @@ class TransactionNotifier extends StateNotifier<List<TransactionModel>> {
       // Reload transactions to update state
       await loadTransactions();
     } catch (e) {
-      print('Error updating transaction: $e');
+      debugPrint('Error updating transaction: $e');
     }
   }
 
@@ -102,7 +103,7 @@ class TransactionNotifier extends StateNotifier<List<TransactionModel>> {
       // Reload transactions to update state
       await loadTransactions();
     } catch (e) {
-      print('Error deleting transaction: $e');
+      debugPrint('Error deleting transaction: $e');
     }
   }
 

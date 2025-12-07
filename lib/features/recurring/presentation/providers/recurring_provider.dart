@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:daily_pace/core/providers/isar_provider.dart';
@@ -28,7 +29,7 @@ class RecurringNotifier extends StateNotifier<List<RecurringTransactionModel>> {
       final recurring = await isar.recurringTransactionModels.where().findAll();
       state = recurring;
     } catch (e) {
-      print('Error loading recurring transactions: $e');
+      debugPrint('Error loading recurring transactions: $e');
       state = [];
     }
   }
@@ -45,7 +46,7 @@ class RecurringNotifier extends StateNotifier<List<RecurringTransactionModel>> {
       // Reload recurring transactions to update state
       await loadRecurringTransactions();
     } catch (e) {
-      print('Error adding recurring transaction: $e');
+      debugPrint('Error adding recurring transaction: $e');
     }
   }
 
@@ -94,7 +95,7 @@ class RecurringNotifier extends StateNotifier<List<RecurringTransactionModel>> {
       // Reload recurring transactions to update state
       await loadRecurringTransactions();
     } catch (e) {
-      print('Error updating recurring transaction: $e');
+      debugPrint('Error updating recurring transaction: $e');
     }
   }
 
@@ -110,7 +111,7 @@ class RecurringNotifier extends StateNotifier<List<RecurringTransactionModel>> {
       // Reload recurring transactions to update state
       await loadRecurringTransactions();
     } catch (e) {
-      print('Error deleting recurring transaction: $e');
+      debugPrint('Error deleting recurring transaction: $e');
     }
   }
 
@@ -131,7 +132,7 @@ class RecurringNotifier extends StateNotifier<List<RecurringTransactionModel>> {
       // Reload recurring transactions to update state
       await loadRecurringTransactions();
     } catch (e) {
-      print('Error toggling recurring transaction active status: $e');
+      debugPrint('Error toggling recurring transaction active status: $e');
     }
   }
 
@@ -163,9 +164,9 @@ class RecurringNotifier extends StateNotifier<List<RecurringTransactionModel>> {
       // Reload transactions to update the transaction provider
       await transactionNotifier.loadTransactions();
 
-      print('Generated ${newTransactions.length} recurring transactions for $year-$month');
+      debugPrint('Generated ${newTransactions.length} recurring transactions for $year-$month');
     } catch (e) {
-      print('Error generating recurring transactions: $e');
+      debugPrint('Error generating recurring transactions: $e');
     }
   }
 }

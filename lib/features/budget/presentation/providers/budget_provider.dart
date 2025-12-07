@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:daily_pace/core/providers/isar_provider.dart';
@@ -26,7 +27,7 @@ class BudgetNotifier extends StateNotifier<List<BudgetModel>> {
       state = budgets;
     } catch (e) {
       // Handle error - could use error state management here
-      print('Error loading budgets: $e');
+      debugPrint('Error loading budgets: $e');
       state = [];
     }
   }
@@ -65,7 +66,7 @@ class BudgetNotifier extends StateNotifier<List<BudgetModel>> {
       // Reload budgets to update state
       await loadBudgets();
     } catch (e) {
-      print('Error setting budget: $e');
+      debugPrint('Error setting budget: $e');
     }
   }
 
@@ -102,7 +103,7 @@ class BudgetNotifier extends StateNotifier<List<BudgetModel>> {
       // Reload budgets to update state
       await loadBudgets();
     } catch (e) {
-      print('Error deleting budget: $e');
+      debugPrint('Error deleting budget: $e');
     }
   }
 }

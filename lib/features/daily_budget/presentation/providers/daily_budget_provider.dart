@@ -5,6 +5,25 @@ import 'package:daily_pace/features/transaction/presentation/providers/transacti
 import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 
+/// Get effective date for budget calculations based on selected month
+/// - Current month: returns today's date
+/// - Past month: returns last day of that month
+/// - Future month: returns first day of that month
+DateTime _getEffectiveDate(DateTime selectedMonth) {
+  final now = DateTime.now();
+  final isCurrentMonth = now.year == selectedMonth.year && now.month == selectedMonth.month;
+
+  if (isCurrentMonth) {
+    return now;
+  } else if (selectedMonth.isBefore(DateTime(now.year, now.month, 1))) {
+    // Past month: use last day of that month
+    return DateTime(selectedMonth.year, selectedMonth.month + 1, 0);
+  } else {
+    // Future month: use first day
+    return DateTime(selectedMonth.year, selectedMonth.month, 1);
+  }
+}
+
 /// Provider for calculating daily budget data
 /// This is a computed provider that depends on:
 /// - budgetProvider: for the monthly budget
@@ -30,7 +49,8 @@ final dailyBudgetProvider = Provider<DailyBudgetData>((ref) {
       .toList();
 
   // Calculate daily budget data using the service
-  final currentDate = DateTime(currentMonth.year, currentMonth.month, DateTime.now().day);
+  final selectedMonth = DateTime(currentMonth.year, currentMonth.month, 1);
+  final currentDate = _getEffectiveDate(selectedMonth);
 
   return DailyBudgetService.calculateDailyBudgetData(
     budget,
@@ -60,7 +80,8 @@ final dailyBudgetHistoryProvider = Provider.family<List<DailyBudgetHistoryItem>,
         .toList();
 
     // Calculate history using the service
-    final currentDate = DateTime(currentMonth.year, currentMonth.month, DateTime.now().day);
+    final selectedMonth = DateTime(currentMonth.year, currentMonth.month, 1);
+    final currentDate = _getEffectiveDate(selectedMonth);
     final currentDay = currentDate.day;
 
     // Calculate start day based on period

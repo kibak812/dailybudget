@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 
@@ -26,7 +27,7 @@ class BudgetInfoCard extends StatelessWidget {
             Text(
               '남은 일수: ${budgetData.remainingDays}일',
               style: TextStyle(
-                color: Colors.grey[700],
+                color: AppColors.textSecondary,
                 fontSize: 14,
               ),
             ),
@@ -34,7 +35,7 @@ class BudgetInfoCard extends StatelessWidget {
             Text(
               '총 남은 예산: ${Formatters.formatCurrency(budgetData.totalRemaining)}',
               style: TextStyle(
-                color: Colors.grey[700],
+                color: AppColors.textSecondary,
                 fontSize: 14,
               ),
             ),

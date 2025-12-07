@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 
 /// Category Management Section Widget
@@ -18,7 +19,7 @@ class CategoryManagementSection extends ConsumerWidget {
             '카테고리',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                   letterSpacing: 1.2,
                 ),
           ),
@@ -195,7 +196,7 @@ class _CategorySectionState extends ConsumerState<_CategorySection> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -237,11 +238,11 @@ class _CategorySectionState extends ConsumerState<_CategorySection> {
                     hintText: '새 카테고리 추가',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                      borderSide: BorderSide(color: AppColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                      borderSide: BorderSide(color: AppColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -287,7 +288,7 @@ class _CategorySectionState extends ConsumerState<_CategorySection> {
                 child: Text(
                   '카테고리가 없습니다',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[500],
+                        color: AppColors.textSecondary,
                       ),
                 ),
               ),

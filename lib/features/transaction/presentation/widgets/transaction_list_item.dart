@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 
 /// Transaction list item widget
 /// Displays a single transaction with category, memo, time, and amount
@@ -18,7 +19,7 @@ class TransactionListItem extends StatelessWidget {
 
   /// Get category color based on category name
   Color _getCategoryColor(String? category) {
-    if (category == null) return Colors.grey;
+    if (category == null) return AppColors.textTertiary;
 
     // Simple color mapping based on category name
     final colorMap = {
@@ -31,10 +32,10 @@ class TransactionListItem extends StatelessWidget {
       '주거': Colors.brown,
       '통신': Colors.teal,
       '금융': Colors.indigo,
-      '기타': Colors.grey,
+      '기타': AppColors.textTertiary,
     };
 
-    return colorMap[category] ?? Colors.grey;
+    return colorMap[category] ?? AppColors.textTertiary;
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/providers/providers.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 
 /// Bottom sheet for selecting and managing categories
 /// Supports: selection, add, delete, reorder (drag & drop)
@@ -255,7 +256,7 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
                       child: Text(
                         '카테고리가 없습니다',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[500],
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ),
@@ -302,7 +303,7 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
                                   : null,
                               border: Border(
                                 bottom: BorderSide(
-                                  color: Colors.grey[200]!,
+                                  color: AppColors.border,
                                   width: 1,
                                 ),
                               ),
@@ -318,7 +319,7 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
                                       child: Icon(
                                         Icons.drag_handle,
                                         size: 20,
-                                        color: Colors.grey[400],
+                                        color: AppColors.textTertiary,
                                       ),
                                     ),
                                   ),
@@ -357,7 +358,7 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
                                   IconButton(
                                     onPressed: () => _handleEditCategory(category),
                                     icon: const Icon(Icons.edit_outlined, size: 18),
-                                    color: Colors.grey[500],
+                                    color: AppColors.textSecondary,
                                     visualDensity: VisualDensity.compact,
                                   ),
 
@@ -366,7 +367,7 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
                                   IconButton(
                                     onPressed: () => _handleDeleteCategory(category),
                                     icon: const Icon(Icons.close, size: 20),
-                                    color: Colors.grey[600],
+                                    color: AppColors.textSecondary,
                                     visualDensity: VisualDensity.compact,
                                   ),
                               ],

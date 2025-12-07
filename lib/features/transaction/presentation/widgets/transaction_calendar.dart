@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 
 /// Transaction calendar widget
 /// Shows monthly calendar with daily spending amounts
@@ -80,7 +81,7 @@ class TransactionCalendar extends StatelessWidget {
 
             // Outside days
             outsideTextStyle: TextStyle(
-              color: Colors.grey[400],
+              color: AppColors.textTertiary,
             ),
 
             // Markers
@@ -112,7 +113,7 @@ class TransactionCalendar extends StatelessWidget {
 
           daysOfWeekStyle: DaysOfWeekStyle(
             weekdayStyle: TextStyle(
-              color: Colors.grey[700],
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w600,
             ),
             weekendStyle: TextStyle(

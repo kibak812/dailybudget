@@ -11,14 +11,14 @@ void main() {
   );
 }
 
-/// Daily Pace - Smart Budget Tracker with SMS Auto-parsing
+/// DailyBudget - Smart Budget Tracker with SMS Auto-parsing
 class DailyPaceApp extends StatelessWidget {
   const DailyPaceApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Daily Pace',
+      title: 'DailyBudget',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

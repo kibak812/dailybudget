@@ -9,6 +9,7 @@ import 'package:daily_pace/features/daily_budget/presentation/widgets/budget_inf
 import 'package:daily_pace/app/router/app_router.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/add_transaction_sheet.dart';
 import 'package:go_router/go_router.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 
 /// Home page - Daily Budget Overview
 /// Displays today's budget, remaining amount, and quick actions
@@ -114,14 +115,14 @@ class HomePage extends ConsumerWidget {
             Icon(
               Icons.account_balance_wallet_outlined,
               size: 80,
-              color: Colors.grey[400],
+              color: AppColors.textTertiary,
             ),
             const SizedBox(height: 24),
             Text(
               '예산을 설정해주세요',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
+                    color: AppColors.textSecondary,
                   ),
             ),
             const SizedBox(height: 12),
@@ -129,7 +130,7 @@ class HomePage extends ConsumerWidget {
               '이번 달 예산을 설정하면\n일별 사용 가능 금액을 확인할 수 있습니다',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.grey[600],
+                color: AppColors.textSecondary,
                 fontSize: 15,
                 height: 1.5,
               ),

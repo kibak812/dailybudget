@@ -4,6 +4,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 
 /// Tooltip data class for type safety
 class _TooltipData {
@@ -115,13 +116,13 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
               Icon(
                 Icons.show_chart,
                 size: 48,
-                color: Colors.grey[400],
+                color: AppColors.textTertiary,
               ),
               const SizedBox(height: 12),
               Text(
                 '예산 데이터가 없습니다',
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                   fontSize: 14,
                 ),
               ),
@@ -204,7 +205,7 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
           } else if (value < 0) {
             args.color = Colors.red;
           } else {
-            args.color = Colors.grey;
+            args.color = AppColors.textTertiary;
           }
         }
       },
@@ -223,14 +224,14 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
           return ChartAxisLabel(
             '${args.value.toInt()}일',
             TextStyle(
-              color: Colors.grey[600],
+              color: AppColors.textSecondary,
               fontSize: 11,
             ),
           );
         },
 
         axisLine: AxisLine(
-          color: Colors.grey[300],
+          color: AppColors.border,
           width: 1,
         ),
         majorTickLines: const MajorTickLines(width: 0),
@@ -247,20 +248,20 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
           return ChartAxisLabel(
             _formatYAxisValue(args.value.toInt()),
             TextStyle(
-              color: Colors.grey[600],
+              color: AppColors.textSecondary,
               fontSize: 10,
             ),
           );
         },
 
         axisLine: AxisLine(
-          color: Colors.grey[300],
+          color: AppColors.border,
           width: 1,
         ),
         majorTickLines: const MajorTickLines(width: 0),
         majorGridLines: MajorGridLines(
           width: 1,
-          color: Colors.grey[200],
+          color: AppColors.border,
         ),
       ),
 

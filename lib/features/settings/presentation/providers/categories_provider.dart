@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -113,7 +114,7 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
         await _saveCategories();
       }
     } catch (e) {
-      print('Error loading categories: $e');
+      debugPrint('Error loading categories: $e');
       // Fall back to default categories on error
       final defaultCategories = [
         ..._defaultExpenseCategories.map((cat) => '$_expensePrefix$cat'),
@@ -129,7 +130,7 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setStringList(_categoriesKey, state);
     } catch (e) {
-      print('Error saving categories: $e');
+      debugPrint('Error saving categories: $e');
     }
   }
 
@@ -231,7 +232,7 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
         }
       });
     } catch (e) {
-      print('Error updating transactions category: $e');
+      debugPrint('Error updating transactions category: $e');
     }
   }
 
