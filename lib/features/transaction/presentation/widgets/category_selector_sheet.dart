@@ -93,6 +93,63 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
     }
   }
 
+  Future<void> _handleEditCategory(String category) async {
+    final editController = TextEditingController(text: category);
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('카테고리 수정'),
+        content: TextField(
+          controller: editController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: '카테고리 이름',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          onSubmitted: (value) => Navigator.pop(context, value.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, null),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, editController.text.trim()),
+            child: const Text('저장'),
+          ),
+        ],
+      ),
+    );
+
+    editController.dispose();
+
+    if (newName != null && newName.isNotEmpty && newName != category) {
+      final success = await ref.read(categoriesProvider.notifier).updateCategory(
+            category,
+            newName,
+            widget.type,
+          );
+
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('카테고리가 수정되었습니다')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('이미 존재하는 카테고리 이름입니다'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   void _handleReorder(int oldIndex, int newIndex) {
     ref.read(categoriesProvider.notifier).reorderCategory(
       widget.type,
@@ -247,15 +304,16 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
                       final category = categories[index];
                       final isSelected = category == widget.selectedCategory;
 
-                      return ReorderableDragStartListener(
+                      return Container(
                         key: ValueKey('${widget.type.name}_$category'),
-                        index: index,
                         child: InkWell(
                           onTap: () => _handleSelect(category),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 16,
+                            padding: EdgeInsets.only(
+                              left: _isEditMode ? 0 : 24,
+                              right: 8,
+                              top: 8,
+                              bottom: 8,
                             ),
                             decoration: BoxDecoration(
                               color: isSelected
@@ -270,8 +328,22 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
                             ),
                             child: Row(
                               children: [
+                                // Drag handle (edit mode only)
+                                if (_isEditMode)
+                                  ReorderableDelayedDragStartListener(
+                                    index: index,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      child: Icon(
+                                        Icons.drag_handle,
+                                        size: 20,
+                                        color: Colors.grey[400],
+                                      ),
+                                    ),
+                                  ),
+
                                 // Check icon for selected
-                                if (isSelected)
+                                if (!_isEditMode && isSelected)
                                   Padding(
                                     padding: const EdgeInsets.only(right: 12),
                                     child: Icon(
@@ -280,21 +352,33 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
                                       size: 20,
                                     ),
                                   )
-                                else
+                                else if (!_isEditMode)
                                   const SizedBox(width: 32),
 
                                 // Category name
                                 Expanded(
-                                  child: Text(
-                                    category,
-                                    style: theme.textTheme.bodyLarge?.copyWith(
-                                      fontWeight: isSelected
-                                          ? FontWeight.w600
-                                          : FontWeight.normal,
-                                      color: isSelected ? iconColor : null,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Text(
+                                      category,
+                                      style: theme.textTheme.bodyLarge?.copyWith(
+                                        fontWeight: isSelected
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                        color: isSelected ? iconColor : null,
+                                      ),
                                     ),
                                   ),
                                 ),
+
+                                // Edit button (edit mode only)
+                                if (_isEditMode)
+                                  IconButton(
+                                    onPressed: () => _handleEditCategory(category),
+                                    icon: const Icon(Icons.edit_outlined, size: 18),
+                                    color: Colors.grey[500],
+                                    visualDensity: VisualDensity.compact,
+                                  ),
 
                                 // Delete button (edit mode only)
                                 if (_isEditMode)

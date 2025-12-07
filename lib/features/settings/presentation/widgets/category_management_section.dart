@@ -109,6 +109,66 @@ class _CategorySectionState extends ConsumerState<_CategorySection> {
     _categoryController.clear();
   }
 
+  Future<void> _handleEditCategory(String category) async {
+    final editController = TextEditingController(text: category);
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('카테고리 수정'),
+        content: TextField(
+          controller: editController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: '카테고리 이름',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          onSubmitted: (value) => Navigator.pop(context, value.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, null),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, editController.text.trim()),
+            child: const Text('저장'),
+          ),
+        ],
+      ),
+    );
+
+    editController.dispose();
+
+    if (newName != null && newName.isNotEmpty && newName != category) {
+      final success = await ref.read(categoriesProvider.notifier).updateCategory(
+            category,
+            newName,
+            widget.type,
+          );
+
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('카테고리가 수정되었습니다.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('이미 존재하는 카테고리 이름입니다.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   Future<void> _handleDeleteCategory(String category) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -238,7 +298,7 @@ class _CategorySectionState extends ConsumerState<_CategorySection> {
             ],
           ),
           const SizedBox(height: 16),
-          // Category chips
+          // Category list with drag & drop
           if (categories.isEmpty)
             Center(
               child: Padding(
@@ -252,41 +312,87 @@ class _CategorySectionState extends ConsumerState<_CategorySection> {
               ),
             )
           else
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: categories.map((category) {
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              buildDefaultDragHandles: false,
+              itemCount: categories.length,
+              onReorder: (oldIndex, newIndex) {
+                ref.read(categoriesProvider.notifier).reorderCategory(
+                      widget.type,
+                      oldIndex,
+                      newIndex,
+                    );
+              },
+              proxyDecorator: (child, index, animation) {
+                return AnimatedBuilder(
+                  animation: animation,
+                  builder: (context, child) {
+                    final elevation = Tween<double>(begin: 0, end: 6).animate(animation).value;
+                    return Material(
+                      elevation: elevation,
+                      borderRadius: BorderRadius.circular(12),
+                      child: child,
+                    );
+                  },
+                  child: child,
+                );
+              },
+              itemBuilder: (context, index) {
+                final category = categories[index];
                 return Container(
+                  key: ValueKey('${widget.type.name}_$category'),
+                  margin: const EdgeInsets.only(bottom: 8),
                   decoration: BoxDecoration(
                     color: widget.iconColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: widget.iconColor.withOpacity(0.2)),
                   ),
-                  padding: const EdgeInsets.only(
-                    left: 16,
-                    right: 8,
-                    top: 8,
-                    bottom: 8,
-                  ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        category,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: widget.iconColor,
-                            ),
+                      ReorderableDelayedDragStartListener(
+                        index: index,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          child: Icon(
+                            Icons.drag_handle,
+                            size: 20,
+                            color: widget.iconColor.withOpacity(0.6),
+                          ),
+                        ),
                       ),
-                      const SizedBox(width: 4),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _handleEditCategory(category),
+                          child: Text(
+                            category,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  color: widget.iconColor,
+                                ),
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () => _handleEditCategory(category),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.edit_outlined,
+                            size: 18,
+                            color: widget.iconColor.withOpacity(0.6),
+                          ),
+                        ),
+                      ),
                       InkWell(
                         onTap: () => _handleDeleteCategory(category),
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.all(8),
                           child: Icon(
                             Icons.close,
-                            size: 14,
+                            size: 18,
                             color: widget.iconColor,
                           ),
                         ),
@@ -294,7 +400,7 @@ class _CategorySectionState extends ConsumerState<_CategorySection> {
                     ],
                   ),
                 );
-              }).toList(),
+              },
             ),
         ],
       ),

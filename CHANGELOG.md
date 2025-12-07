@@ -1,8 +1,37 @@
 # Changelog
 
-All notable changes to the Daily Pace project will be documented in this file.
+All notable changes to the DailyBudget project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+---
+
+## [Phase 19] - 2025-12-07
+
+### Summary
+Renamed app from DailyPace to DailyBudget. Improved category management UX with long-press reordering and added category rename functionality.
+
+### Changed
+
+#### App Name
+- Renamed from **DailyPace** to **DailyBudget** across all platforms
+  - Android: `AndroidManifest.xml`
+  - iOS: `Info.plist`
+  - Windows: `main.cpp`
+  - macOS: `AppInfo.xcconfig`
+
+#### Category Reorder UX
+- **Long-press required**: Changed from `ReorderableDragStartListener` to `ReorderableDelayedDragStartListener`
+- Prevents accidental reordering when scrolling
+- Settings category management: drag handle requires long-press
+- Transaction category selector: drag handle only visible in edit mode, requires long-press
+
+### Added
+
+#### Category Rename Feature
+- **Settings > Category Management**: Tap category name or edit icon to rename
+- **Transaction Category Selector (Edit Mode)**: Edit icon to rename categories
+- `updateCategory()` method in `CategoriesNotifier` (already existed, now used in UI)
 
 ---
 

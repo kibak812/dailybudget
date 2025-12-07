@@ -1,5 +1,5 @@
 name: daily_pace
-description: "Daily Pace - Smart Budget Tracker with SMS Auto-parsing"
+description: "DailyBudget - Smart Budget Tracker with SMS Auto-parsing"
 publish_to: 'none'
 
 version: 1.0.0+1
