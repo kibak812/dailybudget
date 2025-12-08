@@ -4,13 +4,14 @@ import 'package:daily_pace/features/budget/presentation/providers/current_month_
 import 'package:daily_pace/features/transaction/presentation/providers/transaction_provider.dart';
 import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
+import 'package:daily_pace/core/providers/date_provider.dart';
 
 /// Get effective date for budget calculations based on selected month
 /// - Current month: returns today's date
 /// - Past month: returns last day of that month
 /// - Future month: returns first day of that month
-DateTime _getEffectiveDate(DateTime selectedMonth) {
-  final now = DateTime.now();
+DateTime _getEffectiveDate(DateTime selectedMonth, DateTime today) {
+  final now = today;
   final isCurrentMonth = now.year == selectedMonth.year && now.month == selectedMonth.month;
 
   if (isCurrentMonth) {
@@ -29,6 +30,7 @@ DateTime _getEffectiveDate(DateTime selectedMonth) {
 /// - budgetProvider: for the monthly budget
 /// - transactionProvider: for all transactions
 /// - currentMonthProvider: for the selected month/year
+/// - currentDateProvider: for auto-refresh when date changes
 ///
 /// Returns DailyBudgetData with all calculated values
 final dailyBudgetProvider = Provider<DailyBudgetData>((ref) {
@@ -36,6 +38,8 @@ final dailyBudgetProvider = Provider<DailyBudgetData>((ref) {
   final budgets = ref.watch(budgetProvider);
   final transactions = ref.watch(transactionProvider);
   final currentMonth = ref.watch(currentMonthProvider);
+  // Watch currentDateProvider to auto-refresh on date change
+  final today = ref.watch(currentDateProvider);
 
   // Get budget for current month
   final budget = budgets.where((b) =>
@@ -50,7 +54,7 @@ final dailyBudgetProvider = Provider<DailyBudgetData>((ref) {
 
   // Calculate daily budget data using the service
   final selectedMonth = DateTime(currentMonth.year, currentMonth.month, 1);
-  final currentDate = _getEffectiveDate(selectedMonth);
+  final currentDate = _getEffectiveDate(selectedMonth, today);
 
   return DailyBudgetService.calculateDailyBudgetData(
     budget,
@@ -67,6 +71,8 @@ final dailyBudgetHistoryProvider = Provider.family<List<DailyBudgetHistoryItem>,
     final budgets = ref.watch(budgetProvider);
     final transactions = ref.watch(transactionProvider);
     final currentMonth = ref.watch(currentMonthProvider);
+    // Watch currentDateProvider to auto-refresh on date change
+    final today = ref.watch(currentDateProvider);
 
     // Get budget for current month
     final budget = budgets.where((b) =>
@@ -81,7 +87,7 @@ final dailyBudgetHistoryProvider = Provider.family<List<DailyBudgetHistoryItem>,
 
     // Calculate history using the service
     final selectedMonth = DateTime(currentMonth.year, currentMonth.month, 1);
-    final currentDate = _getEffectiveDate(selectedMonth);
+    final currentDate = _getEffectiveDate(selectedMonth, today);
     final currentDay = currentDate.day;
 
     // Calculate start day based on period

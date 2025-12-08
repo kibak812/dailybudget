@@ -6,6 +6,7 @@ import 'package:daily_pace/features/daily_budget/presentation/widgets/today_summ
 import 'package:daily_pace/features/daily_budget/presentation/widgets/today_spent_card.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/daily_budget_trend_chart.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/budget_info_card.dart';
+import 'package:daily_pace/features/daily_budget/presentation/widgets/yesterday_summary_card.dart';
 import 'package:daily_pace/app/router/app_router.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/add_transaction_sheet.dart';
 import 'package:go_router/go_router.dart';
@@ -85,6 +86,10 @@ class HomePage extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Yesterday's Summary Card (dismissible)
+          const YesterdaySummaryCard(),
+          const SizedBox(height: 16),
+
           // Today's Summary Card
           TodaySummaryCard(budgetData: dailyBudget),
           const SizedBox(height: 16),

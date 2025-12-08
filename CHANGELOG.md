@@ -6,6 +6,60 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 24] - 2025-12-09
+
+### Summary
+Daily notification feature with yesterday's spending summary. Fixed critical bug in flutter_local_notifications v17.x causing scheduled notifications to fail on real devices.
+
+### Added
+
+#### Daily Summary Notification
+- Scheduled notifications at user-configured time
+- Yesterday's spending summary card on home page
+- Notification settings UI in settings page
+  - Toggle to enable/disable notifications
+  - Time picker for notification time
+- Automatic permission handling (Android 13+ notification permission, Android 12+ exact alarm permission)
+
+#### Date Change Detection
+- App automatically refreshes data when date changes
+- Detects date change when app resumes from background
+- Uses `WidgetsBindingObserver` lifecycle hooks
+
+### Fixed
+
+#### Critical: flutter_local_notifications v17.x Bug
+- **Problem**: "Missing type parameter" error on real Samsung devices
+- **Symptom**: `zonedSchedule()`, `cancel()`, `pendingNotificationRequests()` all failed
+- **Root Cause**: Bug in flutter_local_notifications v17.x
+- **Solution**: Upgraded to v19.5.0
+
+### Changed
+
+#### Dependencies
+- `flutter_local_notifications`: ^17.2.2 → ^19.0.0
+- `timezone`: ^0.9.4 → ^0.10.0
+- `desugar_jdk_libs`: 2.0.4 → 2.1.4 (Android)
+
+#### API Updates for v19
+- Removed deprecated `uiLocalNotificationDateInterpretation` parameter from `zonedSchedule()`
+
+### Technical Details
+- **New files**:
+  - `lib/core/services/notification_service.dart` - Notification scheduling
+  - `lib/core/services/daily_summary_service.dart` - Summary data model
+  - `lib/features/settings/presentation/providers/notification_settings_provider.dart`
+  - `lib/features/settings/presentation/widgets/notification_section.dart`
+  - `lib/features/daily_budget/presentation/widgets/yesterday_summary_card.dart`
+  - `lib/core/providers/date_provider.dart` - Date change detection
+- **Modified files**:
+  - `android/app/src/main/AndroidManifest.xml` - Notification permissions & receivers
+  - `android/app/build.gradle.kts` - desugar_jdk_libs version
+  - `lib/main.dart` - Lifecycle observer
+  - `pubspec.yaml` - Updated dependencies
+
+---
+
 ## [Phase 23] - 2025-12-07
 
 ### Summary
