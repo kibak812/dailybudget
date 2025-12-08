@@ -4,6 +4,7 @@ library providers;
 
 // Core providers
 export 'isar_provider.dart';
+export 'date_provider.dart';
 
 // Budget providers
 export 'package:daily_pace/features/budget/presentation/providers/budget_provider.dart';
@@ -21,3 +22,4 @@ export 'package:daily_pace/features/daily_budget/presentation/providers/daily_bu
 
 // Settings providers
 export 'package:daily_pace/features/settings/presentation/providers/categories_provider.dart';
+export 'package:daily_pace/features/settings/presentation/providers/notification_settings_provider.dart';

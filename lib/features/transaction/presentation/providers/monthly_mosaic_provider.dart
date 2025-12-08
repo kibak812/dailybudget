@@ -7,10 +7,13 @@ import 'package:daily_pace/core/utils/formatters.dart';
 
 /// Provider for monthly mosaic data
 /// Calculates day-by-day status based on spending vs daily budget
+/// Watches currentDateProvider to auto-refresh when date changes
 final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
   final currentMonth = ref.watch(currentMonthProvider);
   final budgets = ref.watch(budgetProvider);
   final transactions = ref.watch(transactionProvider);
+  // Watch currentDateProvider to auto-refresh on date change (midnight/app resume)
+  final today = ref.watch(currentDateProvider);
 
   // Get budget for current month
   final budget = budgets
@@ -24,7 +27,7 @@ final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
   final monthTransactions =
       transactions.where((t) => t.date.startsWith(monthPrefix)).toList();
 
-  final today = DateTime.now();
+  // Use watched today from currentDateProvider (already defined above)
   final daysInMonth =
       DailyBudgetService.getDaysInMonth(currentMonth.year, currentMonth.month);
 
@@ -76,8 +79,8 @@ final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
         daysInMonth,
         day,
       );
-    } else {
-      // Past or current day - calculate daily budget
+    } else if (!isToday) {
+      // Past day only - calculate daily budget and determine status
       final prevDayStr = day > 1
           ? Formatters.formatDateISO(
               DateTime(currentMonth.year, currentMonth.month, day - 1))
@@ -114,6 +117,26 @@ final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
         status = DayStatus.danger;
         dangerCount++;
       }
+    } else {
+      // Today - pending settlement (no color yet, settled at end of day)
+      // Calculate daily budget for display purposes
+      final prevDayStr = day > 1
+          ? Formatters.formatDateISO(
+              DateTime(currentMonth.year, currentMonth.month, day - 1))
+          : null;
+      final netSpentUntilPrevDay = prevDayStr != null
+          ? DailyBudgetService.getNetSpentUntilDate(
+              monthTransactions, prevDayStr)
+          : 0;
+
+      dailyBudget = DailyBudgetService.calculateDailyBudget(
+        budget.amount,
+        netSpentUntilPrevDay,
+        daysInMonth,
+        day,
+      );
+      // Today gets future status (no color) - will be settled when day ends
+      status = DayStatus.future;
     }
 
     days.add(DayData(

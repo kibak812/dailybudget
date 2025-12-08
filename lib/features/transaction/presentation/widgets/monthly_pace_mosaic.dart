@@ -129,8 +129,13 @@ class MonthlyPaceMosaic extends StatelessWidget {
   Widget _buildDayTile(BuildContext context, DayData dayData) {
     final theme = Theme.of(context);
     final isSelected = selectedDate == dayData.date;
+
+    // Today: same as future (gray background) with border (pending settlement)
+    // Other days: use status-based colors
     final backgroundColor = MosaicColors.getBackgroundColor(dayData.status);
-    final textColor = MosaicColors.getTextColor(dayData.status);
+    final textColor = dayData.isToday
+        ? theme.colorScheme.primary
+        : MosaicColors.getTextColor(dayData.status);
 
     return GestureDetector(
       onTap: () => onDateTap(dayData.date),
@@ -148,9 +153,9 @@ class MonthlyPaceMosaic extends StatelessWidget {
                 color: isSelected
                     ? theme.colorScheme.primary
                     : dayData.isToday
-                        ? theme.colorScheme.primary.withOpacity(0.5)
+                        ? theme.colorScheme.primary
                         : Colors.transparent,
-                width: isSelected ? 2.5 : dayData.isToday ? 1.5 : 0,
+                width: isSelected ? 2.5 : dayData.isToday ? 2.0 : 0,
               ),
             ),
             child: Center(
