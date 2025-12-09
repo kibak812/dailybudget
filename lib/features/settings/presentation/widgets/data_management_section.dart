@@ -82,7 +82,8 @@ class DataManagementSection extends ConsumerWidget {
               '데이터를 가져왔습니다!\n'
               '예산: ${counts['budgets']}, '
               '거래: ${counts['transactions']}, '
-              '반복: ${counts['recurring']}',
+              '반복: ${counts['recurring']}, '
+              '카테고리: ${counts['categories']}',
             ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 3),
