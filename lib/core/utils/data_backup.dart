@@ -1,22 +1,31 @@
 import 'dart:convert';
 import 'package:isar/isar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:daily_pace/features/budget/data/models/budget_model.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/recurring/data/models/recurring_transaction_model.dart';
 
 /// Utility class for backing up and restoring data
 class DataBackup {
-  /// Export all data from Isar to JSON string
+  /// SharedPreferences key for categories (matches categories_provider.dart)
+  static const String _categoriesKey = 'categories';
+
+  /// Export all data from Isar and SharedPreferences to JSON string
   static Future<String> exportData(Isar isar) async {
     // Get all data from Isar
     final budgets = await isar.budgetModels.where().findAll();
     final transactions = await isar.transactionModels.where().findAll();
     final recurring = await isar.recurringTransactionModels.where().findAll();
 
+    // Get categories from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final categories = prefs.getStringList(_categoriesKey) ?? [];
+
     // Create JSON structure
     final data = {
-      'version': '1.0.0',
+      'version': '1.1.0',  // Updated version for categories support
       'exportDate': DateTime.now().toIso8601String(),
+      'categories': categories,  // Include categories in backup
       'budgets': budgets
           .map((b) => {
                 'year': b.year,
@@ -55,7 +64,7 @@ class DataBackup {
     return jsonEncode(data);
   }
 
-  /// Import data from JSON string and save to Isar
+  /// Import data from JSON string and save to Isar and SharedPreferences
   /// Returns number of items imported
   static Future<Map<String, int>> importData(Isar isar, String jsonString) async {
     final data = jsonDecode(jsonString) as Map<String, dynamic>;
@@ -63,6 +72,17 @@ class DataBackup {
     int budgetCount = 0;
     int transactionCount = 0;
     int recurringCount = 0;
+    int categoryCount = 0;
+
+    // Import categories to SharedPreferences first
+    if (data.containsKey('categories')) {
+      final prefs = await SharedPreferences.getInstance();
+      final categories = (data['categories'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList();
+      await prefs.setStringList(_categoriesKey, categories);
+      categoryCount = categories.length;
+    }
 
     await isar.writeTxn(() async {
       // Clear existing data
@@ -133,15 +153,21 @@ class DataBackup {
       'budgets': budgetCount,
       'transactions': transactionCount,
       'recurring': recurringCount,
+      'categories': categoryCount,
     };
   }
 
-  /// Clear all data from Isar database
+  /// Clear all data from Isar database and reset categories to defaults
   static Future<void> clearAllData(Isar isar) async {
+    // Clear Isar data
     await isar.writeTxn(() async {
       await isar.budgetModels.clear();
       await isar.transactionModels.clear();
       await isar.recurringTransactionModels.clear();
     });
+
+    // Reset categories to defaults (clear SharedPreferences key so it reloads defaults)
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_categoriesKey);
   }
 }
