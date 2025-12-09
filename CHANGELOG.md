@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 25] - 2025-12-09
+
+### Summary
+Backup/restore now includes category data. App refresh logic improved for notification time check.
+
+### Fixed
+
+#### Backup/Restore Category Data (PR #3)
+- Categories stored in SharedPreferences were not included in backup/restore
+- Added categories to backup JSON export (version bumped to 1.1.0)
+- Restores categories from backup file to SharedPreferences
+- Resets categories to defaults when clearing all data
+- Shows category count in restore success message
+
+#### App Refresh on Resume (PR #4)
+- Invalidate `shouldShowYesterdaySummaryProvider` when app resumes from background
+- Ensures yesterday summary card appears after configured notification time
+
+---
+
 ## [Phase 24] - 2025-12-09
 
 ### Summary
