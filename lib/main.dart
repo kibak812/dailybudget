@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/app/theme/app_theme.dart';
 import 'package:daily_pace/app/router/app_router.dart';
 import 'package:daily_pace/core/providers/date_provider.dart';
+import 'package:daily_pace/features/daily_budget/presentation/widgets/yesterday_summary_card.dart';
 
 void main() {
   runApp(
@@ -42,6 +43,8 @@ class _DailyPaceAppState extends ConsumerState<DailyPaceApp>
     // When app resumes from background, check if date has changed
     if (state == AppLifecycleState.resumed) {
       ref.read(currentDateProvider.notifier).checkDateChange();
+      // Re-check if notification time has passed (for yesterday summary card)
+      ref.invalidate(shouldShowYesterdaySummaryProvider);
     }
   }
 
