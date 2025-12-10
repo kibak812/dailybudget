@@ -282,10 +282,10 @@ class StatisticsPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Budget usage bar
+                  // Budget usage bar (based on net spending)
                   BudgetUsageCard(
                     totalBudget: budget.amount,
-                    totalSpent: budgetData.totalSpent,
+                    totalSpent: budgetData.totalSpent - budgetData.totalIncome,
                   ),
                   const SizedBox(height: 16),
 
@@ -335,7 +335,7 @@ class StatisticsPage extends ConsumerWidget {
                   const SizedBox(height: 16),
                   BudgetUsageCard(
                     totalBudget: budget.amount,
-                    totalSpent: budgetData.totalSpent,
+                    totalSpent: budgetData.totalSpent - budgetData.totalIncome,
                   ),
                 ],
               ),

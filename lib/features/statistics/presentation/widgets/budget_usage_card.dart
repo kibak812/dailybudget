@@ -3,10 +3,10 @@ import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 
 /// Budget usage card widget
-/// Shows budget usage with progress bar
+/// Shows budget usage with progress bar (based on net spending)
 class BudgetUsageCard extends StatefulWidget {
   final int totalBudget;
-  final int totalSpent;
+  final int totalSpent; // Net spending (can be negative if income > expenses)
 
   const BudgetUsageCard({
     super.key,
@@ -46,8 +46,10 @@ class _BudgetUsageCardState extends State<BudgetUsageCard>
   }
 
   void _updateAnimation() {
+    // For negative net spending (income > expenses), progress is 0
+    final effectiveSpent = widget.totalSpent < 0 ? 0 : widget.totalSpent;
     final percent = widget.totalBudget > 0
-        ? (widget.totalSpent / widget.totalBudget).clamp(0.0, 1.0)
+        ? (effectiveSpent / widget.totalBudget).clamp(0.0, 1.0)
         : 0.0;
 
     _progressAnimation = Tween<double>(
@@ -77,9 +79,17 @@ class _BudgetUsageCardState extends State<BudgetUsageCard>
 
   @override
   Widget build(BuildContext context) {
+    final isNetIncome = widget.totalSpent < 0;
+    final effectiveSpent = isNetIncome ? 0 : widget.totalSpent;
     final budgetUsagePercent = widget.totalBudget > 0
-        ? (widget.totalSpent / widget.totalBudget) * 100
+        ? (effectiveSpent / widget.totalBudget) * 100
         : 0.0;
+
+    // Display label and value based on net spending/income
+    final displayLabel = isNetIncome ? '순수입' : '순지출';
+    final displayAmount = isNetIncome
+        ? '+${Formatters.formatCurrency(widget.totalSpent.abs())}'
+        : Formatters.formatCurrency(widget.totalSpent);
 
     return Card(
       child: Padding(
@@ -101,9 +111,9 @@ class _BudgetUsageCardState extends State<BudgetUsageCard>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '사용: ${Formatters.formatCurrency(widget.totalSpent)}',
+                  '$displayLabel: $displayAmount',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: isNetIncome ? AppColors.success : AppColors.textSecondary,
                       ),
                 ),
                 Text(
