@@ -9,6 +9,10 @@ class AdService {
   AdService._internal();
 
   bool _isInitialized = false;
+  Future<void>? _initializeFuture;
+
+  /// 초기화 완료 여부
+  bool get isInitialized => _isInitialized;
 
   /// AdMob SDK 초기화
   Future<void> initialize() async {
@@ -17,6 +21,12 @@ class AdService {
     await MobileAds.instance.initialize();
     _isInitialized = true;
     debugPrint('AdMob SDK initialized');
+  }
+
+  /// 초기화 완료 보장 (여러 곳에서 호출해도 한 번만 실행)
+  Future<void> ensureInitialized() {
+    _initializeFuture ??= initialize();
+    return _initializeFuture!;
   }
 
   /// 배너 광고 단위 ID
