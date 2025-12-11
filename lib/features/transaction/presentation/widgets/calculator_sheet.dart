@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 
 /// Calculator bottom sheet for transaction amount input
 /// Returns the calculated result when confirmed
@@ -221,7 +222,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
-      height: screenHeight * 0.65,
+      height: screenHeight * 0.68,
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
@@ -242,7 +243,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
 
           // Title
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -261,10 +262,10 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
             ),
           ),
 
-          // Display area
+          // Display area with more padding
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest,
             ),
@@ -274,7 +275,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                 // Expression
                 Text(
                   _getDisplayExpression(),
-                  style: theme.textTheme.bodyLarge?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                   maxLines: 1,
@@ -295,31 +296,34 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
             ),
           ),
 
-          // Calculator buttons
+          // Calculator buttons - 4 column grid
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 children: [
-                  _buildButtonRow(['AC', '⌫', '÷']),
+                  _buildButtonRow(['AC', '⌫', '%', '÷']),
                   _buildButtonRow(['7', '8', '9', '×']),
                   _buildButtonRow(['4', '5', '6', '-']),
                   _buildButtonRow(['1', '2', '3', '+']),
-                  _buildButtonRow(['00', '0', '=']),
+                  _buildButtonRow(['00', '0', '.', '=']),
                 ],
               ),
             ),
           ),
 
-          // Confirm button
+          // Confirm button - emphasized as primary action
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
             child: SizedBox(
               width: double.infinity,
               child: FilledButton(
                 onPressed: _onConfirm,
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  textStyle: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 child: const Text('확인'),
               ),
@@ -343,45 +347,98 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
 
     Color backgroundColor;
     Color textColor;
-    double flex = 1;
+    double fontSize;
+    FontWeight fontWeight;
+    bool isIcon = false;
 
+    // AC button - Rose/Red with white text
     if (label == 'AC') {
-      backgroundColor = theme.colorScheme.errorContainer;
-      textColor = theme.colorScheme.error;
-    } else if (label == '⌫') {
-      backgroundColor = theme.colorScheme.surfaceContainerHighest;
+      backgroundColor = AppColors.danger; // Rose-500
+      textColor = Colors.white;
+      fontSize = 22;
+      fontWeight = FontWeight.bold;
+    }
+    // Backspace - subtle gray with filled icon
+    else if (label == '⌫') {
+      backgroundColor = theme.colorScheme.surfaceContainerHigh;
       textColor = theme.colorScheme.onSurface;
-    } else if (label == '=') {
-      backgroundColor = theme.colorScheme.primary;
-      textColor = theme.colorScheme.onPrimary;
-      flex = 2;
-    } else if (_isOperator(label)) {
+      fontSize = 24;
+      fontWeight = FontWeight.normal;
+      isIcon = true;
+    }
+    // Percent - functional button
+    else if (label == '%') {
+      backgroundColor = theme.colorScheme.surfaceContainerHigh;
+      textColor = theme.colorScheme.onSurface;
+      fontSize = 22;
+      fontWeight = FontWeight.w600;
+    }
+    // Equals - secondary emphasis (toned down)
+    else if (label == '=') {
       backgroundColor = theme.colorScheme.primaryContainer;
-      textColor = theme.colorScheme.primary;
-    } else {
-      backgroundColor = theme.colorScheme.surface;
+      textColor = theme.colorScheme.onPrimaryContainer;
+      fontSize = 28;
+      fontWeight = FontWeight.bold;
+    }
+    // Operators - Primary blue with white text for visibility
+    else if (_isOperator(label)) {
+      backgroundColor = theme.colorScheme.primary;
+      textColor = Colors.white;
+      fontSize = 26;
+      fontWeight = FontWeight.bold;
+    }
+    // Decimal point - visually disabled (integer-only calculator)
+    else if (label == '.') {
+      backgroundColor = theme.colorScheme.surfaceContainerLow;
+      textColor = AppColors.disabledText;
+      fontSize = 24;
+      fontWeight = FontWeight.w600;
+    }
+    // Number buttons - light background
+    else {
+      backgroundColor = theme.colorScheme.surfaceContainerLow;
       textColor = theme.colorScheme.onSurface;
+      fontSize = 24;
+      fontWeight = FontWeight.w600;
     }
 
     return Expanded(
-      flex: flex.toInt(),
       child: Padding(
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(5),
         child: Material(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(12),
-          elevation: 1,
-          child: InkWell(
-            onTap: () => _handleButtonPress(label),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              alignment: Alignment.center,
-              child: Text(
-                label,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: textColor,
-                  fontWeight: FontWeight.w600,
+          borderRadius: BorderRadius.circular(14),
+          elevation: 0,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
+              ],
+            ),
+            child: InkWell(
+              onTap: () => _handleButtonPress(label),
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                alignment: Alignment.center,
+                child: isIcon
+                    ? Icon(
+                        Icons.backspace_rounded, // Filled/rounded icon
+                        color: textColor,
+                        size: 26,
+                      )
+                    : Text(
+                        label,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: fontSize,
+                          fontWeight: fontWeight,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -397,10 +454,28 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
       _onBackspace();
     } else if (label == '=') {
       _onEquals();
+    } else if (label == '%') {
+      _onPercent();
+    } else if (label == '.') {
+      // Decimal point - ignored for integer-only calculator
+      // Korean won doesn't use decimals
     } else if (_isOperator(label)) {
       _onOperatorPressed(label);
     } else {
       _onNumberPressed(label);
+    }
+  }
+
+  void _onPercent() {
+    // Convert current number to percentage (divide by 100)
+    final calculated = _calculate();
+    if (calculated != 0) {
+      setState(() {
+        final percentValue = calculated ~/ 100;
+        _expression = percentValue.toString();
+        _result = _formatNumber(percentValue);
+        _hasCalculated = true;
+      });
     }
   }
 }
