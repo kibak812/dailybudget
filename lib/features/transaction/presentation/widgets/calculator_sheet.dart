@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 
 /// Calculator bottom sheet for transaction amount input
 /// Returns the calculated result when confirmed
@@ -352,7 +353,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
 
     // AC button - Rose/Red with white text
     if (label == 'AC') {
-      backgroundColor = const Color(0xFFF43F5E); // Rose-500
+      backgroundColor = AppColors.danger; // Rose-500
       textColor = Colors.white;
       fontSize = 22;
       fontWeight = FontWeight.bold;
@@ -386,10 +387,10 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
       fontSize = 26;
       fontWeight = FontWeight.bold;
     }
-    // Decimal point
+    // Decimal point - visually disabled (integer-only calculator)
     else if (label == '.') {
       backgroundColor = theme.colorScheme.surfaceContainerLow;
-      textColor = theme.colorScheme.onSurface;
+      textColor = AppColors.disabledText;
       fontSize = 24;
       fontWeight = FontWeight.w600;
     }
@@ -407,15 +408,13 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
         child: Material(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(14),
-          // Soft shadow - lower opacity, higher blur
           elevation: 0,
-          shadowColor: Colors.black.withOpacity(0.1),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
+                  color: Colors.black.withValues(alpha: 0.06),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -470,7 +469,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
   void _onPercent() {
     // Convert current number to percentage (divide by 100)
     final calculated = _calculate();
-    if (calculated > 0) {
+    if (calculated != 0) {
       setState(() {
         final percentValue = calculated ~/ 100;
         _expression = percentValue.toString();
