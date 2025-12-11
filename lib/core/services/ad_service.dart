@@ -21,13 +21,20 @@ class AdService {
 
   /// 배너 광고 단위 ID
   /// 디버그 모드에서는 테스트 ID 사용
+  /// 프로덕션 ID는 --dart-define=ADMOB_BANNER_ID=xxx 로 주입
   String get bannerAdUnitId {
     if (kDebugMode) {
       // 테스트 광고 ID (개발용)
       return 'ca-app-pub-3940256099942544/6300978111';
     }
-    // 실제 광고 ID (프로덕션용)
-    return 'ca-app-pub-1068771440265964/1240692725';
+    // 프로덕션 광고 ID (빌드 타임에 주입)
+    const prodBannerId = String.fromEnvironment('ADMOB_BANNER_ID');
+    if (prodBannerId.isEmpty) {
+      // 프로덕션 빌드에 광고 ID가 없으면 테스트 ID 사용 (광고 수익 없음)
+      debugPrint('Warning: ADMOB_BANNER_ID not set, using test ad');
+      return 'ca-app-pub-3940256099942544/6300978111';
+    }
+    return prodBannerId;
   }
 
   /// 배너 광고 생성

@@ -48,8 +48,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   @override
   Widget build(BuildContext context) {
     if (!_isAdLoaded || _bannerAd == null) {
-      // 광고 로딩 중이거나 실패 시 빈 공간 표시 (높이 유지)
-      return const SizedBox(height: 50);
+      // 광고 로딩 중이거나 실패 시 완전히 숨김
+      return const SizedBox.shrink();
     }
 
     return SizedBox(

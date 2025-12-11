@@ -47,10 +47,10 @@
         <!-- Flutter Local Notifications - Notification receiver -->
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"/>
 
-        <!-- AdMob App ID -->
+        <!-- AdMob App ID (gradle.properties에서 주입) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-1068771440265964~5702681911"/>
+            android:value="${ADMOB_APP_ID}"/>
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

@@ -9,8 +9,8 @@ import 'package:daily_pace/features/daily_budget/presentation/widgets/yesterday_
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // AdMob SDK 초기화
-  await AdService().initialize();
+  // AdMob SDK 초기화 (비동기 - 앱 시작을 차단하지 않음)
+  AdService().initialize();
 
   runApp(
     const ProviderScope(
