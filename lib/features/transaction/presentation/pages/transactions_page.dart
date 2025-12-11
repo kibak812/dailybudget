@@ -426,7 +426,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 Text(
                   dayTotal < 0
                       ? '+${Formatters.formatCurrency(dayTotal.abs())}'
-                      : Formatters.formatCurrency(dayTotal),
+                      : '-${Formatters.formatCurrency(dayTotal)}',
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: dayTotal < 0 ? Colors.green[700] : theme.colorScheme.error,
                     fontWeight: FontWeight.w600,
