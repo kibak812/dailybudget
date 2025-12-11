@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 26] - 2025-12-12
+
+### Summary
+Calculator button design refinement for clearer visual separation.
+
+### Changed
+
+#### Calculator Button Border
+- Added 1px border to all calculator buttons for clear edge definition
+- Border color uses theme's outline color with 25% opacity
+- Reduced border radius from 14 to 12 for cleaner appearance
+- Adjusted button padding from 5 to 4 for slightly larger buttons
+- Removed shadow effect (now using border instead)
+
+---
+
 ## [Phase 25] - 2025-12-09
 
 ### Summary
