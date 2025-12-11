@@ -316,3 +316,27 @@ See: `lib/app/theme/app_colors.dart` and `lib/features/transaction/presentation/
 - Do NOT commit or push until user explicitly confirms the changes work correctly
 - PR 방식에서는 master에 직접 커밋하지 않음
 - GitHub CLI (`gh`) 사용하여 PR 생성/관리
+
+### CHANGELOG 작성 가이드라인
+
+CHANGELOG.md 업데이트 시 **로컬 변경사항뿐 아니라 머지된 PR도 반드시 확인**:
+
+1. **PR 확인 명령어**
+   ```bash
+   # 마지막 문서화 이후 머지된 PR 목록 확인
+   gh pr list --state merged --limit 20
+
+   # PR 상세 내용 확인
+   gh pr view PR번호 --json title,body
+   ```
+
+2. **문서화 시점**
+   - 커밋/푸시 전 CHANGELOG 업데이트 요청 시
+   - 새 세션 시작 시 이전 세션의 PR이 문서화되었는지 확인
+   - Phase 번호는 주요 변경 시 증가 (예: Phase 25 → Phase 26)
+   - 소규모 변경은 소수점 버전 사용 (예: Phase 25.1, 25.2)
+
+3. **포함 내용**
+   - PR 번호와 제목 명시 (예: `#### Feature Name (PR #8)`)
+   - 주요 변경사항 불릿 포인트로 정리
+   - 새 파일, 수정된 파일, 의존성 변경 등

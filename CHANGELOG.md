@@ -22,6 +22,86 @@ Calculator button design refinement for clearer visual separation.
 
 ---
 
+## [Phase 25.4] - 2025-12-11
+
+### Summary
+UI consistency improvements for colors and symbols across the app.
+
+### Changed
+
+#### Standardize UI Colors and Symbols (PR #10)
+- Income items now display in green (was indigo/primary)
+- Added minus sign (-) to daily net spending total for symmetry with income (+)
+- Follows standard finance app pattern: expense=red(-), income=green(+)
+
+#### Calculator Design Review (PR #9)
+- Enhanced visibility: white text on AC/operator buttons, larger font sizes
+- Unified 4-column grid layout (added %, . buttons)
+- Adjusted info hierarchy: toned down = button, emphasized confirm button
+- Replaced backspace character with filled rounded icon
+- Applied soft shadows (6% opacity, 8px blur)
+- Increased padding for better spacing
+
+---
+
+## [Phase 25.3] - 2025-12-11
+
+### Summary
+Calculator feature and AdMob integration for monetization.
+
+### Added
+
+#### Calculator Feature (PR #8)
+- New `CalculatorSheet` widget with basic arithmetic operations (+, -, ×, ÷)
+- Support AC (clear all), backspace, and equals functions
+- Display running calculation with formatted numbers
+- Calculator button added to `AddTransactionSheet` amount field
+- Calculator button added to `TransactionEditModalSheet` amount field
+- Calculator opens with current amount as initial value
+- Calculated result automatically applied to amount field
+
+#### AdMob Integration (PR #7)
+- Added `google_mobile_ads` package (v5.3.1)
+- Added AdMob App ID to AndroidManifest.xml
+- Created `AdService` class for ad management
+- Created `BannerAdWidget` for displaying banner ads
+- Initialized AdMob SDK in main.dart
+- Added banner ad to home page bottom
+- Uses test ad ID in debug mode for account safety
+
+---
+
+## [Phase 25.2] - 2025-12-10
+
+### Summary
+Unified net spending display across all screens for consistency.
+
+### Changed
+
+#### Unify Spending Display (PR #6)
+- Home tab: "오늘 지출" card now shows net spending (expenses - income)
+- Transactions tab: Daily totals now show net spending instead of total expenses
+- Statistics tab: Budget usage card now based on net spending
+- Added `getNetSpentForDate()` helper method in `DailyBudgetService`
+- All screens handle negative net spending (income > expenses) with green color, + sign, and "순수입" label
+
+---
+
+## [Phase 25.1] - 2025-12-10
+
+### Summary
+Korean localization for date picker calendar.
+
+### Added
+
+#### Korean Locale Support (PR #5)
+- Added `flutter_localizations` package to pubspec.yaml
+- Configured MaterialApp with Korean locale (ko_KR)
+- Added localization delegates for Material, Widgets, and Cupertino
+- Date picker calendar now displays in Korean
+
+---
+
 ## [Phase 25] - 2025-12-09
 
 ### Summary
