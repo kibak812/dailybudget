@@ -3,9 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/app/theme/app_theme.dart';
 import 'package:daily_pace/app/router/app_router.dart';
 import 'package:daily_pace/core/providers/date_provider.dart';
+import 'package:daily_pace/core/services/ad_service.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/yesterday_summary_card.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // AdMob SDK 초기화
+  await AdService().initialize();
+
   runApp(
     const ProviderScope(
       child: DailyPaceApp(),
