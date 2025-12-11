@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/category_selector_sheet.dart';
+import 'package:daily_pace/features/transaction/presentation/widgets/calculator_sheet.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 
@@ -93,6 +94,29 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
 
     if (picked != null) {
       setState(() => _selectedDate = picked);
+    }
+  }
+
+  void _showCalculator() async {
+    final currentAmount = Formatters.parseFormattedNumber(_amountController.text);
+
+    final result = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => CalculatorSheet(
+        initialValue: currentAmount > 0 ? currentAmount : null,
+      ),
+    );
+
+    if (result != null && result > 0) {
+      final formatted = Formatters.formatNumberInput(result.toString());
+      _amountController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
     }
   }
 
@@ -192,6 +216,11 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                     color: _selectedType == TransactionType.expense
                         ? theme.colorScheme.error
                         : theme.colorScheme.primary,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.calculate_outlined),
+                    tooltip: '계산기',
+                    onPressed: _showCalculator,
                   ),
                 ),
                 keyboardType: TextInputType.number,
