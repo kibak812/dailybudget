@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/category_selector_sheet.dart';
+import 'package:daily_pace/features/transaction/presentation/widgets/calculator_sheet.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 
@@ -351,6 +352,29 @@ class _TransactionEditModalSheetState
     );
   }
 
+  void _showCalculator() async {
+    final currentAmount = Formatters.parseFormattedNumber(_amountController.text);
+
+    final result = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => CalculatorSheet(
+        initialValue: currentAmount > 0 ? currentAmount : null,
+      ),
+    );
+
+    if (result != null && result > 0) {
+      final formatted = Formatters.formatNumberInput(result.toString());
+      _amountController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -399,10 +423,15 @@ class _TransactionEditModalSheetState
           TextField(
             controller: _amountController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: '금액',
               hintText: '0',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.calculate_outlined),
+                tooltip: '계산기',
+                onPressed: _showCalculator,
+              ),
             ),
             onChanged: (value) {
               final formatted = Formatters.formatNumberInput(value);
