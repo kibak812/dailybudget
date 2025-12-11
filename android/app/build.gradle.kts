@@ -29,6 +29,10 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // AdMob App ID를 gradle.properties에서 가져와서 manifest에 주입
+        val admobAppId = project.findProperty("ADMOB_APP_ID") as String? ?: ""
+        manifestPlaceholders["ADMOB_APP_ID"] = admobAppId
     }
 
     buildTypes {

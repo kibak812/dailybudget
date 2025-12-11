@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/providers/providers.dart';
+import 'package:daily_pace/core/widgets/banner_ad_widget.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/today_summary_card.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/today_spent_card.dart';
@@ -104,6 +105,10 @@ class HomePage extends ConsumerWidget {
 
           // Budget Info
           BudgetInfoCard(budgetData: dailyBudget),
+          const SizedBox(height: 16),
+
+          // Banner Ad
+          const Center(child: BannerAdWidget()),
           const SizedBox(height: 80), // Extra space for FAB
         ],
       ),
