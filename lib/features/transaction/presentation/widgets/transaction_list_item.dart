@@ -145,7 +145,7 @@ class TransactionListItem extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: transaction.type == TransactionType.expense
                       ? theme.colorScheme.error
-                      : theme.colorScheme.primary,
+                      : Colors.green[700],
                 ),
               ),
             ],
