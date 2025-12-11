@@ -16,10 +16,12 @@ class TodaySpentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOverBudget = budgetData.remainingToday < 0;
+    final netSpentToday = budgetData.spentToday;
+    final isNetIncome = netSpentToday < 0; // 수입이 지출보다 많은 경우
 
     return Row(
       children: [
-        // Spent Today
+        // Net Spent Today (순지출)
         Expanded(
           child: Card(
             elevation: 2,
@@ -32,7 +34,7 @@ class TodaySpentCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '오늘 지출',
+                    isNetIncome ? '오늘 순수입' : '오늘 순지출',
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 13,
@@ -40,11 +42,11 @@ class TodaySpentCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    Formatters.formatCurrency(budgetData.spentToday),
-                    style: const TextStyle(
+                    '${isNetIncome ? '+' : ''}${Formatters.formatCurrency(netSpentToday.abs())}',
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: isNetIncome ? Colors.green[700] : Colors.black87,
                     ),
                   ),
                 ],

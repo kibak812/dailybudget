@@ -50,6 +50,13 @@ class DailyBudgetService {
         .fold<int>(0, (sum, t) => sum + t.amount);
   }
 
+  /// Calculate net spent for a specific date (expenses - income)
+  static int getNetSpentForDate(List<TransactionModel> transactions, String date) {
+    final expenses = getSpentForDate(transactions, date);
+    final income = getIncomeForDate(transactions, date);
+    return expenses - income;
+  }
+
   /// Calculate total income until date (inclusive)
   static int getIncomeUntilDate(List<TransactionModel> transactions, String date) {
     final targetDate = DateTime.parse(date);
@@ -132,8 +139,8 @@ class DailyBudgetService {
         ? getNetSpentUntilDate(transactions, dayBeforeYesterdayStr)
         : 0;
 
-    // Spent today
-    final spentToday = getSpentForDate(transactions, todayStr);
+    // Net spent today (expenses - income)
+    final spentToday = getNetSpentForDate(transactions, todayStr);
 
     // Daily budget as of today (based on spending until yesterday to avoid today's swings)
     final dailyBudgetNow = calculateDailyBudget(

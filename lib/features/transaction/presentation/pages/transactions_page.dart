@@ -387,11 +387,15 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         .fold<int>(0, (sum, t) => sum + t.amount);
   }
 
-  /// Calculate day total (expenses only)
+  /// Calculate day total (net: expenses - income)
   int _calculateDayTotal(List<TransactionModel> transactions) {
-    return transactions
+    final expenses = transactions
         .where((t) => t.type == TransactionType.expense)
         .fold<int>(0, (sum, t) => sum + t.amount);
+    final income = transactions
+        .where((t) => t.type == TransactionType.income)
+        .fold<int>(0, (sum, t) => sum + t.amount);
+    return expenses - income;
   }
 
   /// Build date section with transactions
@@ -418,11 +422,13 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 ),
               ),
               const Spacer(),
-              if (dayTotal > 0)
+              if (dayTotal != 0)
                 Text(
-                  Formatters.formatCurrency(dayTotal),
+                  dayTotal < 0
+                      ? '+${Formatters.formatCurrency(dayTotal.abs())}'
+                      : Formatters.formatCurrency(dayTotal),
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.error,
+                    color: dayTotal < 0 ? Colors.green[700] : theme.colorScheme.error,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
