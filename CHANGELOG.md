@@ -6,6 +6,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 27] - 2025-12-12
+
+### Summary
+Architecture review and P0 refactoring: DRY principle compliance, centralized constants, and DayStatus enum enhancement.
+
+### Added
+
+#### Architecture Review Documents (PR #11)
+- `docs/ARCHITECTURE_REVIEW_ERICH_GAMMA.md`: GoF patterns and SOLID principles analysis
+- `docs/ARCHITECTURE_REVIEW_MARTIN_FOWLER.md`: Code smells and pragmatic refactoring approach
+- `docs/ARCHITECTURE_REVIEW_REMI_ROUSSELET.md`: Riverpod creator's Flutter-specific perspective
+
+#### New Files
+- `lib/core/constants/budget_constants.dart`: Centralized `BudgetThresholds` (0.5, 1.0, 1.5) and `CategoryConstants`
+
+### Changed
+
+#### DayStatus Enum Enhancement (PR #11)
+- Added properties directly to `DayStatus` enum: `backgroundColor`, `textColor`, `cardColor`, `icon`, `message`
+- `MosaicColors` now delegates to `DayStatus` properties (backward compatible)
+- `YesterdaySummary` now delegates to `DayStatus` for color/icon/message
+
+#### Centralized Status Calculation (PR #11)
+- `DailySummaryService.calculateStatus()` now uses `BudgetThresholds` constants
+- Removed ~20 lines of duplicate status logic from `monthly_mosaic_provider.dart`
+- Removed ~12 lines of duplicate status logic from `yesterday_summary_card.dart`
+
+#### Formatters Utility (PR #11)
+- Added `Formatters.formatYearMonth(year, month)` for YYYY-MM formatting
+- Applied to 5 files: `monthly_mosaic_provider`, `yesterday_summary_card`, `isar_transaction_repository`, `transaction_provider`, `recurring_service`
+
+### Results
+- ~80 lines of duplicate code removed
+- ~40 lines of utilities/constants added
+- Net reduction: ~40 lines
+- Single source of truth for status thresholds and date formatting
+
+---
+
 ## [Phase 26] - 2025-12-12
 
 ### Summary
