@@ -1,3 +1,4 @@
+import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/recurring/data/models/recurring_transaction_model.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
@@ -15,7 +16,7 @@ class RecurringService {
   ) {
     if (!recurring.isActive) return false;
 
-    final targetMonth = '$year-${month.toString().padLeft(2, '0')}';
+    final targetMonth = Formatters.formatYearMonth(year, month);
 
     // Check start month
     if (recurring.startMonth.compareTo(targetMonth) > 0) return false;
@@ -61,7 +62,7 @@ class RecurringService {
     int year,
     int month,
   ) {
-    final monthPrefix = '$year-${month.toString().padLeft(2, '0')}';
+    final monthPrefix = Formatters.formatYearMonth(year, month);
 
     return transactions.any(
       (t) => t.recurringId == recurringId && t.date.startsWith(monthPrefix),

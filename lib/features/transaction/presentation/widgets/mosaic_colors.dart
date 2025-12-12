@@ -26,38 +26,10 @@ class MosaicColors {
   static const Color noBudgetText = Color(0xFFBDBDBD); // Grey
 
   /// Get background color for day status
-  static Color getBackgroundColor(DayStatus status) {
-    switch (status) {
-      case DayStatus.perfect:
-        return perfect;
-      case DayStatus.safe:
-        return safe;
-      case DayStatus.warning:
-        return warning;
-      case DayStatus.danger:
-        return danger;
-      case DayStatus.future:
-        return future;
-      case DayStatus.noBudget:
-        return noBudget;
-    }
-  }
+  /// Delegates to DayStatus.backgroundColor
+  static Color getBackgroundColor(DayStatus status) => status.backgroundColor;
 
   /// Get text color for day status
-  static Color getTextColor(DayStatus status) {
-    switch (status) {
-      case DayStatus.perfect:
-        return perfectText;
-      case DayStatus.safe:
-        return safeText;
-      case DayStatus.warning:
-        return warningText;
-      case DayStatus.danger:
-        return dangerText;
-      case DayStatus.future:
-        return futureText;
-      case DayStatus.noBudget:
-        return noBudgetText;
-    }
-  }
+  /// Delegates to DayStatus.textColor
+  static Color getTextColor(DayStatus status) => status.textColor;
 }

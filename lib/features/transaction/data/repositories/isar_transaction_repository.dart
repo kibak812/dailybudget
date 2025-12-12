@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/transaction/domain/repositories/transaction_repository.dart';
 
@@ -18,7 +19,7 @@ class IsarTransactionRepository implements TransactionRepository {
     int year,
     int month,
   ) async {
-    final monthPrefix = '$year-${month.toString().padLeft(2, '0')}';
+    final monthPrefix = Formatters.formatYearMonth(year, month);
     return await isar.transactionModels
         .where()
         .filter()

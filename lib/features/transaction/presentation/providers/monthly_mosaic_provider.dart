@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/providers/providers.dart';
+import 'package:daily_pace/core/services/daily_summary_service.dart';
 import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
 import 'package:daily_pace/features/transaction/domain/models/monthly_mosaic_data.dart';
 import 'package:daily_pace/features/transaction/domain/models/day_status.dart';
@@ -22,8 +23,7 @@ final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
       .firstOrNull;
 
   // Filter transactions for current month
-  final monthPrefix =
-      '${currentMonth.year}-${currentMonth.month.toString().padLeft(2, '0')}';
+  final monthPrefix = Formatters.formatYearMonth(currentMonth.year, currentMonth.month);
   final monthTransactions =
       transactions.where((t) => t.date.startsWith(monthPrefix)).toList();
 
@@ -97,25 +97,21 @@ final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
         day,
       );
 
-      // Determine status based on net spent vs daily budget
-      if (dailyBudget <= 0) {
-        status = DayStatus.noBudget;
-      } else if (netSpent <= dailyBudget * 0.5) {
-        // Perfect: spending at or below 50% of daily budget
-        status = DayStatus.perfect;
-        perfectCount++;
-      } else if (netSpent <= dailyBudget) {
-        // Safe: spending between 50% and 100% of daily budget
-        status = DayStatus.safe;
-        safeCount++;
-      } else if (netSpent <= dailyBudget * 1.5) {
-        // Warning: over budget but within 1.5x
-        status = DayStatus.warning;
-        warningCount++;
-      } else {
-        // Danger: significantly over budget
-        status = DayStatus.danger;
-        dangerCount++;
+      // Determine status using centralized calculation
+      status = DailySummaryService.calculateStatus(dailyBudget, netSpent);
+
+      // Update counts for summary
+      switch (status) {
+        case DayStatus.perfect:
+          perfectCount++;
+        case DayStatus.safe:
+          safeCount++;
+        case DayStatus.warning:
+          warningCount++;
+        case DayStatus.danger:
+          dangerCount++;
+        default:
+          break;
       }
     } else {
       // Today - pending settlement (no color yet, settled at end of day)

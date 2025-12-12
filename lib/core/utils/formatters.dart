@@ -47,6 +47,13 @@ class Formatters {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
+  /// Format year and month to YYYY-MM string
+  /// Example: (2025, 12) -> "2025-12"
+  /// Useful for filtering transactions by month prefix
+  static String formatYearMonth(int year, int month) {
+    return '$year-${month.toString().padLeft(2, '0')}';
+  }
+
   /// Format number input with Korean locale (add commas)
   /// Example: "1234567" -> "1,234,567"
   static String formatNumberInput(String input) {

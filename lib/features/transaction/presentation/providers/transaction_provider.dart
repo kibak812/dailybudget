@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/providers/isar_provider.dart';
+import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/transaction/domain/repositories/transaction_repository.dart';
 import 'package:daily_pace/features/transaction/data/repositories/isar_transaction_repository.dart';
@@ -82,7 +83,7 @@ class TransactionNotifier extends StateNotifier<List<TransactionModel>> {
 
   /// Get transactions for a specific month
   List<TransactionModel> getTransactionsForMonth(int year, int month) {
-    final monthPrefix = '$year-${month.toString().padLeft(2, '0')}';
+    final monthPrefix = Formatters.formatYearMonth(year, month);
     return state
         .where((transaction) => transaction.date.startsWith(monthPrefix))
         .toList();
