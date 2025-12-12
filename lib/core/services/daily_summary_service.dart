@@ -1,4 +1,5 @@
 import 'package:daily_pace/features/transaction/domain/models/day_status.dart';
+import 'package:daily_pace/core/constants/budget_constants.dart';
 
 /// Daily summary data for notifications
 class DailySummary {
@@ -102,13 +103,14 @@ class DailySummary {
 /// Service to calculate daily summary
 class DailySummaryService {
   /// Calculate status based on spending ratio
+  /// Uses BudgetThresholds constants for threshold values
   static DayStatus calculateStatus(int budget, int spent) {
     if (budget <= 0) return DayStatus.noBudget;
 
     final ratio = spent / budget;
-    if (ratio <= 0.5) return DayStatus.perfect;
-    if (ratio <= 1.0) return DayStatus.safe;
-    if (ratio <= 1.5) return DayStatus.warning;
+    if (ratio <= BudgetThresholds.perfect) return DayStatus.perfect;
+    if (ratio <= BudgetThresholds.safe) return DayStatus.safe;
+    if (ratio <= BudgetThresholds.warning) return DayStatus.warning;
     return DayStatus.danger;
   }
 }

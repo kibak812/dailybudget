@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/providers/providers.dart';
+import 'package:daily_pace/core/services/daily_summary_service.dart';
 import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/transaction/domain/models/day_status.dart';
@@ -74,8 +75,7 @@ final yesterdaySummaryProvider = Provider<YesterdaySummary?>((ref) {
   final yesterdayStr = Formatters.formatDateISO(yesterday);
 
   // Filter transactions for current month
-  final monthPrefix =
-      '${currentMonth.year}-${currentMonth.month.toString().padLeft(2, '0')}';
+  final monthPrefix = Formatters.formatYearMonth(currentMonth.year, currentMonth.month);
   final monthTransactions =
       transactions.where((t) => t.date.startsWith(monthPrefix)).toList();
 
@@ -104,19 +104,8 @@ final yesterdaySummaryProvider = Provider<YesterdaySummary?>((ref) {
     yesterday.day,
   );
 
-  // Determine status
-  DayStatus status;
-  if (yesterdayBudget <= 0) {
-    status = DayStatus.noBudget;
-  } else if (yesterdayNetSpent <= yesterdayBudget * 0.5) {
-    status = DayStatus.perfect;
-  } else if (yesterdayNetSpent <= yesterdayBudget) {
-    status = DayStatus.safe;
-  } else if (yesterdayNetSpent <= yesterdayBudget * 1.5) {
-    status = DayStatus.warning;
-  } else {
-    status = DayStatus.danger;
-  }
+  // Determine status using centralized calculation
+  final status = DailySummaryService.calculateStatus(yesterdayBudget, yesterdayNetSpent);
 
   return YesterdaySummary(
     budget: yesterdayBudget,
@@ -148,53 +137,14 @@ class YesterdaySummary {
     return (savings.clamp(0.0, 1.0) * 100).round();
   }
 
-  String get encouragementMessage {
-    switch (status) {
-      case DayStatus.perfect:
-        return '훌륭해요! 예산의 50% 이하로 지출했어요';
-      case DayStatus.safe:
-        return '잘했어요! 예산 내에서 지출했어요';
-      case DayStatus.warning:
-        return '조금 주의하세요. 예산을 약간 초과했어요';
-      case DayStatus.danger:
-        return '예산 관리가 필요해요. 크게 초과했어요';
-      case DayStatus.noBudget:
-      case DayStatus.future:
-        return '';
-    }
-  }
+  /// Delegates to DayStatus.message
+  String get encouragementMessage => status.message;
 
-  Color get statusColor {
-    switch (status) {
-      case DayStatus.perfect:
-        return const Color(0xFF4338CA); // Indigo-700
-      case DayStatus.safe:
-        return const Color(0xFF6366F1); // Indigo-500
-      case DayStatus.warning:
-        return const Color(0xFFF59E0B); // Amber-500
-      case DayStatus.danger:
-        return const Color(0xFFEF4444); // Red-500
-      case DayStatus.noBudget:
-      case DayStatus.future:
-        return Colors.grey;
-    }
-  }
+  /// Delegates to DayStatus.cardColor
+  Color get statusColor => status.cardColor;
 
-  IconData get statusIcon {
-    switch (status) {
-      case DayStatus.perfect:
-        return Icons.star_rounded;
-      case DayStatus.safe:
-        return Icons.check_circle_rounded;
-      case DayStatus.warning:
-        return Icons.warning_rounded;
-      case DayStatus.danger:
-        return Icons.error_rounded;
-      case DayStatus.noBudget:
-      case DayStatus.future:
-        return Icons.info_rounded;
-    }
-  }
+  /// Delegates to DayStatus.icon
+  IconData get statusIcon => status.icon;
 }
 
 /// Yesterday summary card widget
