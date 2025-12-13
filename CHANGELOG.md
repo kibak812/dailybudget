@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 27.1] - 2025-12-13
+
+### Summary
+AdMob banner ad placement optimization for better viewability and revenue.
+
+### Changed
+
+#### Banner Ad Placement (v1.0.1+3)
+- Moved banner from scroll content to fixed bottom position on all tabs
+- Banner now visible without scrolling (improves Active View metrics)
+- Added banner to all 4 tabs: Home, Transactions, Statistics, Settings
+
+#### Files Modified
+- `lib/features/daily_budget/presentation/pages/home_page.dart`
+- `lib/features/transaction/presentation/pages/transactions_page.dart`
+- `lib/features/statistics/presentation/pages/statistics_page.dart`
+- `lib/features/settings/presentation/pages/settings_page.dart`
+
+### Technical Notes
+- Used `Column` + `Expanded` + `SafeArea` pattern for fixed bottom banner
+- Each tab loads its own banner (new impression on tab switch)
+- AdMob auto-refresh (60s) handles same-tab impressions
+
+---
+
 ## [Phase 27] - 2025-12-12
 
 ### Summary

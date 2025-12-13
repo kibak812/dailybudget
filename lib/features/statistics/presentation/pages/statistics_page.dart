@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
+import 'package:daily_pace/core/widgets/banner_ad_widget.dart';
 import 'package:daily_pace/features/budget/presentation/providers/current_month_provider.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/statistics/presentation/widgets/summary_card.dart';
@@ -246,56 +247,66 @@ class StatisticsPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('통계'),
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= _wideBreakpoint;
+      body: Column(
+        children: [
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= _wideBreakpoint;
 
-          if (isWide) {
-            return _buildWideLayout(
-              context,
-              ref,
-              budget,
-              budgetData,
-              categoryData,
-              currentMonth,
-            );
-          }
+                if (isWide) {
+                  return _buildWideLayout(
+                    context,
+                    ref,
+                    budget,
+                    budgetData,
+                    categoryData,
+                    currentMonth,
+                  );
+                }
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(transactionProvider);
-              ref.invalidate(budgetProvider);
-              await Future.delayed(const Duration(milliseconds: 500));
-            },
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // Summary cards
-                  _buildSummaryCards(
-                    budget.amount,
-                    budgetData.totalSpent,
-                    budgetData.totalIncome,
-                    budgetData.totalSpent - budgetData.totalIncome,
-                    budgetData.totalRemaining,
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(transactionProvider);
+                    ref.invalidate(budgetProvider);
+                    await Future.delayed(const Duration(milliseconds: 500));
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        // Summary cards
+                        _buildSummaryCards(
+                          budget.amount,
+                          budgetData.totalSpent,
+                          budgetData.totalIncome,
+                          budgetData.totalSpent - budgetData.totalIncome,
+                          budgetData.totalRemaining,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Budget usage bar (based on net spending)
+                        BudgetUsageCard(
+                          totalBudget: budget.amount,
+                          totalSpent: budgetData.totalSpent - budgetData.totalIncome,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Category pie chart
+                        _buildCategorySection(context, categoryData, budgetData, currentMonth),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-
-                  // Budget usage bar (based on net spending)
-                  BudgetUsageCard(
-                    totalBudget: budget.amount,
-                    totalSpent: budgetData.totalSpent - budgetData.totalIncome,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Category pie chart
-                  _buildCategorySection(context, categoryData, budgetData, currentMonth),
-                ],
-              ),
+                );
+              },
             ),
-          );
-        },
+          ),
+          const SafeArea(
+            top: false,
+            child: BannerAdWidget(),
+          ),
+        ],
       ),
     );
   }

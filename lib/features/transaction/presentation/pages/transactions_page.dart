@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
+import 'package:daily_pace/core/widgets/banner_ad_widget.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/transaction_list_item.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/transaction_edit_sheet.dart';
@@ -55,21 +56,31 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     return Scaffold(
       appBar: _buildAppBar(context),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= _wideBreakpoint;
+      body: Column(
+        children: [
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= _wideBreakpoint;
 
-          if (isWide) {
-            return _buildWideLayout(context, mosaicData, grouped, filteredTransactions);
-          }
+                if (isWide) {
+                  return _buildWideLayout(context, mosaicData, grouped, filteredTransactions);
+                }
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              await ref.read(transactionProvider.notifier).loadTransactions();
-            },
-            child: _buildBody(context, mosaicData, grouped, filteredTransactions),
-          );
-        },
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    await ref.read(transactionProvider.notifier).loadTransactions();
+                  },
+                  child: _buildBody(context, mosaicData, grouped, filteredTransactions),
+                );
+              },
+            ),
+          ),
+          const SafeArea(
+            top: false,
+            child: BannerAdWidget(),
+          ),
+        ],
       ),
       // FAB only shown in narrow layout (wide layout has FAB in left panel)
       floatingActionButton: LayoutBuilder(

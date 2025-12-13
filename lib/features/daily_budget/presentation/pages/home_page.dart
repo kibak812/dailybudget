@@ -82,36 +82,44 @@ class HomePage extends ConsumerWidget {
       return _buildEmptyState(context);
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Yesterday's Summary Card (dismissible)
-          const YesterdaySummaryCard(),
-          const SizedBox(height: 16),
+    return Column(
+      children: [
+        // Scrollable content
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Yesterday's Summary Card (dismissible)
+                const YesterdaySummaryCard(),
+                const SizedBox(height: 16),
 
-          // Today's Summary Card
-          TodaySummaryCard(budgetData: dailyBudget),
-          const SizedBox(height: 16),
+                // Today's Summary Card
+                TodaySummaryCard(budgetData: dailyBudget),
+                const SizedBox(height: 16),
 
-          // Today's Spent and Remaining
-          TodaySpentCard(budgetData: dailyBudget),
-          const SizedBox(height: 16),
+                // Today's Spent and Remaining
+                TodaySpentCard(budgetData: dailyBudget),
+                const SizedBox(height: 16),
 
-          // Daily Budget Trend Chart
-          const DailyBudgetTrendChartSyncfusion(),
-          const SizedBox(height: 16),
+                // Daily Budget Trend Chart
+                const DailyBudgetTrendChartSyncfusion(),
+                const SizedBox(height: 16),
 
-          // Budget Info
-          BudgetInfoCard(budgetData: dailyBudget),
-          const SizedBox(height: 16),
-
-          // Banner Ad
-          const Center(child: BannerAdWidget()),
-          const SizedBox(height: 80), // Extra space for FAB
-        ],
-      ),
+                // Budget Info
+                BudgetInfoCard(budgetData: dailyBudget),
+                const SizedBox(height: 80), // Extra space for FAB
+              ],
+            ),
+          ),
+        ),
+        // Fixed Banner Ad at bottom
+        const SafeArea(
+          top: false,
+          child: BannerAdWidget(),
+        ),
+      ],
     );
   }
 
