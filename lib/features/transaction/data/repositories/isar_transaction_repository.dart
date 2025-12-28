@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/transaction/domain/repositories/transaction_repository.dart';

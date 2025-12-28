@@ -6,6 +6,51 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 28] - 2025-12-28
+
+### Summary
+Migration to isar_community for Android 16KB page size support (Google Play requirement).
+
+### Changed
+
+#### Database Migration (v1.0.2+4)
+- Migrated from `isar` 3.1.0+1 to `isar_community` 3.3.0
+- Migrated from `isar_flutter_libs` to `isar_community_flutter_libs`
+- Migrated from `isar_generator` to `isar_community_generator`
+
+#### Why This Migration
+- Google Play requires 16KB page size support starting November 2025
+- Original Isar package has open issue (#1699) for 16KB support
+- isar_community fork provides 16KB-aligned native libraries
+
+#### Files Modified
+- `pubspec.yaml`: Updated dependencies
+- 9 Dart files: Updated imports from `package:isar/isar.dart` to `package:isar_community/isar.dart`
+  - `lib/core/providers/isar_provider.dart`
+  - `lib/core/utils/data_backup.dart`
+  - `lib/features/budget/data/models/budget_model.dart`
+  - `lib/features/budget/presentation/providers/budget_provider.dart`
+  - `lib/features/recurring/data/models/recurring_transaction_model.dart`
+  - `lib/features/recurring/presentation/providers/recurring_provider.dart`
+  - `lib/features/settings/presentation/providers/categories_provider.dart`
+  - `lib/features/transaction/data/models/transaction_model.dart`
+  - `lib/features/transaction/data/repositories/isar_transaction_repository.dart`
+
+### Technical Notes
+- All APKs pass `zipalign -c -P 16 -v 4` verification
+- AAB size: 51.3MB (slight reduction from previous)
+- No API changes - isar_community maintains full compatibility with original Isar
+
+### Verification
+```bash
+# 16KB alignment check (all passed)
+zipalign -c -P 16 -v 4 app-arm64-v8a-release.apk  # Verification successful
+zipalign -c -P 16 -v 4 app-armeabi-v7a-release.apk  # Verification successful
+zipalign -c -P 16 -v 4 app-x86_64-release.apk  # Verification successful
+```
+
+---
+
 ## [Phase 27.1] - 2025-12-13
 
 ### Summary

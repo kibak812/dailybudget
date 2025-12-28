@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:daily_pace/features/budget/data/models/budget_model.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';

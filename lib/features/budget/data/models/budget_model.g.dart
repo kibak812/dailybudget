@@ -17,27 +17,16 @@ const BudgetModelSchema = CollectionSchema(
   name: r'BudgetModel',
   id: 7247118153370490723,
   properties: {
-    r'amount': PropertySchema(
-      id: 0,
-      name: r'amount',
-      type: IsarType.long,
-    ),
+    r'amount': PropertySchema(id: 0, name: r'amount', type: IsarType.long),
     r'compositeKey': PropertySchema(
       id: 1,
       name: r'compositeKey',
       type: IsarType.string,
     ),
-    r'month': PropertySchema(
-      id: 2,
-      name: r'month',
-      type: IsarType.long,
-    ),
-    r'year': PropertySchema(
-      id: 3,
-      name: r'year',
-      type: IsarType.long,
-    )
+    r'month': PropertySchema(id: 2, name: r'month', type: IsarType.long),
+    r'year': PropertySchema(id: 3, name: r'year', type: IsarType.long),
   },
+
   estimateSize: _budgetModelEstimateSize,
   serialize: _budgetModelSerialize,
   deserialize: _budgetModelDeserialize,
@@ -59,16 +48,17 @@ const BudgetModelSchema = CollectionSchema(
           name: r'month',
           type: IndexType.value,
           caseSensitive: false,
-        )
+        ),
       ],
-    )
+    ),
   },
   links: {},
   embeddedSchemas: {},
+
   getId: _budgetModelGetId,
   getLinks: _budgetModelGetLinks,
   attach: _budgetModelAttach,
-  version: '3.1.0+1',
+  version: '3.3.0',
 );
 
 int _budgetModelEstimateSize(
@@ -137,7 +127,10 @@ List<IsarLinkBase<dynamic>> _budgetModelGetLinks(BudgetModel object) {
 }
 
 void _budgetModelAttach(
-    IsarCollection<dynamic> col, Id id, BudgetModel object) {
+  IsarCollection<dynamic> col,
+  Id id,
+  BudgetModel object,
+) {
   object.id = id;
 }
 
@@ -162,15 +155,13 @@ extension BudgetModelQueryWhere
     on QueryBuilder<BudgetModel, BudgetModel, QWhereClause> {
   QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause> idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause> idNotEqualTo(
-      Id id) {
+    Id id,
+  ) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -192,8 +183,10 @@ extension BudgetModelQueryWhere
     });
   }
 
-  QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause> idGreaterThan(Id id,
-      {bool include = false}) {
+  QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause> idGreaterThan(
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -201,8 +194,10 @@ extension BudgetModelQueryWhere
     });
   }
 
-  QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause> idLessThan(Id id,
-      {bool include = false}) {
+  QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause> idLessThan(
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -217,87 +212,95 @@ extension BudgetModelQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause> yearEqualToAnyMonth(
-      int year) {
+    int year,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'year_month',
-        value: [year],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'year_month', value: [year]),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause>
-      yearNotEqualToAnyMonth(int year) {
+  yearNotEqualToAnyMonth(int year) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'year_month',
-              lower: [],
-              upper: [year],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'year_month',
-              lower: [year],
-              includeLower: false,
-              upper: [],
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'year_month',
+                lower: [],
+                upper: [year],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'year_month',
+                lower: [year],
+                includeLower: false,
+                upper: [],
+              ),
+            );
       } else {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'year_month',
-              lower: [year],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'year_month',
-              lower: [],
-              upper: [year],
-              includeUpper: false,
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'year_month',
+                lower: [year],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'year_month',
+                lower: [],
+                upper: [year],
+                includeUpper: false,
+              ),
+            );
       }
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause>
-      yearGreaterThanAnyMonth(
-    int year, {
-    bool include = false,
-  }) {
+  yearGreaterThanAnyMonth(int year, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'year_month',
-        lower: [year],
-        includeLower: include,
-        upper: [],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'year_month',
+          lower: [year],
+          includeLower: include,
+          upper: [],
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause>
-      yearLessThanAnyMonth(
-    int year, {
-    bool include = false,
-  }) {
+  yearLessThanAnyMonth(int year, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'year_month',
-        lower: [],
-        upper: [year],
-        includeUpper: include,
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'year_month',
+          lower: [],
+          upper: [year],
+          includeUpper: include,
+        ),
+      );
     });
   }
 
@@ -308,95 +311,105 @@ extension BudgetModelQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'year_month',
-        lower: [lowerYear],
-        includeLower: includeLower,
-        upper: [upperYear],
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'year_month',
+          lower: [lowerYear],
+          includeLower: includeLower,
+          upper: [upperYear],
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause> yearMonthEqualTo(
-      int year, int month) {
+    int year,
+    int month,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'year_month',
-        value: [year, month],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'year_month',
+          value: [year, month],
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause>
-      yearEqualToMonthNotEqualTo(int year, int month) {
+  yearEqualToMonthNotEqualTo(int year, int month) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'year_month',
-              lower: [year],
-              upper: [year, month],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'year_month',
-              lower: [year, month],
-              includeLower: false,
-              upper: [year],
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'year_month',
+                lower: [year],
+                upper: [year, month],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'year_month',
+                lower: [year, month],
+                includeLower: false,
+                upper: [year],
+              ),
+            );
       } else {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'year_month',
-              lower: [year, month],
-              includeLower: false,
-              upper: [year],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'year_month',
-              lower: [year],
-              upper: [year, month],
-              includeUpper: false,
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'year_month',
+                lower: [year, month],
+                includeLower: false,
+                upper: [year],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'year_month',
+                lower: [year],
+                upper: [year, month],
+                includeUpper: false,
+              ),
+            );
       }
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause>
-      yearEqualToMonthGreaterThan(
-    int year,
-    int month, {
-    bool include = false,
-  }) {
+  yearEqualToMonthGreaterThan(int year, int month, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'year_month',
-        lower: [year, month],
-        includeLower: include,
-        upper: [year],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'year_month',
+          lower: [year, month],
+          includeLower: include,
+          upper: [year],
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause>
-      yearEqualToMonthLessThan(
-    int year,
-    int month, {
-    bool include = false,
-  }) {
+  yearEqualToMonthLessThan(int year, int month, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'year_month',
-        lower: [year],
-        upper: [year, month],
-        includeUpper: include,
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'year_month',
+          lower: [year],
+          upper: [year, month],
+          includeUpper: include,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterWhereClause>
-      yearEqualToMonthBetween(
+  yearEqualToMonthBetween(
     int year,
     int lowerMonth,
     int upperMonth, {
@@ -404,13 +417,15 @@ extension BudgetModelQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'year_month',
-        lower: [year, lowerMonth],
-        includeLower: includeLower,
-        upper: [year, upperMonth],
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'year_month',
+          lower: [year, lowerMonth],
+          includeLower: includeLower,
+          upper: [year, upperMonth],
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -418,26 +433,25 @@ extension BudgetModelQueryWhere
 extension BudgetModelQueryFilter
     on QueryBuilder<BudgetModel, BudgetModel, QFilterCondition> {
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition> amountEqualTo(
-      int value) {
+    int value,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'amount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'amount', value: value),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
-      amountGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  amountGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'amount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'amount',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -446,11 +460,13 @@ extension BudgetModelQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'amount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'amount',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -461,64 +477,69 @@ extension BudgetModelQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'amount',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'amount',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
-      compositeKeyEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  compositeKeyEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'compositeKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'compositeKey',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
-      compositeKeyGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'compositeKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
-      compositeKeyLessThan(
+  compositeKeyGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'compositeKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'compositeKey',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
-      compositeKeyBetween(
+  compositeKeyLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'compositeKey',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
+  compositeKeyBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -526,94 +547,96 @@ extension BudgetModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'compositeKey',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'compositeKey',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
-      compositeKeyStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  compositeKeyStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'compositeKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'compositeKey',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
-      compositeKeyEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  compositeKeyEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'compositeKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'compositeKey',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
-      compositeKeyContains(String value, {bool caseSensitive = true}) {
+  compositeKeyContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'compositeKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'compositeKey',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
-      compositeKeyMatches(String pattern, {bool caseSensitive = true}) {
+  compositeKeyMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'compositeKey',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'compositeKey',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
-      compositeKeyIsEmpty() {
+  compositeKeyIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'compositeKey',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'compositeKey', value: ''),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
-      compositeKeyIsNotEmpty() {
+  compositeKeyIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'compositeKey',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'compositeKey', value: ''),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition> idEqualTo(
-      Id value) {
+    Id value,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
     });
   }
 
@@ -622,11 +645,13 @@ extension BudgetModelQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -635,11 +660,13 @@ extension BudgetModelQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -650,37 +677,38 @@ extension BudgetModelQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition> monthEqualTo(
-      int value) {
+    int value,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'month',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'month', value: value),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition>
-      monthGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  monthGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'month',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'month',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -689,11 +717,13 @@ extension BudgetModelQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'month',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'month',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -704,23 +734,25 @@ extension BudgetModelQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'month',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'month',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterFilterCondition> yearEqualTo(
-      int value) {
+    int value,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'year',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'year', value: value),
+      );
     });
   }
 
@@ -729,11 +761,13 @@ extension BudgetModelQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'year',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'year',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -742,11 +776,13 @@ extension BudgetModelQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'year',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'year',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -757,13 +793,15 @@ extension BudgetModelQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'year',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'year',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -795,7 +833,7 @@ extension BudgetModelQuerySortBy
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterSortBy>
-      sortByCompositeKeyDesc() {
+  sortByCompositeKeyDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'compositeKey', Sort.desc);
     });
@@ -847,7 +885,7 @@ extension BudgetModelQuerySortThenBy
   }
 
   QueryBuilder<BudgetModel, BudgetModel, QAfterSortBy>
-      thenByCompositeKeyDesc() {
+  thenByCompositeKeyDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'compositeKey', Sort.desc);
     });
@@ -898,8 +936,9 @@ extension BudgetModelQueryWhereDistinct
     });
   }
 
-  QueryBuilder<BudgetModel, BudgetModel, QDistinct> distinctByCompositeKey(
-      {bool caseSensitive = true}) {
+  QueryBuilder<BudgetModel, BudgetModel, QDistinct> distinctByCompositeKey({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'compositeKey', caseSensitive: caseSensitive);
     });
