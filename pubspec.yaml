@@ -2,7 +2,7 @@ name: daily_pace
 description: "DailyBudget - Smart Budget Tracker with SMS Auto-parsing"
 publish_to: 'none'
 
-version: 1.0.2+4
+version: 1.0.2+6
 
 environment:
   sdk: ^3.10.1
