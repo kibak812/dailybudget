@@ -178,11 +178,13 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
       _category = categories.isNotEmpty ? categories.first : null;
     }
 
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Container(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
         child: SingleChildScrollView(
           child: Padding(
@@ -380,6 +382,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

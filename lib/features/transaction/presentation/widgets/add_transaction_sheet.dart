@@ -143,7 +143,9 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
@@ -321,6 +323,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

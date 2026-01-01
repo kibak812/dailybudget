@@ -13,11 +13,13 @@ class SettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('설정'),
-      ),
-      body: Column(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('설정'),
+        ),
+        body: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
@@ -49,6 +51,7 @@ class SettingsPage extends ConsumerWidget {
             child: BannerAdWidget(),
           ),
         ],
+      ),
       ),
     );
   }
