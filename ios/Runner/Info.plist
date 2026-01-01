@@ -45,6 +45,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>파일 선택 시 사진 라이브러리 접근이 필요할 수 있습니다.</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-1068771440265964~5479314461</string>
 	<key>SKAdNetworkItems</key>
