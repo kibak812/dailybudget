@@ -11,7 +11,6 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.dailypace.dailyPace
-        certificate_type: IOS_DISTRIBUTION
       flutter: stable
       xcode: latest
       cocoapods: default
