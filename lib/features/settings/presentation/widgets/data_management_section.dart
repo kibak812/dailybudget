@@ -25,11 +25,15 @@ class DataManagementSection extends ConsumerWidget {
       final file = File('${directory.path}/$fileName');
       await file.writeAsString(jsonData);
 
-      // Share the file
+      // Share the file (iOS requires sharePositionOrigin for iPad)
+      final box = context.findRenderObject() as RenderBox?;
       final result = await Share.shareXFiles(
         [XFile(file.path)],
         subject: 'Daily Pace 백업',
         text: '데이터 백업 파일',
+        sharePositionOrigin: box != null
+            ? box.localToGlobal(Offset.zero) & box.size
+            : null,
       );
 
       if (context.mounted && result.status == ShareResultStatus.success) {
