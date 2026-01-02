@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 29] - 2026-01-02
+
+### Summary
+iOS App Store submission preparation - fixed iOS-specific UX issues and added required privacy descriptions.
+
+### Fixed
+
+#### iOS Keyboard Dismiss (v1.0.2+6)
+- Added `GestureDetector` to dismiss keyboard when tapping outside text fields
+- Applied to: Settings page (budget input), Add transaction sheet, Recurring modal
+- iOS doesn't have a native keyboard dismiss button like Android
+
+#### iOS Share Sheet Error (v1.0.2+7)
+- Added `sharePositionOrigin` parameter to `Share.shareXFiles`
+- Required for iOS (especially iPad) where share sheet displays as popover
+- Fixed error: "sharePositionOrigin: argument must be set"
+
+### Added
+
+#### App Store Compliance
+- Added `NSPhotoLibraryUsageDescription` to iOS Info.plist for App Store requirements
+- Added iOS CI/CD pipeline with Codemagic for automated builds
+- Added iOS AdMob App ID configuration
+
+### Files Modified
+- `lib/features/settings/presentation/pages/settings_page.dart`
+- `lib/features/settings/presentation/widgets/recurring_modal.dart`
+- `lib/features/transaction/presentation/widgets/add_transaction_sheet.dart`
+- `lib/features/settings/presentation/widgets/data_management_section.dart`
+- `ios/Runner/Info.plist`
+- `codemagic.yaml`
+
+---
+
 ## [Phase 28] - 2025-12-28
 
 ### Summary
