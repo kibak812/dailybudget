@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -31,13 +32,16 @@ class AdService {
 
   /// 배너 광고 단위 ID
   /// 디버그 모드에서는 테스트 ID 사용
-  /// 릴리스 모드에서는 프로덕션 ID 사용
+  /// 릴리스 모드에서는 플랫폼별 프로덕션 ID 사용
   String get bannerAdUnitId {
     if (kDebugMode) {
       // 테스트 광고 ID (개발용)
       return 'ca-app-pub-3940256099942544/6300978111';
     }
-    // 프로덕션 광고 ID
+    // 프로덕션 광고 ID (플랫폼별)
+    if (Platform.isIOS) {
+      return 'ca-app-pub-1068771440265964/2807336510';
+    }
     return 'ca-app-pub-1068771440265964/1240692725';
   }
 
