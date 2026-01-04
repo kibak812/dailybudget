@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 29.1] - 2026-01-04
+
+### Summary
+iOS App Store release preparation - platform-specific AdMob configuration and iPhone-only build.
+
+### Fixed
+
+#### iOS AdMob Banner Ads (v1.0.3+1)
+- Added iOS-specific banner ad unit ID
+- iOS: `ca-app-pub-1068771440265964/2807336510`
+- Android: `ca-app-pub-1068771440265964/1240692725`
+- Uses `Platform.isIOS` to select correct ad unit
+
+### Changed
+
+#### iPhone Only Build (v1.0.2+8)
+- Changed `TARGETED_DEVICE_FAMILY` from `1,2` to `1` (iPhone only)
+- Removed iPad orientation settings from Info.plist
+- Eliminates iPad screenshot requirement for App Store submission
+
+### Files Modified
+- `lib/core/services/ad_service.dart`
+- `ios/Runner.xcodeproj/project.pbxproj`
+- `ios/Runner/Info.plist`
+- `docs/index.html` (updated support page)
+
+---
+
 ## [Phase 29] - 2026-01-02
 
 ### Summary
