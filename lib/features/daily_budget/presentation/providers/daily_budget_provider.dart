@@ -117,54 +117,23 @@ final dailyBudgetHistoryProvider = Provider.family<List<DailyBudgetHistoryItem>,
 
     // Get effective date for calculations
     final currentDate = _getEffectiveDateForPeriod(periodStart, periodEnd, today);
-    final daysInPeriod = periodEnd.difference(periodStart).inDays + 1;
     final currentDayIndex = currentDate.difference(periodStart).inDays + 1;
 
     // Calculate start index based on chart period
-    final startDayIndex = period.getStartDayIndex(currentDayIndex, daysInPeriod);
+    // Use existing getStartDay method on ChartPeriod enum
+    final startDayIndex = period.getStartDay(currentDayIndex);
 
     // Calculate history using the period-aware service
-    return DailyBudgetService.getDailyBudgetHistoryForPeriod(
+    // History items now have day = dayIndex (1-based period index)
+    final history = DailyBudgetService.getDailyBudgetHistoryForPeriod(
       budget,
       periodTransactions,
       currentDate,
       periodStart,
       periodEnd,
-    ).where((item) {
-      // Filter based on the chart period range
-      final itemDate = periodStart.add(Duration(days: _findDayIndex(item.day, periodStart, currentDate) - 1));
-      final itemDayIndex = itemDate.difference(periodStart).inDays + 1;
-      return itemDayIndex >= startDayIndex && itemDayIndex <= currentDayIndex;
-    }).toList();
+    );
+
+    // Filter based on the chart period range (item.day is now dayIndex)
+    return history.where((item) => item.day >= startDayIndex).toList();
   },
 );
-
-/// Helper to find the day index within the period for a given day number
-int _findDayIndex(int dayNumber, DateTime periodStart, DateTime currentDate) {
-  // Iterate through the period to find the matching day
-  var date = periodStart;
-  var index = 1;
-  while (!date.isAfter(currentDate)) {
-    if (date.day == dayNumber) {
-      return index;
-    }
-    date = date.add(const Duration(days: 1));
-    index++;
-  }
-  return index;
-}
-
-/// Extension on ChartPeriod for period-based calculations
-extension ChartPeriodPeriodExtension on ChartPeriod {
-  /// Get start day index for chart period within a custom period
-  int getStartDayIndex(int currentDayIndex, int daysInPeriod) {
-    switch (this) {
-      case ChartPeriod.week:
-        return (currentDayIndex - 6).clamp(1, currentDayIndex);
-      case ChartPeriod.twoWeeks:
-        return (currentDayIndex - 13).clamp(1, currentDayIndex);
-      case ChartPeriod.month:
-        return 1;
-    }
-  }
-}

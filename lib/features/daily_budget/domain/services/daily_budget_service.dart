@@ -186,7 +186,7 @@ class DailyBudgetService {
     );
   }
 
-  /// Get daily budget history from specified day range
+  /// Get daily budget history from specified day range (for standard month with startDay=1)
   static List<DailyBudgetHistoryItem> getDailyBudgetHistory(
     BudgetModel? budget,
     List<TransactionModel> transactions,
@@ -223,7 +223,12 @@ class DailyBudgetService {
         day,
       );
 
-      history.add(DailyBudgetHistoryItem(day: day, dailyBudget: dailyBudget));
+      // For standard months, day = dayIndex = calendar day
+      history.add(DailyBudgetHistoryItem(
+        dayIndex: day,
+        dateLabel: '$month/$day',
+        dailyBudget: dailyBudget,
+      ));
     }
 
     return history;
@@ -338,6 +343,7 @@ class DailyBudgetService {
   }
 
   /// Get daily budget history for a custom period
+  /// Returns history with dayIndex for ordering and dateLabel for display
   static List<DailyBudgetHistoryItem> getDailyBudgetHistoryForPeriod(
     BudgetModel? budget,
     List<TransactionModel> transactions,
@@ -371,7 +377,14 @@ class DailyBudgetService {
         dayIndex,
       );
 
-      history.add(DailyBudgetHistoryItem(day: date.day, dailyBudget: dailyBudget));
+      // Create date label (e.g., "1/9" or "12/25")
+      final dateLabel = '${date.month}/${date.day}';
+
+      history.add(DailyBudgetHistoryItem(
+        dayIndex: dayIndex,
+        dateLabel: dateLabel,
+        dailyBudget: dailyBudget,
+      ));
     }
 
     return history;

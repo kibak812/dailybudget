@@ -68,6 +68,17 @@ Custom budget start day UX improvements. App now properly initializes to today's
 - `lib/features/settings/presentation/providers/budget_start_day_provider.dart` - Start day state management
 - `test/core/utils/date_range_extension_test.dart` - Unit tests for period calculations
 
+### Fixed
+
+#### Daily Budget Trend Chart for Custom Periods
+- **Problem**: When period spans two months (e.g., 12/25~1/24), X-axis showed non-sequential values (25, 26, ..., 31, 1, 2, ...) causing chart rendering issues
+- **Solution**: Separated internal ordering from display
+  - `dayIndex`: Sequential period index (1, 2, 3, ...) for X-axis ordering
+  - `dateLabel`: Actual date display (e.g., "1/9", "12/25") for labels and tooltips
+- `DailyBudgetHistoryItem` model updated with both fields
+- Chart now correctly shows date labels like "1/3", "1/4", ..., "1/9" for 1-week view
+- Tooltips show actual dates with amounts (e.g., "1/9\n32,000원")
+
 ### Testing
 - All 19 unit tests pass for date range extension
 - Build successful (arm64-v8a: 24.4MB)
