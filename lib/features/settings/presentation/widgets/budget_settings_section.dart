@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
+import 'package:daily_pace/core/utils/date_range_extension.dart';
+import 'package:daily_pace/features/settings/presentation/providers/budget_start_day_provider.dart';
+import 'package:daily_pace/features/budget/presentation/providers/current_month_provider.dart';
 
 /// Budget Settings Section Widget
 /// Displays current budget and allows user to update it
@@ -55,6 +58,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
   @override
   Widget build(BuildContext context) {
     final currentMonth = ref.watch(currentMonthProvider);
+    final startDay = ref.watch(budgetStartDayProvider);
     final budgets = ref.watch(budgetProvider);
 
     // Find current month's budget
@@ -62,6 +66,12 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
       (budget) => budget.year == currentMonth.year && budget.month == currentMonth.month,
       orElse: () => null,
     );
+
+    // Calculate period for display
+    final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
+    final periodLabel = startDay == 1
+        ? '${currentMonth.month}월 예산'
+        : '${periodStart.month}/${periodStart.day}~${periodEnd.month}/${periodEnd.day} 예산';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,7 +108,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '현재 월 예산',
+                    periodLabel,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                           color: AppColors.textSecondary,
@@ -180,7 +190,186 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
             ],
           ),
         ),
+        const SizedBox(height: 24),
+        // Budget Start Day Section
+        _buildStartDaySection(context),
       ],
+    );
+  }
+
+  Widget _buildStartDaySection(BuildContext context) {
+    final startDay = ref.watch(budgetStartDayProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            '예산 시작일',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                  letterSpacing: 1.2,
+                ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 8,
+            ),
+            title: Text(
+              '매월 시작일',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                startDay == 1
+                    ? '매월 1일 (기본)'
+                    : '매월 $startDay일',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
+              ),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$startDay일',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right,
+                  color: AppColors.textTertiary,
+                ),
+              ],
+            ),
+            onTap: () => _showStartDayPicker(context),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, top: 8),
+          child: Text(
+            '월급날 등 예산 시작일을 설정하면 해당 날짜부터 다음 시작일 전날까지를 한 달 예산 기간으로 계산합니다.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textTertiary,
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showStartDayPicker(BuildContext context) {
+    final currentStartDay = ref.read(budgetStartDayProvider);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '예산 시작일 선택',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  itemCount: 31,
+                  itemBuilder: (context, index) {
+                    final day = index + 1;
+                    final isSelected = day == currentStartDay;
+
+                    return ListTile(
+                      title: Text(
+                        day == 1 ? '$day일 (기본)' : '$day일',
+                        style: TextStyle(
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primary
+                              : null,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? Icon(
+                              Icons.check,
+                              color: Theme.of(context).colorScheme.primary,
+                            )
+                          : null,
+                      onTap: () {
+                        ref
+                            .read(budgetStartDayProvider.notifier)
+                            .setStartDay(day);
+                        Navigator.pop(context);
+
+                        if (day != currentStartDay) {
+                          // Auto-navigate to today's period with new start day
+                          final today = DateTime.now();
+                          final newLabelMonth = getLabelMonthForDate(today, day);
+                          ref.read(currentMonthProvider.notifier).state = newLabelMonth;
+
+                          ScaffoldMessenger.of(this.context).showSnackBar(
+                            SnackBar(
+                              content: Text('예산 시작일이 $day일로 변경되었습니다.'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

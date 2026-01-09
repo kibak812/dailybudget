@@ -6,6 +6,74 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 30] - 2026-01-10
+
+### Summary
+Custom budget start day UX improvements. App now properly initializes to today's budget period on startup, auto-transitions when start day changes, and displays periods (e.g., "12/25 ~ 1/24") instead of month names when start day ≠ 1.
+
+### Added
+
+#### Period-based Initialization
+- `getLabelMonthForDate()` helper function in `current_month_provider.dart`
+  - Calculates which "label month" a given date belongs to based on start day
+  - Example: With start day 25, date 1/15 belongs to "1월" (12/25~1/24)
+- `todayLabelMonthProvider` - computed provider for today's label month
+- App now initializes to correct period based on configured start day
+
+#### Auto-transition on Start Day Change
+- When user changes budget start day in settings, app automatically navigates to today's period
+- Eliminates confusion of viewing wrong period after changing start day
+- Shows confirmation SnackBar after successful change
+
+### Changed
+
+#### UI: Period Display (Banksalad Style)
+- **Home page AppBar**: Shows period instead of month when startDay ≠ 1
+  - Example: "2025.12.25 ~ 1.24" instead of "2025년 1월"
+- **Month navigation bar**: Same period display logic
+- When startDay = 1, shows traditional "YYYY년 M월" format
+
+#### Terminology: "월" → "기간"
+- `budget_settings_section.dart`: "현재 월 예산" → Dynamic period label (e.g., "1/9~2/8 예산")
+- `mosaic_summary_bar.dart`: "이번 달: 퍼펙트..." → "이번 기간: 퍼펙트..."
+- `statistics_page.dart`: "이번 달 예산" → "현재 기간 예산"
+- `daily_summary_service.dart`: "이번 달 진행률" → "기간 진행률"
+- `recurring_section.dart`: "이번 달 반복 지출..." → "현재 기간 반복 지출..."
+
+### Technical Details
+
+#### Files Modified
+- `lib/features/budget/presentation/providers/current_month_provider.dart`
+  - Added `getLabelMonthForDate()` function
+  - Added `todayLabelMonthProvider`
+  - Updated `currentMonthProvider` to watch `todayLabelMonthProvider`
+- `lib/features/settings/presentation/widgets/budget_settings_section.dart`
+  - Auto-transition on start day change
+  - Dynamic period label for budget display
+- `lib/features/daily_budget/presentation/pages/home_page.dart`
+  - Period-only display in AppBar
+- `lib/features/transaction/presentation/widgets/month_navigation_bar.dart`
+  - Period-only display
+- `lib/features/transaction/presentation/widgets/mosaic_summary_bar.dart`
+  - Terminology change
+- `lib/features/statistics/presentation/pages/statistics_page.dart`
+  - Terminology change
+- `lib/core/services/daily_summary_service.dart`
+  - Terminology change
+- `lib/features/settings/presentation/widgets/recurring_section.dart`
+  - Terminology change
+
+#### New Files
+- `lib/core/utils/date_range_extension.dart` - Period calculation utilities
+- `lib/features/settings/presentation/providers/budget_start_day_provider.dart` - Start day state management
+- `test/core/utils/date_range_extension_test.dart` - Unit tests for period calculations
+
+### Testing
+- All 19 unit tests pass for date range extension
+- Build successful (arm64-v8a: 24.4MB)
+
+---
+
 ## [Phase 29.2] - 2026-01-09
 
 ### Summary

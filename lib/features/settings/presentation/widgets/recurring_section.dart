@@ -93,7 +93,7 @@ class RecurringSection extends ConsumerWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('이번 달 반복 지출을 다시 생성했습니다.'),
+          content: Text('현재 기간 반복 지출을 다시 생성했습니다.'),
           backgroundColor: Colors.green,
         ),
       );
@@ -349,7 +349,7 @@ class RecurringSection extends ConsumerWidget {
                       minimumSize: const Size.fromHeight(32),
                     ),
                     child: Text(
-                      '이번 달 반복 지출 다시 생성하기',
+                      '현재 기간 반복 지출 다시 생성하기',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,

@@ -96,7 +96,7 @@ class StatisticsPage extends ConsumerWidget {
         SummaryCard(
           icon: Icons.attach_money,
           iconColor: AppColors.primary,
-          label: '이번 달 예산',
+          label: '현재 기간 예산',
           amount: monthlyBudget,
         ),
         const SizedBox(height: 12),

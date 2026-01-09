@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/features/budget/presentation/providers/current_month_provider.dart';
+import 'package:daily_pace/features/settings/presentation/providers/budget_start_day_provider.dart';
+import 'package:daily_pace/core/utils/date_range_extension.dart';
 
 /// Month navigation bar for switching between months
 class MonthNavigationBar extends ConsumerWidget {
@@ -10,6 +12,8 @@ class MonthNavigationBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final currentMonth = ref.watch(currentMonthProvider);
+    final startDay = ref.watch(budgetStartDayProvider);
+    final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -31,7 +35,9 @@ class MonthNavigationBar extends ConsumerWidget {
             tooltip: '이전 달',
           ),
           Text(
-            '${currentMonth.year}년 ${currentMonth.month}월',
+            startDay == 1
+                ? '${currentMonth.year}년 ${currentMonth.month}월'
+                : '${periodStart.year}.${periodStart.month}.${periodStart.day} ~ ${periodEnd.month}.${periodEnd.day}',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),

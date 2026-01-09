@@ -75,7 +75,7 @@ class DailySummary {
       buffer.writeln('오늘 예산: ${_formatCurrency(todayBudget)}');
     }
 
-    buffer.write('이번 달 진행률: $monthProgress%');
+    buffer.write('기간 진행률: $monthProgress%');
 
     return buffer.toString();
   }
