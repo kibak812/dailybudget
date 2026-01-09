@@ -6,6 +6,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 29.2] - 2026-01-09
+
+### Summary
+Android Play Store v1.0.4+7 release - removed exact alarm permissions and fixed app size issue.
+
+### Fixed
+
+#### USE_EXACT_ALARM Permission Removal
+- Removed `SCHEDULE_EXACT_ALARM` and `USE_EXACT_ALARM` permissions
+- Added `tools:node="remove"` to prevent flutter_local_notifications from re-adding them
+- Fixes Play Store policy compliance issue
+
+#### App Bundle Size Optimization
+- Removed `keepDebugSymbols` packaging option that was inflating bundle size
+- Reduced bundle size from ~133MB to ~52MB
+
+### Changed
+
+#### Version Update
+- Updated to v1.0.4+7 for Play Store release
+
+### Developer Environment (macOS)
+- Added Android Studio installation via Homebrew
+- Configured ANDROID_HOME and JAVA_HOME in ~/.zshrc
+- Set up release keystore for signing
+
+### Files Modified
+- `android/app/src/main/AndroidManifest.xml` - Added tools:node="remove" for exact alarm permissions
+- `android/app/build.gradle.kts` - Removed keepDebugSymbols packaging option
+- `android/local.properties` - Updated version code to 7
+- `android/key.properties` - Release signing configuration
+- `pubspec.yaml` - Updated to 1.0.4+7
+
+---
+
 ## [Phase 29.1] - 2026-01-04
 
 ### Summary
