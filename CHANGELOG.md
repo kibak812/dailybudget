@@ -79,6 +79,13 @@ Custom budget start day UX improvements. App now properly initializes to today's
 - Chart now correctly shows date labels like "1/3", "1/4", ..., "1/9" for 1-week view
 - Tooltips show actual dates with amounts (e.g., "1/9\n32,000원")
 
+#### Chart X-axis Rendering for 2-week+ Views
+- **Problem**: NumericAxis with non-zero starting dayIndex (e.g., 17-30 for 2-week view) caused chart to render incorrectly ("spread out")
+- **Solution**: Changed from `NumericAxis` to `CategoryAxis`
+  - Data points now evenly distributed regardless of dayIndex values
+  - X-axis uses `dateLabel` strings directly
+  - Works correctly for all period lengths (1-week, 2-week, 1-month)
+
 ### Testing
 - All 19 unit tests pass for date range extension
 - Build successful (arm64-v8a: 24.4MB)

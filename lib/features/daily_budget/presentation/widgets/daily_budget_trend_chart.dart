@@ -161,9 +161,6 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
     // Pre-extract tooltip data to avoid type inference issues in callback
     final tooltipData = history.map((item) => _TooltipData(item.dateLabel, item.dailyBudget)).toList();
 
-    // Create a map from dayIndex to dateLabel for X-axis formatting
-    final dateLabelMap = {for (var item in history) item.dayIndex: item.dateLabel};
-
     return SfCartesianChart(
       // Use trackball for better touch interaction
       trackballBehavior: TrackballBehavior(
@@ -213,27 +210,28 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
         }
       },
 
-      primaryXAxis: NumericAxis(
-        minimum: history.first.dayIndex.toDouble(),
-        maximum: history.last.dayIndex.toDouble(),
+      primaryXAxis: CategoryAxis(
+        // Show labels at calculated intervals
+        labelPlacement: LabelPlacement.onTicks,
         interval: _calculateXInterval(history.length),
 
         axisLabelFormatter: (AxisLabelRenderDetails args) {
-          final dayIndex = args.value.toInt();
-          // Skip min and max labels to match fl_chart behavior
-          if (dayIndex == history.first.dayIndex ||
-              dayIndex == history.last.dayIndex) {
+          final index = args.value.toInt();
+          // Skip first and last labels
+          if (index == 0 || index == history.length - 1) {
             return ChartAxisLabel('', const TextStyle());
           }
-          // Use dateLabel from map, fallback to dayIndex if not found
-          final label = dateLabelMap[dayIndex] ?? '$dayIndex';
-          return ChartAxisLabel(
-            label,
-            TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 11,
-            ),
-          );
+          // Get dateLabel from history
+          if (index >= 0 && index < history.length) {
+            return ChartAxisLabel(
+              history[index].dateLabel,
+              TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+              ),
+            );
+          }
+          return ChartAxisLabel('', const TextStyle());
         },
 
         axisLine: AxisLine(
@@ -271,10 +269,10 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
         ),
       ),
 
-      series: <CartesianSeries<DailyBudgetHistoryItem, int>>[
-        SplineAreaSeries<DailyBudgetHistoryItem, int>(
+      series: <CartesianSeries<DailyBudgetHistoryItem, String>>[
+        SplineAreaSeries<DailyBudgetHistoryItem, String>(
           dataSource: history,
-          xValueMapper: (DailyBudgetHistoryItem item, _) => item.dayIndex,
+          xValueMapper: (DailyBudgetHistoryItem item, _) => item.dateLabel,
           yValueMapper: (DailyBudgetHistoryItem item, _) => item.dailyBudget,
 
           borderColor: theme.colorScheme.primary,
