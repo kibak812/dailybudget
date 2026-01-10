@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Phase 30] - 2026-01-10
 
 ### Summary
-Custom budget start day UX improvements. App now properly initializes to today's budget period on startup, auto-transitions when start day changes, and displays periods (e.g., "12/25 ~ 1/24") instead of month names when start day ≠ 1.
+Custom budget start day UX improvements and toast notification cleanup. App now properly initializes to today's budget period on startup, auto-transitions when start day changes, and displays periods (e.g., "12/25 ~ 1/24") instead of month names when start day ≠ 1. Removed unnecessary success toasts throughout the app for a cleaner UX.
 
 ### Added
 
@@ -23,7 +23,6 @@ Custom budget start day UX improvements. App now properly initializes to today's
 #### Auto-transition on Start Day Change
 - When user changes budget start day in settings, app automatically navigates to today's period
 - Eliminates confusion of viewing wrong period after changing start day
-- Shows confirmation SnackBar after successful change
 
 ### Changed
 
@@ -40,6 +39,35 @@ Custom budget start day UX improvements. App now properly initializes to today's
 - `daily_summary_service.dart`: "이번 달 진행률" → "기간 진행률"
 - `recurring_section.dart`: "이번 달 반복 지출..." → "현재 기간 반복 지출..."
 
+#### Toast Notification Cleanup
+Removed unnecessary success toasts for cleaner UX. FAB button no longer covered by toasts.
+
+**Notifications** (`notification_section.dart`):
+- Removed "정확한 시간에 받으려면 알람 권한을 허용해주세요" message (exact alarm not used)
+- Removed non-functional "설정" button
+- Notification toggle now works silently (UI toggle feedback sufficient)
+- Only shows toast when notification permission is denied
+
+**Transactions** (`add_transaction_sheet.dart`, `transaction_edit_sheet.dart`, `transactions_page.dart`):
+- Removed "거래가 추가되었습니다" toast
+- Removed "거래가 수정되었습니다" toast
+- Removed "거래가 삭제되었습니다" toast (confirmation dialog sufficient)
+
+**Categories** (`category_management_section.dart`, `category_selector_sheet.dart`):
+- Removed success toasts for add/edit/delete operations
+
+**Recurring** (`recurring_modal.dart`, `recurring_section.dart`):
+- Removed success toasts for add/edit/delete/toggle/regenerate operations
+
+**Budget** (`budget_settings_section.dart`):
+- Removed "예산이 수정되었습니다" toast
+- Removed "예산 시작일이 N일로 변경되었습니다" toast
+
+#### Toast Color Standardization
+- Error/validation toasts: `AppColors.danger` (Rose)
+- Important success toasts (data backup/restore/delete): `Theme.of(context).colorScheme.primary` (Indigo)
+- General success: No toast (removed)
+
 ### Technical Details
 
 #### Files Modified
@@ -50,6 +78,7 @@ Custom budget start day UX improvements. App now properly initializes to today's
 - `lib/features/settings/presentation/widgets/budget_settings_section.dart`
   - Auto-transition on start day change
   - Dynamic period label for budget display
+  - Removed success toasts
 - `lib/features/daily_budget/presentation/pages/home_page.dart`
   - Period-only display in AppBar
 - `lib/features/transaction/presentation/widgets/month_navigation_bar.dart`
@@ -61,7 +90,23 @@ Custom budget start day UX improvements. App now properly initializes to today's
 - `lib/core/services/daily_summary_service.dart`
   - Terminology change
 - `lib/features/settings/presentation/widgets/recurring_section.dart`
-  - Terminology change
+  - Terminology change, removed success toasts
+- `lib/features/settings/presentation/widgets/notification_section.dart`
+  - Simplified notification enable flow, removed _showInfoSnackBar
+- `lib/features/transaction/presentation/widgets/add_transaction_sheet.dart`
+  - Removed success toast, error toast uses AppColors.danger
+- `lib/features/transaction/presentation/widgets/transaction_edit_sheet.dart`
+  - Removed success toasts for edit/delete
+- `lib/features/transaction/presentation/pages/transactions_page.dart`
+  - Removed delete success toast
+- `lib/features/settings/presentation/widgets/category_management_section.dart`
+  - Removed success toasts, error toasts use AppColors.danger
+- `lib/features/transaction/presentation/widgets/category_selector_sheet.dart`
+  - Removed success toasts
+- `lib/features/settings/presentation/widgets/recurring_modal.dart`
+  - Removed success toasts, error toasts use AppColors.danger
+- `lib/features/settings/presentation/widgets/data_management_section.dart`
+  - Changed success toast color to primary, error to AppColors.danger
 
 #### New Files
 - `lib/core/utils/date_range_extension.dart` - Period calculation utilities

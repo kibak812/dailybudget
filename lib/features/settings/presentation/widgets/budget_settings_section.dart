@@ -45,13 +45,6 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
           amount,
         );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('예산이 수정되었습니다.'),
-        backgroundColor: AppColors.success,
-      ),
-    );
-
     _budgetController.clear();
   }
 
@@ -354,14 +347,6 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
                           final today = DateTime.now();
                           final newLabelMonth = getLabelMonthForDate(today, day);
                           ref.read(currentMonthProvider.notifier).state = newLabelMonth;
-
-                          if (!this.context.mounted) return;
-                          ScaffoldMessenger.of(this.context).showSnackBar(
-                            SnackBar(
-                              content: Text('예산 시작일이 $day일로 변경되었습니다.'),
-                              backgroundColor: AppColors.success,
-                            ),
-                          );
                         }
                       },
                     );

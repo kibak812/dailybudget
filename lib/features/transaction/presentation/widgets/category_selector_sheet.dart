@@ -44,17 +44,12 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
 
     if (success) {
       _addController.clear();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('카테고리가 추가되었습니다')),
-        );
-      }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('이미 존재하는 카테고리입니다'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text('이미 존재하는 카테고리입니다'),
+            backgroundColor: AppColors.danger,
           ),
         );
       }
@@ -86,11 +81,6 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
         category,
         widget.type,
       );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('카테고리가 삭제되었습니다')),
-        );
-      }
     }
   }
 
@@ -117,15 +107,11 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
       if (success) {
         // Refresh transaction provider to reflect category name changes
         ref.invalidate(transactionProvider);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('카테고리가 수정되었습니다')),
-        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('이미 존재하는 카테고리 이름입니다'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text('이미 존재하는 카테고리 이름입니다'),
+            backgroundColor: AppColors.danger,
           ),
         );
       }

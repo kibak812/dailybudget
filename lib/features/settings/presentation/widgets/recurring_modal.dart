@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/recurring/data/models/recurring_transaction_model.dart';
@@ -70,9 +71,9 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
     // Validation
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('올바른 금액을 입력해주세요.'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('올바른 금액을 입력해주세요.'),
+          backgroundColor: AppColors.danger,
         ),
       );
       return;
@@ -80,9 +81,9 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
 
     if (day == null || day < 1 || day > 31) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('날짜는 1~31 사이여야 합니다.'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('날짜는 1~31 사이여야 합니다.'),
+          backgroundColor: AppColors.danger,
         ),
       );
       return;
@@ -90,9 +91,9 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
 
     if (_category == null || _category!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('카테고리를 선택해주세요.'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('카테고리를 선택해주세요.'),
+          backgroundColor: AppColors.danger,
         ),
       );
       return;
@@ -115,15 +116,6 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
         )..id = widget.recurring!.id;
 
         await ref.read(recurringProvider.notifier).updateRecurringTransaction(updatedRecurring);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('반복 지출이 수정되었습니다.'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
       } else {
         // Add new
         final newRecurring = RecurringTransactionModel.create(
@@ -138,15 +130,6 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
         );
 
         await ref.read(recurringProvider.notifier).addRecurringTransaction(newRecurring);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('반복 지출이 추가되었습니다.'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
       }
 
       if (mounted) {
@@ -157,7 +140,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('오류가 발생했습니다: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.danger,
           ),
         );
       }

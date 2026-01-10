@@ -83,35 +83,16 @@ class NotificationSection extends ConsumerWidget {
 
     switch (result) {
       case NotificationEnableResult.success:
-        // Success - no action needed
-        break;
       case NotificationEnableResult.successWithInexactScheduling:
-        // Enabled but with inexact scheduling - show info
-        _showInfoSnackBar(
-          context,
-          message: '알림이 활성화되었습니다. 정확한 시간에 받으려면 알람 권한을 허용해주세요.',
-          actionLabel: '설정',
-          onAction: () async {
-            await notifier.setDailySummaryEnabled(true);
-          },
-        );
+      case NotificationEnableResult.exactAlarmPermissionDenied:
+        // 성공 - 토스트 없이 UI 토글로 확인 가능
         break;
       case NotificationEnableResult.notificationPermissionDenied:
         _showPermissionSnackBar(
           context,
           message: '알림 권한이 필요합니다. 설정에서 권한을 허용해주세요.',
-          actionLabel: '설정 열기',
+          actionLabel: '다시 요청',
           onAction: () => notifier.requestPermission(),
-        );
-        break;
-      case NotificationEnableResult.exactAlarmPermissionDenied:
-        _showPermissionSnackBar(
-          context,
-          message: '정확한 알람 권한이 필요합니다. 설정에서 허용해주세요.',
-          actionLabel: '설정 열기',
-          onAction: () async {
-            await notifier.setDailySummaryEnabled(true);
-          },
         );
         break;
     }
@@ -130,31 +111,6 @@ class NotificationSection extends ConsumerWidget {
         action: SnackBarAction(
           label: actionLabel,
           textColor: Colors.amber,
-          onPressed: onAction,
-        ),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
-  }
-
-  void _showInfoSnackBar(
-    BuildContext context, {
-    required String message,
-    required String actionLabel,
-    required VoidCallback onAction,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 4),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        action: SnackBarAction(
-          label: actionLabel,
-          textColor: Colors.white,
           onPressed: onAction,
         ),
         behavior: SnackBarBehavior.floating,

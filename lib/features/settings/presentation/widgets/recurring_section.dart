@@ -27,17 +27,6 @@ class RecurringSection extends ConsumerWidget {
     RecurringTransactionModel recurring,
   ) async {
     await ref.read(recurringProvider.notifier).toggleActive(recurring.id);
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '반복 지출이 ${!recurring.isActive ? "활성화" : "비활성화"}되었습니다.',
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
   }
 
   Future<void> _handleDelete(
@@ -68,15 +57,6 @@ class RecurringSection extends ConsumerWidget {
 
     if (confirmed == true) {
       await ref.read(recurringProvider.notifier).deleteRecurringTransaction(recurring.id);
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('반복 지출이 삭제되었습니다.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
     }
   }
 
@@ -89,15 +69,6 @@ class RecurringSection extends ConsumerWidget {
           currentMonth.year,
           currentMonth.month,
         );
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('현재 기간 반복 지출을 다시 생성했습니다.'),
-          backgroundColor: AppColors.success,
-        ),
-      );
-    }
   }
 
   @override
