@@ -244,6 +244,19 @@ class DailyBudgetService {
     return _formatDate(date.year, date.month, date.day);
   }
 
+  /// Filter transactions within a date range (inclusive)
+  /// Used for period-based filtering when budget start day is not 1
+  static List<TransactionModel> filterTransactionsForPeriod(
+    List<TransactionModel> transactions,
+    DateTime periodStart,
+    DateTime periodEnd,
+  ) {
+    return transactions.where((t) {
+      final txDate = DateTime.parse(t.date);
+      return !txDate.isBefore(periodStart) && !txDate.isAfter(periodEnd);
+    }).toList();
+  }
+
   /// Calculate complete daily budget data for a custom period
   /// Used when budget start day is not 1
   static DailyBudgetData calculateDailyBudgetDataForPeriod(

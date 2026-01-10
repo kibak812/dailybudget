@@ -11,7 +11,11 @@ extension DateRangeForBudget on CurrentMonth {
   /// Example with startDay = 25:
   /// - "January 2024" period = Dec 25, 2023 ~ Jan 24, 2024
   /// - "February 2024" period = Jan 25, 2024 ~ Feb 24, 2024
+  ///
+  /// Throws assertion error if startDay is not between 1 and 31.
   (DateTime start, DateTime end) getDateRange(int startDay) {
+    assert(startDay >= 1 && startDay <= 31, 'startDay must be between 1 and 31');
+
     if (startDay == 1) {
       // Standard calendar month (existing behavior)
       return (

@@ -30,9 +30,9 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
 
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('올바른 금액을 입력해주세요.'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('올바른 금액을 입력해주세요.'),
+          backgroundColor: AppColors.danger,
         ),
       );
       return;
@@ -46,9 +46,9 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
         );
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('예산이 수정되었습니다.'),
-        backgroundColor: Colors.green,
+      SnackBar(
+        content: const Text('예산이 수정되었습니다.'),
+        backgroundColor: AppColors.success,
       ),
     );
 
@@ -342,10 +342,11 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
                               color: Theme.of(context).colorScheme.primary,
                             )
                           : null,
-                      onTap: () {
-                        ref
+                      onTap: () async {
+                        await ref
                             .read(budgetStartDayProvider.notifier)
                             .setStartDay(day);
+                        if (!context.mounted) return;
                         Navigator.pop(context);
 
                         if (day != currentStartDay) {
@@ -354,10 +355,11 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
                           final newLabelMonth = getLabelMonthForDate(today, day);
                           ref.read(currentMonthProvider.notifier).state = newLabelMonth;
 
+                          if (!this.context.mounted) return;
                           ScaffoldMessenger.of(this.context).showSnackBar(
                             SnackBar(
                               content: Text('예산 시작일이 $day일로 변경되었습니다.'),
-                              backgroundColor: Colors.green,
+                              backgroundColor: AppColors.success,
                             ),
                           );
                         }

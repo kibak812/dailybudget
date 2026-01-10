@@ -29,11 +29,12 @@ final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
   final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
   final daysInPeriod = periodEnd.difference(periodStart).inDays + 1;
 
-  // Filter transactions for the period
-  final periodTransactions = transactions.where((t) {
-    final txDate = DateTime.parse(t.date);
-    return !txDate.isBefore(periodStart) && !txDate.isAfter(periodEnd);
-  }).toList();
+  // Filter transactions for the period using shared utility
+  final periodTransactions = DailyBudgetService.filterTransactionsForPeriod(
+    transactions,
+    periodStart,
+    periodEnd,
+  );
 
   // Calculate data for each day in the period
   final List<DayData> days = [];

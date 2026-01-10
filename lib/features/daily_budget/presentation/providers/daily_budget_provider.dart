@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/features/budget/presentation/providers/budget_provider.dart';
 import 'package:daily_pace/features/budget/presentation/providers/current_month_provider.dart';
 import 'package:daily_pace/features/transaction/presentation/providers/transaction_provider.dart';
-import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 import 'package:daily_pace/features/settings/presentation/providers/budget_start_day_provider.dart';
@@ -30,17 +29,6 @@ DateTime _getEffectiveDateForPeriod(
   }
 }
 
-/// Filter transactions within the period date range
-List<TransactionModel> _filterTransactionsForPeriod(
-  List<TransactionModel> transactions,
-  DateTime periodStart,
-  DateTime periodEnd,
-) {
-  return transactions.where((t) {
-    final txDate = DateTime.parse(t.date);
-    return !txDate.isBefore(periodStart) && !txDate.isAfter(periodEnd);
-  }).toList();
-}
 
 /// Provider for calculating daily budget data
 /// This is a computed provider that depends on:
@@ -69,7 +57,7 @@ final dailyBudgetProvider = Provider<DailyBudgetData>((ref) {
   final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
 
   // Filter transactions for the period
-  final periodTransactions = _filterTransactionsForPeriod(
+  final periodTransactions = DailyBudgetService.filterTransactionsForPeriod(
     transactions,
     periodStart,
     periodEnd,
@@ -109,7 +97,7 @@ final dailyBudgetHistoryProvider = Provider.family<List<DailyBudgetHistoryItem>,
     final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
 
     // Filter transactions for the period
-    final periodTransactions = _filterTransactionsForPeriod(
+    final periodTransactions = DailyBudgetService.filterTransactionsForPeriod(
       transactions,
       periodStart,
       periodEnd,
