@@ -6,6 +6,137 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 30] - 2026-01-10
+
+### Summary
+Custom budget start day UX improvements and toast notification cleanup. App now properly initializes to today's budget period on startup, auto-transitions when start day changes, and displays periods (e.g., "12/25 ~ 1/24") instead of month names when start day ≠ 1. Removed unnecessary success toasts throughout the app for a cleaner UX.
+
+### Added
+
+#### Period-based Initialization
+- `getLabelMonthForDate()` helper function in `current_month_provider.dart`
+  - Calculates which "label month" a given date belongs to based on start day
+  - Example: With start day 25, date 1/15 belongs to "1월" (12/25~1/24)
+- `todayLabelMonthProvider` - computed provider for today's label month
+- App now initializes to correct period based on configured start day
+
+#### Auto-transition on Start Day Change
+- When user changes budget start day in settings, app automatically navigates to today's period
+- Eliminates confusion of viewing wrong period after changing start day
+
+### Changed
+
+#### UI: Period Display (Banksalad Style)
+- **Home page AppBar**: Shows period instead of month when startDay ≠ 1
+  - Example: "2025.12.25 ~ 1.24" instead of "2025년 1월"
+- **Month navigation bar**: Same period display logic
+- When startDay = 1, shows traditional "YYYY년 M월" format
+
+#### Terminology: "월" → "기간"
+- `budget_settings_section.dart`: "현재 월 예산" → Dynamic period label (e.g., "1/9~2/8 예산")
+- `mosaic_summary_bar.dart`: "이번 달: 퍼펙트..." → "이번 기간: 퍼펙트..."
+- `statistics_page.dart`: "이번 달 예산" → "현재 기간 예산"
+- `daily_summary_service.dart`: "이번 달 진행률" → "기간 진행률"
+- `recurring_section.dart`: "이번 달 반복 지출..." → "현재 기간 반복 지출..."
+
+#### Toast Notification Cleanup
+Removed unnecessary success toasts for cleaner UX. FAB button no longer covered by toasts.
+
+**Notifications** (`notification_section.dart`):
+- Removed "정확한 시간에 받으려면 알람 권한을 허용해주세요" message (exact alarm not used)
+- Removed non-functional "설정" button
+- Notification toggle now works silently (UI toggle feedback sufficient)
+- Only shows toast when notification permission is denied
+
+**Transactions** (`add_transaction_sheet.dart`, `transaction_edit_sheet.dart`, `transactions_page.dart`):
+- Removed "거래가 추가되었습니다" toast
+- Removed "거래가 수정되었습니다" toast
+- Removed "거래가 삭제되었습니다" toast (confirmation dialog sufficient)
+
+**Categories** (`category_management_section.dart`, `category_selector_sheet.dart`):
+- Removed success toasts for add/edit/delete operations
+
+**Recurring** (`recurring_modal.dart`, `recurring_section.dart`):
+- Removed success toasts for add/edit/delete/toggle/regenerate operations
+
+**Budget** (`budget_settings_section.dart`):
+- Removed "예산이 수정되었습니다" toast
+- Removed "예산 시작일이 N일로 변경되었습니다" toast
+
+#### Toast Color Standardization
+- Error/validation toasts: `AppColors.danger` (Rose)
+- Important success toasts (data backup/restore/delete): `Theme.of(context).colorScheme.primary` (Indigo)
+- General success: No toast (removed)
+
+### Technical Details
+
+#### Files Modified
+- `lib/features/budget/presentation/providers/current_month_provider.dart`
+  - Added `getLabelMonthForDate()` function
+  - Added `todayLabelMonthProvider`
+  - Updated `currentMonthProvider` to watch `todayLabelMonthProvider`
+- `lib/features/settings/presentation/widgets/budget_settings_section.dart`
+  - Auto-transition on start day change
+  - Dynamic period label for budget display
+  - Removed success toasts
+- `lib/features/daily_budget/presentation/pages/home_page.dart`
+  - Period-only display in AppBar
+- `lib/features/transaction/presentation/widgets/month_navigation_bar.dart`
+  - Period-only display
+- `lib/features/transaction/presentation/widgets/mosaic_summary_bar.dart`
+  - Terminology change
+- `lib/features/statistics/presentation/pages/statistics_page.dart`
+  - Terminology change
+- `lib/core/services/daily_summary_service.dart`
+  - Terminology change
+- `lib/features/settings/presentation/widgets/recurring_section.dart`
+  - Terminology change, removed success toasts
+- `lib/features/settings/presentation/widgets/notification_section.dart`
+  - Simplified notification enable flow, removed _showInfoSnackBar
+- `lib/features/transaction/presentation/widgets/add_transaction_sheet.dart`
+  - Removed success toast, error toast uses AppColors.danger
+- `lib/features/transaction/presentation/widgets/transaction_edit_sheet.dart`
+  - Removed success toasts for edit/delete
+- `lib/features/transaction/presentation/pages/transactions_page.dart`
+  - Removed delete success toast
+- `lib/features/settings/presentation/widgets/category_management_section.dart`
+  - Removed success toasts, error toasts use AppColors.danger
+- `lib/features/transaction/presentation/widgets/category_selector_sheet.dart`
+  - Removed success toasts
+- `lib/features/settings/presentation/widgets/recurring_modal.dart`
+  - Removed success toasts, error toasts use AppColors.danger
+- `lib/features/settings/presentation/widgets/data_management_section.dart`
+  - Changed success toast color to primary, error to AppColors.danger
+
+#### New Files
+- `lib/core/utils/date_range_extension.dart` - Period calculation utilities
+- `lib/features/settings/presentation/providers/budget_start_day_provider.dart` - Start day state management
+- `test/core/utils/date_range_extension_test.dart` - Unit tests for period calculations
+
+### Fixed
+
+#### Daily Budget Trend Chart for Custom Periods
+- **Problem**: When period spans two months (e.g., 12/25~1/24), X-axis showed non-sequential values (25, 26, ..., 31, 1, 2, ...) causing chart rendering issues
+- **Solution**: Separated internal ordering from display
+  - `dayIndex`: Sequential period index (1, 2, 3, ...) for X-axis ordering
+  - `dateLabel`: Actual date display (e.g., "1/9", "12/25") for labels and tooltips
+- `DailyBudgetHistoryItem` model updated with both fields
+- Chart now correctly shows date labels like "1/3", "1/4", ..., "1/9" for 1-week view
+- Tooltips show actual dates with amounts (e.g., "1/9\n32,000원")
+
+#### Chart X-axis Rendering for 2-week+ Views
+- **Problem**: NumericAxis with non-zero starting dayIndex (e.g., 17-30 for 2-week view) caused chart to render incorrectly ("spread out")
+- **Solution**: Changed from `NumericAxis` to `CategoryAxis`
+  - Data points now evenly distributed regardless of dayIndex values
+  - X-axis uses `dateLabel` strings directly
+  - Works correctly for all period lengths (1-week, 2-week, 1-month)
+
+### Testing
+- All 19 unit tests pass for date range extension
+- Build successful (arm64-v8a: 24.4MB)
+
+---
+
 ## [Phase 29.2] - 2026-01-09
 
 ### Summary

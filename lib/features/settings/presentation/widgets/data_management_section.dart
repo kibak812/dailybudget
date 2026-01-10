@@ -38,9 +38,9 @@ class DataManagementSection extends ConsumerWidget {
 
       if (context.mounted && result.status == ShareResultStatus.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('데이터가 내보내졌습니다.'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('데이터가 내보내졌습니다.'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
       }
@@ -49,7 +49,7 @@ class DataManagementSection extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('데이터 내보내기에 실패했습니다: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.danger,
           ),
         );
       }
@@ -89,7 +89,7 @@ class DataManagementSection extends ConsumerWidget {
               '반복: ${counts['recurring']}, '
               '카테고리: ${counts['categories']}',
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: Theme.of(context).colorScheme.primary,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -99,7 +99,7 @@ class DataManagementSection extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('데이터 가져오기에 실패했습니다: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.danger,
           ),
         );
       }
@@ -169,9 +169,9 @@ class DataManagementSection extends ConsumerWidget {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('모든 데이터가 삭제되었습니다.'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('모든 데이터가 삭제되었습니다.'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
       }
@@ -180,7 +180,7 @@ class DataManagementSection extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('데이터 삭제에 실패했습니다: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.danger,
           ),
         );
       }

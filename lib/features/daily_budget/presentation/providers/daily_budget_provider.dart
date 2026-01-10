@@ -4,32 +4,38 @@ import 'package:daily_pace/features/budget/presentation/providers/current_month_
 import 'package:daily_pace/features/transaction/presentation/providers/transaction_provider.dart';
 import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
+import 'package:daily_pace/features/settings/presentation/providers/budget_start_day_provider.dart';
 import 'package:daily_pace/core/providers/date_provider.dart';
+import 'package:daily_pace/core/utils/date_range_extension.dart';
 
-/// Get effective date for budget calculations based on selected month
-/// - Current month: returns today's date
-/// - Past month: returns last day of that month
-/// - Future month: returns first day of that month
-DateTime _getEffectiveDate(DateTime selectedMonth, DateTime today) {
-  final now = today;
-  final isCurrentMonth = now.year == selectedMonth.year && now.month == selectedMonth.month;
-
-  if (isCurrentMonth) {
-    return now;
-  } else if (selectedMonth.isBefore(DateTime(now.year, now.month, 1))) {
-    // Past month: use last day of that month
-    return DateTime(selectedMonth.year, selectedMonth.month + 1, 0);
+/// Get effective date for budget calculations based on selected month and period
+/// - Current period: returns today's date (clamped to period bounds)
+/// - Past period: returns last day of that period
+/// - Future period: returns first day of that period
+DateTime _getEffectiveDateForPeriod(
+  DateTime periodStart,
+  DateTime periodEnd,
+  DateTime today,
+) {
+  if (today.isBefore(periodStart)) {
+    // Future period: use first day
+    return periodStart;
+  } else if (today.isAfter(periodEnd)) {
+    // Past period: use last day
+    return periodEnd;
   } else {
-    // Future month: use first day
-    return DateTime(selectedMonth.year, selectedMonth.month, 1);
+    // Current period: use today
+    return today;
   }
 }
+
 
 /// Provider for calculating daily budget data
 /// This is a computed provider that depends on:
 /// - budgetProvider: for the monthly budget
 /// - transactionProvider: for all transactions
 /// - currentMonthProvider: for the selected month/year
+/// - budgetStartDayProvider: for the custom start day
 /// - currentDateProvider: for auto-refresh when date changes
 ///
 /// Returns DailyBudgetData with all calculated values
@@ -38,28 +44,35 @@ final dailyBudgetProvider = Provider<DailyBudgetData>((ref) {
   final budgets = ref.watch(budgetProvider);
   final transactions = ref.watch(transactionProvider);
   final currentMonth = ref.watch(currentMonthProvider);
+  final startDay = ref.watch(budgetStartDayProvider);
   // Watch currentDateProvider to auto-refresh on date change
   final today = ref.watch(currentDateProvider);
 
-  // Get budget for current month
+  // Get budget for current month (label month)
   final budget = budgets.where((b) =>
     b.year == currentMonth.year && b.month == currentMonth.month
   ).firstOrNull;
 
-  // Filter transactions for current month
-  final monthPrefix = '${currentMonth.year}-${currentMonth.month.toString().padLeft(2, '0')}';
-  final monthTransactions = transactions
-      .where((t) => t.date.startsWith(monthPrefix))
-      .toList();
+  // Calculate period date range based on start day
+  final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
 
-  // Calculate daily budget data using the service
-  final selectedMonth = DateTime(currentMonth.year, currentMonth.month, 1);
-  final currentDate = _getEffectiveDate(selectedMonth, today);
+  // Filter transactions for the period
+  final periodTransactions = DailyBudgetService.filterTransactionsForPeriod(
+    transactions,
+    periodStart,
+    periodEnd,
+  );
 
-  return DailyBudgetService.calculateDailyBudgetData(
+  // Get effective date for calculations
+  final currentDate = _getEffectiveDateForPeriod(periodStart, periodEnd, today);
+
+  // Use period-aware calculation
+  return DailyBudgetService.calculateDailyBudgetDataForPeriod(
     budget,
-    monthTransactions,
+    periodTransactions,
     currentDate,
+    periodStart,
+    periodEnd,
   );
 });
 
@@ -71,34 +84,44 @@ final dailyBudgetHistoryProvider = Provider.family<List<DailyBudgetHistoryItem>,
     final budgets = ref.watch(budgetProvider);
     final transactions = ref.watch(transactionProvider);
     final currentMonth = ref.watch(currentMonthProvider);
+    final startDay = ref.watch(budgetStartDayProvider);
     // Watch currentDateProvider to auto-refresh on date change
     final today = ref.watch(currentDateProvider);
 
-    // Get budget for current month
+    // Get budget for current month (label month)
     final budget = budgets.where((b) =>
       b.year == currentMonth.year && b.month == currentMonth.month
     ).firstOrNull;
 
-    // Filter transactions for current month
-    final monthPrefix = '${currentMonth.year}-${currentMonth.month.toString().padLeft(2, '0')}';
-    final monthTransactions = transactions
-        .where((t) => t.date.startsWith(monthPrefix))
-        .toList();
+    // Calculate period date range based on start day
+    final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
 
-    // Calculate history using the service
-    final selectedMonth = DateTime(currentMonth.year, currentMonth.month, 1);
-    final currentDate = _getEffectiveDate(selectedMonth, today);
-    final currentDay = currentDate.day;
-
-    // Calculate start day based on period
-    final startDay = period.getStartDay(currentDay);
-
-    return DailyBudgetService.getDailyBudgetHistory(
-      budget,
-      monthTransactions,
-      currentDate,
-      startDay: startDay,
-      endDay: currentDay,
+    // Filter transactions for the period
+    final periodTransactions = DailyBudgetService.filterTransactionsForPeriod(
+      transactions,
+      periodStart,
+      periodEnd,
     );
+
+    // Get effective date for calculations
+    final currentDate = _getEffectiveDateForPeriod(periodStart, periodEnd, today);
+    final currentDayIndex = currentDate.difference(periodStart).inDays + 1;
+
+    // Calculate start index based on chart period
+    // Use existing getStartDay method on ChartPeriod enum
+    final startDayIndex = period.getStartDay(currentDayIndex);
+
+    // Calculate history using the period-aware service
+    // History items now have day = dayIndex (1-based period index)
+    final history = DailyBudgetService.getDailyBudgetHistoryForPeriod(
+      budget,
+      periodTransactions,
+      currentDate,
+      periodStart,
+      periodEnd,
+    );
+
+    // Filter based on the chart period range (item.day is now dayIndex)
+    return history.where((item) => item.day >= startDayIndex).toList();
   },
 );

@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/services/daily_summary_service.dart';
+import 'package:daily_pace/core/utils/date_range_extension.dart';
 import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
+import 'package:daily_pace/features/settings/presentation/providers/budget_start_day_provider.dart';
 import 'package:daily_pace/features/transaction/domain/models/monthly_mosaic_data.dart';
 import 'package:daily_pace/features/transaction/domain/models/day_status.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
@@ -13,44 +15,49 @@ final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
   final currentMonth = ref.watch(currentMonthProvider);
   final budgets = ref.watch(budgetProvider);
   final transactions = ref.watch(transactionProvider);
+  final startDay = ref.watch(budgetStartDayProvider);
   // Watch currentDateProvider to auto-refresh on date change (midnight/app resume)
   final today = ref.watch(currentDateProvider);
 
-  // Get budget for current month
+  // Get budget for current month (label month)
   final budget = budgets
       .where(
           (b) => b.year == currentMonth.year && b.month == currentMonth.month)
       .firstOrNull;
 
-  // Filter transactions for current month
-  final monthPrefix = Formatters.formatYearMonth(currentMonth.year, currentMonth.month);
-  final monthTransactions =
-      transactions.where((t) => t.date.startsWith(monthPrefix)).toList();
+  // Calculate period date range based on start day
+  final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
+  final daysInPeriod = periodEnd.difference(periodStart).inDays + 1;
 
-  // Use watched today from currentDateProvider (already defined above)
-  final daysInMonth =
-      DailyBudgetService.getDaysInMonth(currentMonth.year, currentMonth.month);
+  // Filter transactions for the period using shared utility
+  final periodTransactions = DailyBudgetService.filterTransactionsForPeriod(
+    transactions,
+    periodStart,
+    periodEnd,
+  );
 
-  // Calculate data for each day
+  // Calculate data for each day in the period
   final List<DayData> days = [];
   int perfectCount = 0;
   int safeCount = 0;
   int warningCount = 0;
   int dangerCount = 0;
 
-  for (int day = 1; day <= daysInMonth; day++) {
-    final dateStr = Formatters.formatDateISO(
-        DateTime(currentMonth.year, currentMonth.month, day));
-    final date = DateTime(currentMonth.year, currentMonth.month, day);
-    final isToday =
-        date.year == today.year && date.month == today.month && date.day == today.day;
-    final isFuture = date.isAfter(today);
+  var currentDate = periodStart;
+  int dayIndex = 1;
+
+  while (!currentDate.isAfter(periodEnd)) {
+    final dateStr = Formatters.formatDateISO(currentDate);
+    final isToday = currentDate.year == today.year &&
+        currentDate.month == today.month &&
+        currentDate.day == today.day;
+    final isFuture = currentDate.isAfter(today);
 
     // Calculate net spent for this day
     final expenses =
-        DailyBudgetService.getSpentForDate(monthTransactions, dateStr);
+        DailyBudgetService.getSpentForDate(periodTransactions, dateStr);
     final income =
-        DailyBudgetService.getIncomeForDate(monthTransactions, dateStr);
+        DailyBudgetService.getIncomeForDate(periodTransactions, dateStr);
     final netSpent = expenses - income;
 
     // Calculate daily budget for this day (based on spending until previous day)
@@ -65,36 +72,36 @@ final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
       // Future day
       status = DayStatus.future;
       // Calculate daily budget for future days too (for display purposes)
-      final prevDayStr = day > 1
-          ? Formatters.formatDateISO(
-              DateTime(currentMonth.year, currentMonth.month, day - 1))
-          : null;
+      final prevDate = currentDate.subtract(const Duration(days: 1));
+      final prevDayStr = prevDate.isBefore(periodStart)
+          ? null
+          : Formatters.formatDateISO(prevDate);
       final netSpentUntilPrevDay = prevDayStr != null
           ? DailyBudgetService.getNetSpentUntilDate(
-              monthTransactions, prevDayStr)
+              periodTransactions, prevDayStr)
           : 0;
       dailyBudget = DailyBudgetService.calculateDailyBudget(
         budget.amount,
         netSpentUntilPrevDay,
-        daysInMonth,
-        day,
+        daysInPeriod,
+        dayIndex,
       );
     } else if (!isToday) {
       // Past day only - calculate daily budget and determine status
-      final prevDayStr = day > 1
-          ? Formatters.formatDateISO(
-              DateTime(currentMonth.year, currentMonth.month, day - 1))
-          : null;
+      final prevDate = currentDate.subtract(const Duration(days: 1));
+      final prevDayStr = prevDate.isBefore(periodStart)
+          ? null
+          : Formatters.formatDateISO(prevDate);
       final netSpentUntilPrevDay = prevDayStr != null
           ? DailyBudgetService.getNetSpentUntilDate(
-              monthTransactions, prevDayStr)
+              periodTransactions, prevDayStr)
           : 0;
 
       dailyBudget = DailyBudgetService.calculateDailyBudget(
         budget.amount,
         netSpentUntilPrevDay,
-        daysInMonth,
-        day,
+        daysInPeriod,
+        dayIndex,
       );
 
       // Determine status using centralized calculation
@@ -116,20 +123,20 @@ final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
     } else {
       // Today - pending settlement (no color yet, settled at end of day)
       // Calculate daily budget for display purposes
-      final prevDayStr = day > 1
-          ? Formatters.formatDateISO(
-              DateTime(currentMonth.year, currentMonth.month, day - 1))
-          : null;
+      final prevDate = currentDate.subtract(const Duration(days: 1));
+      final prevDayStr = prevDate.isBefore(periodStart)
+          ? null
+          : Formatters.formatDateISO(prevDate);
       final netSpentUntilPrevDay = prevDayStr != null
           ? DailyBudgetService.getNetSpentUntilDate(
-              monthTransactions, prevDayStr)
+              periodTransactions, prevDayStr)
           : 0;
 
       dailyBudget = DailyBudgetService.calculateDailyBudget(
         budget.amount,
         netSpentUntilPrevDay,
-        daysInMonth,
-        day,
+        daysInPeriod,
+        dayIndex,
       );
       // Today gets future status (no color) - will be settled when day ends
       status = DayStatus.future;
@@ -137,13 +144,16 @@ final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
 
     days.add(DayData(
       date: dateStr,
-      day: day,
+      day: currentDate.day,
       isToday: isToday,
       isFuture: isFuture,
       netSpent: netSpent,
       dailyBudget: dailyBudget,
       status: status,
     ));
+
+    currentDate = currentDate.add(const Duration(days: 1));
+    dayIndex++;
   }
 
   final summary = MonthlyMosaicSummary(
@@ -151,11 +161,11 @@ final monthlyMosaicProvider = Provider<MonthlyMosaicData>((ref) {
     safe: safeCount,
     warning: warningCount,
     danger: dangerCount,
-    totalDays: daysInMonth,
+    totalDays: daysInPeriod,
     hasBudget: budget != null && budget.amount > 0,
   );
 
-  final monthHasData = monthTransactions.isNotEmpty;
+  final monthHasData = periodTransactions.isNotEmpty;
 
   return MonthlyMosaicData(
     days: days,

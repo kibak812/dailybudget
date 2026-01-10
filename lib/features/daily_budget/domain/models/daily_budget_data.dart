@@ -45,16 +45,26 @@ class DailyBudgetData {
 
 /// Single item in daily budget history
 class DailyBudgetHistoryItem {
-  final int day;
+  /// Sequential index within the period (1-based) for X-axis ordering
+  final int dayIndex;
+
+  /// Display label for the date (e.g., "1/9" or "12/25")
+  final String dateLabel;
+
+  /// Daily budget amount for this day
   final int dailyBudget;
 
   DailyBudgetHistoryItem({
-    required this.day,
+    required this.dayIndex,
+    required this.dateLabel,
     required this.dailyBudget,
   });
 
+  /// Legacy getter for backward compatibility
+  int get day => dayIndex;
+
   @override
-  String toString() => 'HistoryItem(day: $day, dailyBudget: $dailyBudget)';
+  String toString() => 'HistoryItem(dayIndex: $dayIndex, date: $dateLabel, budget: $dailyBudget)';
 }
 
 /// Chart period filter options

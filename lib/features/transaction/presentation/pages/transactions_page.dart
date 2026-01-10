@@ -509,12 +509,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   /// Handle transaction deletion
   Future<void> _handleDelete(TransactionModel transaction) async {
     await ref.read(transactionProvider.notifier).deleteTransaction(transaction.id);
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('거래가 삭제되었습니다')),
-      );
-    }
   }
 
   /// Apply search keyword and type filters

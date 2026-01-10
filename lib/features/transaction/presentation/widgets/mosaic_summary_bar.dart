@@ -43,7 +43,7 @@ class MosaicSummaryBar extends StatelessWidget {
 
     if (!summary.hasBudget) {
       return Text(
-        '이번 달 예산이 설정되지 않았습니다.',
+        '예산이 설정되지 않았습니다.',
         style: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
         ),
@@ -51,7 +51,7 @@ class MosaicSummaryBar extends StatelessWidget {
     }
 
     return Text(
-      '이번 달: 퍼펙트 ${summary.perfect}일, 과소비 ${summary.overspent}일',
+      '이번 기간: 퍼펙트 ${summary.perfect}일, 과소비 ${summary.overspent}일',
       style: theme.textTheme.bodyMedium?.copyWith(
         fontWeight: FontWeight.w500,
       ),

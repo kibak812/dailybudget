@@ -8,9 +8,9 @@ import 'package:daily_pace/app/theme/app_colors.dart';
 
 /// Tooltip data class for type safety
 class _TooltipData {
-  final int day;
+  final String dateLabel;
   final int budget;
-  _TooltipData(this.day, this.budget);
+  _TooltipData(this.dateLabel, this.budget);
 }
 
 /// Daily budget trend chart widget (Syncfusion version)
@@ -159,7 +159,7 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
     }
 
     // Pre-extract tooltip data to avoid type inference issues in callback
-    final tooltipData = history.map((item) => _TooltipData(item.day, item.dailyBudget)).toList();
+    final tooltipData = history.map((item) => _TooltipData(item.dateLabel, item.dailyBudget)).toList();
 
     return SfCartesianChart(
       // Use trackball for better touch interaction
@@ -189,9 +189,9 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
         if (dataIndex != null && dataIndex < tooltipData.length) {
           final idx = dataIndex.toInt();
           final data = tooltipData[idx];
-          final day = data.day.toInt();
+          final dateLabel = data.dateLabel;
           final budget = data.budget.toInt();
-          pointInfo.label = '$day일\n${Formatters.formatCurrency(budget)}';
+          pointInfo.label = '$dateLabel\n${Formatters.formatCurrency(budget)}';
         }
       },
 
@@ -210,24 +210,28 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
         }
       },
 
-      primaryXAxis: NumericAxis(
-        minimum: history.first.day.toDouble(),
-        maximum: history.last.day.toDouble(),
+      primaryXAxis: CategoryAxis(
+        // Show labels at calculated intervals
+        labelPlacement: LabelPlacement.onTicks,
         interval: _calculateXInterval(history.length),
 
         axisLabelFormatter: (AxisLabelRenderDetails args) {
-          // Skip min and max labels to match fl_chart behavior
-          if (args.value == history.first.day.toDouble() ||
-              args.value == history.last.day.toDouble()) {
+          final index = args.value.toInt();
+          // Skip first and last labels
+          if (index == 0 || index == history.length - 1) {
             return ChartAxisLabel('', const TextStyle());
           }
-          return ChartAxisLabel(
-            '${args.value.toInt()}일',
-            TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 11,
-            ),
-          );
+          // Get dateLabel from history
+          if (index >= 0 && index < history.length) {
+            return ChartAxisLabel(
+              history[index].dateLabel,
+              TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+              ),
+            );
+          }
+          return ChartAxisLabel('', const TextStyle());
         },
 
         axisLine: AxisLine(
@@ -265,10 +269,10 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
         ),
       ),
 
-      series: <CartesianSeries<DailyBudgetHistoryItem, int>>[
-        SplineAreaSeries<DailyBudgetHistoryItem, int>(
+      series: <CartesianSeries<DailyBudgetHistoryItem, String>>[
+        SplineAreaSeries<DailyBudgetHistoryItem, String>(
           dataSource: history,
-          xValueMapper: (DailyBudgetHistoryItem item, _) => item.day,
+          xValueMapper: (DailyBudgetHistoryItem item, _) => item.dateLabel,
           yValueMapper: (DailyBudgetHistoryItem item, _) => item.dailyBudget,
 
           borderColor: theme.colorScheme.primary,

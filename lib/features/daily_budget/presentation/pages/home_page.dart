@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/widgets/banner_ad_widget.dart';
+import 'package:daily_pace/core/utils/date_range_extension.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/today_summary_card.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/today_spent_card.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/daily_budget_trend_chart.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/budget_info_card.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/yesterday_summary_card.dart';
+import 'package:daily_pace/features/settings/presentation/providers/budget_start_day_provider.dart';
 import 'package:daily_pace/app/router/app_router.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/add_transaction_sheet.dart';
 import 'package:go_router/go_router.dart';
@@ -22,10 +24,16 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dailyBudget = ref.watch(dailyBudgetProvider);
     final currentMonth = ref.watch(currentMonthProvider);
+    final startDay = ref.watch(budgetStartDayProvider);
+    final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${currentMonth.year}년 ${currentMonth.month}월'),
+        title: startDay == 1
+            ? Text('${currentMonth.year}년 ${currentMonth.month}월')
+            : Text(
+                '${periodStart.year}.${periodStart.month}.${periodStart.day} ~ ${periodEnd.month}.${periodEnd.day}',
+              ),
         leading: IconButton(
           icon: const Icon(Icons.chevron_left),
           onPressed: () {
@@ -145,7 +153,7 @@ class HomePage extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              '이번 달 예산을 설정하면\n일별 사용 가능 금액을 확인할 수 있습니다',
+              '예산을 설정하면\n일별 사용 가능 금액을 확인할 수 있습니다',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.textSecondary,

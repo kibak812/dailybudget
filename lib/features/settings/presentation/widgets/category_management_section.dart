@@ -75,9 +75,9 @@ class _CategorySectionState extends ConsumerState<_CategorySection> {
 
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('카테고리 이름을 입력해주세요.'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('카테고리 이름을 입력해주세요.'),
+          backgroundColor: AppColors.danger,
         ),
       );
       return;
@@ -89,22 +89,13 @@ class _CategorySectionState extends ConsumerState<_CategorySection> {
     if (!success) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('이미 존재하는 카테고리입니다.'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text('이미 존재하는 카테고리입니다.'),
+            backgroundColor: AppColors.danger,
           ),
         );
       }
       return;
-    }
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('카테고리가 추가되었습니다.'),
-          backgroundColor: Colors.green,
-        ),
-      );
     }
 
     _categoryController.clear();
@@ -133,18 +124,11 @@ class _CategorySectionState extends ConsumerState<_CategorySection> {
       if (success) {
         // Refresh transaction provider to reflect category name changes
         ref.invalidate(transactionProvider);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('카테고리가 수정되었습니다.'),
-            backgroundColor: Colors.green,
-          ),
-        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('이미 존재하는 카테고리 이름입니다.'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text('이미 존재하는 카테고리 이름입니다.'),
+            backgroundColor: AppColors.danger,
           ),
         );
       }
@@ -175,15 +159,6 @@ class _CategorySectionState extends ConsumerState<_CategorySection> {
 
     if (confirmed == true) {
       await ref.read(categoriesProvider.notifier).deleteCategory(category, widget.type);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('카테고리가 삭제되었습니다.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
     }
   }
 
