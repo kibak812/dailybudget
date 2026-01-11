@@ -28,6 +28,11 @@ Complete internationalization (i18n) support for Korean and English locales. The
 - Dollar prefix display in input fields (`$ `)
 - Keyboard type switches to decimal for English
 
+#### Localized Default Categories
+- New English users: Food, Transport, Shopping, Living, Hobby, Medical, Other
+- New Korean users: 식비, 교통, 쇼핑, 생활, 취미, 의료, 기타
+- Existing users' categories remain unchanged
+
 ### Changed
 
 #### Locale-Aware Formatting (`formatters.dart`)
