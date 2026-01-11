@@ -1,6 +1,7 @@
 import 'package:daily_pace/features/budget/data/models/budget_model.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
+import 'package:daily_pace/core/services/locale_service.dart';
 
 /// Service for calculating daily budget data
 /// Ported from TypeScript calculations.ts
@@ -226,7 +227,7 @@ class DailyBudgetService {
       // For standard months, day = dayIndex = calendar day
       history.add(DailyBudgetHistoryItem(
         dayIndex: day,
-        dateLabel: '$month/$day',
+        dateLabel: LocaleService().formatChartDateFromParts(month, day),
         dailyBudget: dailyBudget,
       ));
     }
@@ -390,8 +391,8 @@ class DailyBudgetService {
         dayIndex,
       );
 
-      // Create date label (e.g., "1/9" or "12/25")
-      final dateLabel = '${date.month}/${date.day}';
+      // Create date label - locale aware (e.g., "Jan 6" for English, "1/6" for Korean)
+      final dateLabel = LocaleService().formatChartDate(date);
 
       history.add(DailyBudgetHistoryItem(
         dayIndex: dayIndex,

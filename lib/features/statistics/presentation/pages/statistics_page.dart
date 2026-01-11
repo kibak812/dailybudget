@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/core/widgets/banner_ad_widget.dart';
@@ -30,12 +31,12 @@ class StatisticsPage extends ConsumerWidget {
 
   /// Calculate category spending data
   List<CategorySpending> _calculateCategoryData(
-      List<TransactionModel> transactions) {
+      List<TransactionModel> transactions, BuildContext context) {
     final Map<String, int> categoryMap = {};
 
     for (final t
         in transactions.where((t) => t.type == TransactionType.expense)) {
-      final category = t.category ?? '기타';
+      final category = t.category ?? context.l10n.category_other;
       categoryMap[category] = (categoryMap[category] ?? 0) + t.amount;
     }
 
@@ -80,6 +81,7 @@ class StatisticsPage extends ConsumerWidget {
   }
 
   Widget _buildSummaryCards(
+    BuildContext context,
     int monthlyBudget,
     int totalSpent,
     int totalIncome,
@@ -88,7 +90,7 @@ class StatisticsPage extends ConsumerWidget {
   ) {
     // Determine if net is spending or income
     final isNetIncome = netSpending < 0;
-    final netLabel = isNetIncome ? '순수입' : '순지출';
+    final netLabel = isNetIncome ? context.l10n.statistics_netIncome : context.l10n.statistics_netExpense;
     final netAmount = isNetIncome ? -netSpending : netSpending;
 
     return Column(
@@ -96,7 +98,7 @@ class StatisticsPage extends ConsumerWidget {
         SummaryCard(
           icon: Icons.attach_money,
           iconColor: AppColors.primary,
-          label: '현재 기간 예산',
+          label: context.l10n.statistics_currentPeriodBudget,
           amount: monthlyBudget,
         ),
         const SizedBox(height: 12),
@@ -111,17 +113,17 @@ class StatisticsPage extends ConsumerWidget {
         SummaryCard(
           icon: Icons.trending_up,
           iconColor: AppColors.success,
-          label: '남은 예산',
+          label: context.l10n.statistics_remainingBudget,
           amount: remaining,
           amountColor: remaining >= 0 ? AppColors.success : AppColors.danger,
         ),
         const SizedBox(height: 12),
-        _buildDetailedBreakdown(totalSpent, totalIncome),
+        _buildDetailedBreakdown(context, totalSpent, totalIncome),
       ],
     );
   }
 
-  Widget _buildDetailedBreakdown(int totalSpent, int totalIncome) {
+  Widget _buildDetailedBreakdown(BuildContext context, int totalSpent, int totalIncome) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -148,7 +150,7 @@ class StatisticsPage extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '총 지출',
+                      context.l10n.statistics_totalExpense,
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 14,
@@ -157,7 +159,7 @@ class StatisticsPage extends ConsumerWidget {
                   ],
                 ),
                 Text(
-                  Formatters.formatCurrency(totalSpent),
+                  Formatters.formatCurrency(totalSpent, context),
                   style: TextStyle(
                     color: AppColors.danger,
                     fontSize: 16,
@@ -187,7 +189,7 @@ class StatisticsPage extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '총 수입',
+                      context.l10n.statistics_totalIncome,
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 14,
@@ -196,7 +198,7 @@ class StatisticsPage extends ConsumerWidget {
                   ],
                 ),
                 Text(
-                  Formatters.formatCurrency(totalIncome),
+                  Formatters.formatCurrency(totalIncome, context),
                   style: TextStyle(
                     color: AppColors.success,
                     fontSize: 16,
@@ -228,11 +230,11 @@ class StatisticsPage extends ConsumerWidget {
     if (budget == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('통계'),
+          title: Text(context.l10n.statistics_title),
         ),
         body: _buildEmptyState(
           context,
-          '예산을 먼저 설정해주세요.',
+          context.l10n.statistics_noBudget,
         ),
       );
     }
@@ -241,11 +243,11 @@ class StatisticsPage extends ConsumerWidget {
     final monthTransactions = _filterByMonth(transactions, currentMonth);
 
     // Calculate category data
-    final categoryData = _calculateCategoryData(monthTransactions);
+    final categoryData = _calculateCategoryData(monthTransactions, context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('통계'),
+        title: Text(context.l10n.statistics_title),
       ),
       body: Column(
         children: [
@@ -278,6 +280,7 @@ class StatisticsPage extends ConsumerWidget {
                       children: [
                         // Summary cards
                         _buildSummaryCards(
+                          context,
                           budget.amount,
                           budgetData.totalSpent,
                           budgetData.totalIncome,
@@ -337,6 +340,7 @@ class StatisticsPage extends ConsumerWidget {
               child: Column(
                 children: [
                   _buildSummaryCards(
+                    context,
                     budget.amount,
                     budgetData.totalSpent,
                     budgetData.totalIncome,
@@ -395,7 +399,7 @@ class StatisticsPage extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                '아직 거래 내역이 없습니다',
+                context.l10n.statistics_noTransactions,
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium

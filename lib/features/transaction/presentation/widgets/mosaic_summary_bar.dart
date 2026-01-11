@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/features/transaction/domain/models/monthly_mosaic_data.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 
@@ -43,7 +44,7 @@ class MosaicSummaryBar extends StatelessWidget {
 
     if (!summary.hasBudget) {
       return Text(
-        '예산이 설정되지 않았습니다.',
+        context.l10n.mosaic_noBudget,
         style: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
         ),
@@ -51,7 +52,7 @@ class MosaicSummaryBar extends StatelessWidget {
     }
 
     return Text(
-      '이번 기간: 퍼펙트 ${summary.perfect}일, 과소비 ${summary.overspent}일',
+      context.l10n.mosaic_summary(summary.perfect, summary.overspent),
       style: theme.textTheme.bodyMedium?.copyWith(
         fontWeight: FontWeight.w500,
       ),
@@ -61,7 +62,15 @@ class MosaicSummaryBar extends StatelessWidget {
   Widget _buildSelectedDateInfo(BuildContext context) {
     final theme = Theme.of(context);
     final date = DateTime.parse(selectedDate!);
-    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+    final weekdays = [
+      context.l10n.weekday_sun,
+      context.l10n.weekday_mon,
+      context.l10n.weekday_tue,
+      context.l10n.weekday_wed,
+      context.l10n.weekday_thu,
+      context.l10n.weekday_fri,
+      context.l10n.weekday_sat,
+    ];
     final weekday = weekdays[date.weekday % 7];
 
     return Row(
@@ -72,13 +81,13 @@ class MosaicSummaryBar extends StatelessWidget {
               style: theme.textTheme.bodyMedium,
               children: [
                 TextSpan(
-                  text: '${date.month}월 ${date.day}일 ($weekday)',
+                  text: context.l10n.mosaic_dateLabel(date.month, date.day, weekday),
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 if (selectedDateNetSpent != null) ...[
                   const TextSpan(text: ' • '),
                   TextSpan(
-                    text: '순지출 ${Formatters.formatCurrency(selectedDateNetSpent!)}',
+                    text: context.l10n.net_expense_amount(Formatters.formatCurrency(selectedDateNetSpent!, context)),
                     style: TextStyle(
                       color: selectedDateNetSpent! > 0
                           ? theme.colorScheme.error
@@ -92,7 +101,7 @@ class MosaicSummaryBar extends StatelessWidget {
         ),
         IconButton(
           icon: const Icon(Icons.close),
-          tooltip: '전체 보기',
+          tooltip: context.l10n.transaction_viewAll,
           onPressed: onReset,
           visualDensity: VisualDensity.compact,
         ),

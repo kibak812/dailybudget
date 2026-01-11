@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
+import 'package:daily_pace/core/utils/formatters.dart';
 
 /// Calculator bottom sheet for transaction amount input
 /// Returns the calculated result when confirmed
+/// - Korean: Integer input (won), returns integer
+/// - English: Decimal input (dollars), returns cents (integer)
 class CalculatorSheet extends StatefulWidget {
   final int? initialValue;
 
@@ -17,23 +21,45 @@ class CalculatorSheet extends StatefulWidget {
 
 class _CalculatorSheetState extends State<CalculatorSheet> {
   String _expression = '';
-  String _result = '0';
   bool _hasCalculated = false;
+  bool _isEnglish = false;
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.initialValue != null && widget.initialValue! > 0) {
-      _expression = widget.initialValue.toString();
-      _result = _formatNumber(widget.initialValue!);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _isEnglish = Formatters.isEnglishLocale(context);
+
+    // Initialize with initial value if provided
+    if (widget.initialValue != null && widget.initialValue! > 0 && _expression.isEmpty) {
+      if (_isEnglish) {
+        // Convert cents to dollars for display
+        final dollars = widget.initialValue! / 100;
+        _expression = dollars.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+        if (_expression.endsWith('.')) {
+          _expression = _expression.substring(0, _expression.length - 1);
+        }
+      } else {
+        _expression = widget.initialValue.toString();
+      }
     }
   }
 
-  String _formatNumber(int number) {
-    return number.toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        );
+  /// Format number with comma separators (for display in expression)
+  String _formatNumberWithCommas(String numStr) {
+    if (numStr.isEmpty) return '0';
+
+    // Handle decimal point
+    final parts = numStr.split('.');
+    final intPart = parts[0];
+    final decPart = parts.length > 1 ? '.${parts[1]}' : '';
+
+    // Add commas to integer part
+    final formatted = intPart.replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]},',
+    );
+
+    return formatted + decPart;
   }
 
   void _onNumberPressed(String number) {
@@ -42,9 +68,41 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
         _expression = number;
         _hasCalculated = false;
       } else {
-        _expression += number;
+        // Prevent multiple leading zeros
+        if (_expression == '0' && number != '.') {
+          _expression = number;
+        } else {
+          _expression += number;
+        }
       }
-      _updateResult();
+    });
+  }
+
+  void _onDecimalPressed() {
+    if (!_isEnglish) return; // Decimal only for English locale
+
+    setState(() {
+      if (_hasCalculated) {
+        _expression = '0.';
+        _hasCalculated = false;
+        return;
+      }
+
+      // Find the current number being edited (after last operator)
+      String currentNum = '';
+      for (int i = _expression.length - 1; i >= 0; i--) {
+        if (_isOperator(_expression[i])) break;
+        currentNum = _expression[i] + currentNum;
+      }
+
+      // Only add decimal if current number doesn't have one
+      if (!currentNum.contains('.')) {
+        if (_expression.isEmpty || _isOperator(_expression[_expression.length - 1])) {
+          _expression += '0.';
+        } else {
+          _expression += '.';
+        }
+      }
     });
   }
 
@@ -53,6 +111,10 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
 
     setState(() {
       _hasCalculated = false;
+      // Remove trailing decimal point before operator
+      if (_expression.endsWith('.')) {
+        _expression = _expression.substring(0, _expression.length - 1);
+      }
       // If the last character is an operator, replace it
       if (_isOperator(_expression[_expression.length - 1])) {
         _expression = _expression.substring(0, _expression.length - 1) + operator;
@@ -69,7 +131,6 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
   void _onClear() {
     setState(() {
       _expression = '';
-      _result = '0';
       _hasCalculated = false;
     });
   }
@@ -79,39 +140,37 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
       setState(() {
         _expression = _expression.substring(0, _expression.length - 1);
         _hasCalculated = false;
-        _updateResult();
       });
     }
   }
 
   void _onEquals() {
-    _updateResult();
     setState(() {
       _hasCalculated = true;
-      // Replace expression with result for chained calculations
       final calculated = _calculate();
       if (calculated > 0) {
-        _expression = calculated.toString();
+        if (_isEnglish) {
+          // Format as decimal for English
+          _expression = calculated.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+          if (_expression.endsWith('.')) {
+            _expression = _expression.substring(0, _expression.length - 1);
+          }
+        } else {
+          _expression = calculated.toInt().toString();
+        }
       }
     });
   }
 
-  void _updateResult() {
-    final calculated = _calculate();
-    setState(() {
-      _result = _formatNumber(calculated);
-    });
-  }
-
-  int _calculate() {
+  /// Calculate the expression and return result as double
+  double _calculate() {
     if (_expression.isEmpty) return 0;
 
     try {
-      // Parse the expression
       String expr = _expression;
 
-      // Remove trailing operator
-      while (expr.isNotEmpty && _isOperator(expr[expr.length - 1])) {
+      // Remove trailing operator or decimal
+      while (expr.isNotEmpty && (_isOperator(expr[expr.length - 1]) || expr.endsWith('.'))) {
         expr = expr.substring(0, expr.length - 1);
       }
 
@@ -145,13 +204,13 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
       while (i < tokens.length) {
         if (tokens[i] == '×' || tokens[i] == '÷') {
           if (intermediate.isNotEmpty && i + 1 < tokens.length) {
-            int left = int.tryParse(intermediate.removeLast()) ?? 0;
-            int right = int.tryParse(tokens[i + 1]) ?? 0;
-            int result;
+            double left = double.tryParse(intermediate.removeLast()) ?? 0;
+            double right = double.tryParse(tokens[i + 1]) ?? 0;
+            double result;
             if (tokens[i] == '×') {
               result = left * right;
             } else {
-              result = right != 0 ? left ~/ right : 0;
+              result = right != 0 ? left / right : 0;
             }
             intermediate.add(result.toString());
             i += 2;
@@ -167,11 +226,11 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
       // Second pass: handle + and -
       if (intermediate.isEmpty) return 0;
 
-      int result = int.tryParse(intermediate[0]) ?? 0;
+      double result = double.tryParse(intermediate[0]) ?? 0;
       i = 1;
       while (i < intermediate.length - 1) {
         String op = intermediate[i];
-        int right = int.tryParse(intermediate[i + 1]) ?? 0;
+        double right = double.tryParse(intermediate[i + 1]) ?? 0;
         if (op == '+') {
           result += right;
         } else if (op == '-') {
@@ -186,13 +245,27 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
     }
   }
 
+  /// Get the result as integer (for returning to caller)
+  /// - Korean: returns the value as-is (won)
+  /// - English: converts dollars to cents (* 100)
+  int _getResultAsInt() {
+    final calculated = _calculate();
+    if (_isEnglish) {
+      // Convert dollars to cents
+      return (calculated * 100).round();
+    } else {
+      return calculated.toInt();
+    }
+  }
+
   void _onConfirm() {
-    final result = _calculate();
+    final result = _getResultAsInt();
     Navigator.of(context).pop(result);
   }
 
   String _getDisplayExpression() {
     if (_expression.isEmpty) return '0';
+
     // Format numbers in expression for display
     String display = '';
     String currentNumber = '';
@@ -201,7 +274,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
       String char = _expression[i];
       if (_isOperator(char)) {
         if (currentNumber.isNotEmpty) {
-          display += _formatNumber(int.tryParse(currentNumber) ?? 0);
+          display += _formatNumberWithCommas(currentNumber);
           currentNumber = '';
         }
         display += ' $char ';
@@ -210,10 +283,22 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
       }
     }
     if (currentNumber.isNotEmpty) {
-      display += _formatNumber(int.tryParse(currentNumber) ?? 0);
+      display += _formatNumberWithCommas(currentNumber);
     }
 
     return display;
+  }
+
+  /// Get formatted result for display
+  String _getFormattedResult() {
+    final calculated = _calculate();
+    if (_isEnglish) {
+      // Format as dollars
+      return '\$${calculated.toStringAsFixed(2)}';
+    } else {
+      // Format as Korean won
+      return Formatters.formatCurrency(calculated.toInt(), context);
+    }
   }
 
   @override
@@ -248,7 +333,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '계산기',
+                  context.l10n.calculator_title,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -282,9 +367,9 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
-                // Result
+                // Result - locale-aware currency format
                 Text(
-                  '$_result 원',
+                  _getFormattedResult(),
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.primary,
@@ -325,7 +410,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                child: const Text('확인'),
+                child: Text(context.l10n.common_ok),
               ),
             ),
           ),
@@ -344,6 +429,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
 
   Widget _buildButton(String label) {
     final theme = Theme.of(context);
+    final bool isDecimalEnabled = _isEnglish;
 
     Color backgroundColor;
     Color textColor;
@@ -387,10 +473,15 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
       fontSize = 26;
       fontWeight = FontWeight.bold;
     }
-    // Decimal point - visually disabled (integer-only calculator)
+    // Decimal point - enabled for English, disabled for Korean
     else if (label == '.') {
-      backgroundColor = theme.colorScheme.surfaceContainerLow;
-      textColor = AppColors.disabledText;
+      if (isDecimalEnabled) {
+        backgroundColor = theme.colorScheme.surfaceContainerLow;
+        textColor = theme.colorScheme.onSurface;
+      } else {
+        backgroundColor = theme.colorScheme.surfaceContainerLow;
+        textColor = AppColors.disabledText;
+      }
       fontSize = 24;
       fontWeight = FontWeight.w600;
     }
@@ -454,8 +545,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
     } else if (label == '%') {
       _onPercent();
     } else if (label == '.') {
-      // Decimal point - ignored for integer-only calculator
-      // Korean won doesn't use decimals
+      _onDecimalPressed();
     } else if (_isOperator(label)) {
       _onOperatorPressed(label);
     } else {
@@ -468,9 +558,12 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
     final calculated = _calculate();
     if (calculated != 0) {
       setState(() {
-        final percentValue = calculated ~/ 100;
-        _expression = percentValue.toString();
-        _result = _formatNumber(percentValue);
+        final percentValue = calculated / 100;
+        if (_isEnglish) {
+          _expression = percentValue.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+        } else {
+          _expression = percentValue.toInt().toString();
+        }
         _hasCalculated = true;
       });
     }

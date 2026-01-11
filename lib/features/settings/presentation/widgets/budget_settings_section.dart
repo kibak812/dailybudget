@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
@@ -26,12 +28,12 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
   }
 
   void _handleUpdateBudget() {
-    final amount = Formatters.parseFormattedNumber(_budgetController.text);
+    final amount = Formatters.parseFormattedNumber(_budgetController.text, context);
 
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('올바른 금액을 입력해주세요.'),
+          content: Text(context.l10n.error_invalidAmount),
           backgroundColor: AppColors.danger,
         ),
       );
@@ -63,8 +65,8 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
     // Calculate period for display
     final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
     final periodLabel = startDay == 1
-        ? '${currentMonth.month}월 예산'
-        : '${periodStart.month}/${periodStart.day}~${periodEnd.month}/${periodEnd.day} 예산';
+        ? context.l10n.budget_monthBudget(currentMonth.month)
+        : '${periodStart.month}/${periodStart.day}~${periodEnd.month}/${periodEnd.day}';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +74,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
-            '예산 설정',
+            context.l10n.budget_budgetSettings,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
@@ -109,8 +111,8 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
                   ),
                   Text(
                     currentBudget != null
-                        ? Formatters.formatCurrency(currentBudget.amount)
-                        : '미설정',
+                        ? Formatters.formatCurrency(currentBudget.amount, context)
+                        : context.l10n.budget_notSet,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.primary,
@@ -122,43 +124,55 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _budgetController,
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.right,
-                      decoration: InputDecoration(
-                        hintText: '새 예산 금액 입력',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.primary,
-                            width: 2,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                      onChanged: (value) {
-                        final formatted = Formatters.formatNumberInput(value);
-                        if (formatted != value) {
-                          _budgetController.value = TextEditingValue(
-                            text: formatted,
-                            selection: TextSelection.collapsed(
-                              offset: formatted.length,
+                    child: Builder(
+                      builder: (context) {
+                        final isEnglish = Formatters.isEnglishLocale(context);
+                        return TextField(
+                          controller: _budgetController,
+                          keyboardType: isEnglish
+                              ? const TextInputType.numberWithOptions(decimal: true)
+                              : TextInputType.number,
+                          inputFormatters: isEnglish
+                              ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))]
+                              : [FilteringTextInputFormatter.digitsOnly],
+                          textAlign: TextAlign.right,
+                          decoration: InputDecoration(
+                            hintText: isEnglish ? '0.00' : context.l10n.budget_enterNewAmount,
+                            prefixText: isEnglish ? '\$ ' : null,
+                            suffixText: isEnglish ? null : context.l10n.unit_won,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppColors.border),
                             ),
-                          );
-                        }
-                        setState(() {}); // Trigger rebuild to update button state
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppColors.border),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.primary,
+                                width: 2,
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                          onChanged: (value) {
+                            final formatted = Formatters.formatNumberInput(value, context);
+                            if (formatted != value) {
+                              _budgetController.value = TextEditingValue(
+                                text: formatted,
+                                selection: TextSelection.collapsed(
+                                  offset: formatted.length,
+                                ),
+                              );
+                            }
+                            setState(() {}); // Trigger rebuild to update button state
+                          },
+                        );
                       },
                     ),
                   ),
@@ -176,7 +190,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('저장'),
+                    child: Text(context.l10n.common_save),
                   ),
                 ],
               ),
@@ -199,7 +213,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
-            '예산 시작일',
+            context.l10n.budget_startDay,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
@@ -227,7 +241,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
               vertical: 8,
             ),
             title: Text(
-              '매월 시작일',
+              context.l10n.budget_monthlyStartDay,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                     color: AppColors.textSecondary,
@@ -237,8 +251,8 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
               padding: const EdgeInsets.only(top: 4),
               child: Text(
                 startDay == 1
-                    ? '매월 1일 (기본)'
-                    : '매월 $startDay일',
+                    ? context.l10n.budget_dayDefault(1)
+                    : context.l10n.budget_dayFormat(startDay),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textTertiary,
                     ),
@@ -248,7 +262,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '$startDay일',
+                  context.l10n.budget_dayFormat(startDay),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.primary,
@@ -267,7 +281,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
         Padding(
           padding: const EdgeInsets.only(left: 4, top: 8),
           child: Text(
-            '월급날 등 예산 시작일을 설정하면 해당 날짜부터 다음 시작일 전날까지를 한 달 예산 기간으로 계산합니다.',
+            context.l10n.budget_startDayExplain,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textTertiary,
                 ),
@@ -297,7 +311,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '예산 시작일 선택',
+                      context.l10n.budget_selectStartDay,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -320,7 +334,7 @@ class _BudgetSettingsSectionState extends ConsumerState<BudgetSettingsSection> {
 
                     return ListTile(
                       title: Text(
-                        day == 1 ? '$day일 (기본)' : '$day일',
+                        day == 1 ? context.l10n.budget_dayDefault(day) : context.l10n.budget_dayFormat(day),
                         style: TextStyle(
                           fontWeight:
                               isSelected ? FontWeight.bold : FontWeight.normal,

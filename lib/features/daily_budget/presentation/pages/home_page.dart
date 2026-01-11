@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/widgets/banner_ad_widget.dart';
 import 'package:daily_pace/core/utils/date_range_extension.dart';
+import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/today_summary_card.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/today_spent_card.dart';
@@ -30,7 +32,7 @@ class HomePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: startDay == 1
-            ? Text('${currentMonth.year}년 ${currentMonth.month}월')
+            ? Text(Formatters.formatYearMonthDisplay(currentMonth.year, currentMonth.month, context))
             : Text(
                 '${periodStart.year}.${periodStart.month}.${periodStart.day} ~ ${periodEnd.month}.${periodEnd.day}',
               ),
@@ -45,7 +47,7 @@ class HomePage extends ConsumerWidget {
               month: newMonth,
             );
           },
-          tooltip: '이전 달',
+          tooltip: context.l10n.home_previousMonth,
         ),
         actions: [
           IconButton(
@@ -59,7 +61,7 @@ class HomePage extends ConsumerWidget {
                 month: newMonth,
               );
             },
-            tooltip: '다음 달',
+            tooltip: context.l10n.home_nextMonth,
           ),
         ],
       ),
@@ -76,7 +78,7 @@ class HomePage extends ConsumerWidget {
             builder: (context) => const AddTransactionSheet(),
           );
         },
-        tooltip: '거래 추가',
+        tooltip: context.l10n.home_addTransaction,
         child: const Icon(Icons.add),
       ),
     );
@@ -145,7 +147,7 @@ class HomePage extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              '예산을 설정해주세요',
+              context.l10n.home_setBudget,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textSecondary,
@@ -153,7 +155,7 @@ class HomePage extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              '예산을 설정하면\n일별 사용 가능 금액을 확인할 수 있습니다',
+              context.l10n.home_setBudgetDesc,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.textSecondary,
@@ -167,7 +169,7 @@ class HomePage extends ConsumerWidget {
                 context.go(AppRouter.settingsPath);
               },
               icon: const Icon(Icons.add),
-              label: const Text('예산 설정하기'),
+              label: Text(context.l10n.home_setBudgetButton),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,

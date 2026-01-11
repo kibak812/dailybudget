@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 
@@ -86,10 +87,10 @@ class _BudgetUsageCardState extends State<BudgetUsageCard>
         : 0.0;
 
     // Display label and value based on net spending/income
-    final displayLabel = isNetIncome ? '순수입' : '순지출';
+    final displayLabel = isNetIncome ? context.l10n.statistics_netIncome : context.l10n.statistics_netExpense;
     final displayAmount = isNetIncome
-        ? '+${Formatters.formatCurrency(widget.totalSpent.abs())}'
-        : Formatters.formatCurrency(widget.totalSpent);
+        ? '+${Formatters.formatCurrency(widget.totalSpent.abs(), context)}'
+        : Formatters.formatCurrency(widget.totalSpent, context);
 
     return Card(
       child: Padding(
@@ -99,7 +100,7 @@ class _BudgetUsageCardState extends State<BudgetUsageCard>
           children: [
             // Title
             Text(
-              '예산 사용률',
+              context.l10n.statistics_budgetUsage,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
+import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/budget/presentation/providers/current_month_provider.dart';
 import 'package:daily_pace/features/settings/presentation/providers/budget_start_day_provider.dart';
 import 'package:daily_pace/core/utils/date_range_extension.dart';
@@ -32,11 +34,11 @@ class MonthNavigationBar extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.chevron_left),
             onPressed: () => _navigateToPreviousMonth(ref, currentMonth),
-            tooltip: '이전 달',
+            tooltip: context.l10n.home_previousMonth,
           ),
           Text(
             startDay == 1
-                ? '${currentMonth.year}년 ${currentMonth.month}월'
+                ? Formatters.formatYearMonthDisplay(currentMonth.year, currentMonth.month, context)
                 : '${periodStart.year}.${periodStart.month}.${periodStart.day} ~ ${periodEnd.month}.${periodEnd.day}',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
@@ -45,7 +47,7 @@ class MonthNavigationBar extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.chevron_right),
             onPressed: () => _navigateToNextMonth(ref, currentMonth),
-            tooltip: '다음 달',
+            tooltip: context.l10n.home_nextMonth,
           ),
         ],
       ),

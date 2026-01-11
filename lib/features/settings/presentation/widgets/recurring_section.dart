@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
@@ -36,20 +37,20 @@ class RecurringSection extends ConsumerWidget {
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('반복 지출 삭제'),
-        content: const Text('정말로 이 반복 지출을 삭제하시겠습니까?'),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.recurring_deleteTitle),
+        content: Text(context.l10n.recurring_deleteMessage),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소'),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.l10n.common_cancel),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text('삭제'),
+            child: Text(context.l10n.common_delete),
           ),
         ],
       ),
@@ -84,7 +85,7 @@ class RecurringSection extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '반복 지출',
+                context.l10n.recurring_title,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -109,7 +110,7 @@ class RecurringSection extends ConsumerWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '추가하기',
+                        context.l10n.recurring_add,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: Theme.of(context).colorScheme.primary,
@@ -143,7 +144,7 @@ class RecurringSection extends ConsumerWidget {
                   padding: const EdgeInsets.all(32),
                   child: Center(
                     child: Text(
-                      '등록된 반복 지출이 없습니다',
+                      context.l10n.recurring_empty,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.textTertiary,
                           ),
@@ -247,7 +248,7 @@ class RecurringSection extends ConsumerWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      Formatters.formatCurrency(recurring.amount),
+                                      Formatters.formatCurrency(recurring.amount, context),
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall
@@ -320,7 +321,7 @@ class RecurringSection extends ConsumerWidget {
                       minimumSize: const Size.fromHeight(32),
                     ),
                     child: Text(
-                      '현재 기간 반복 지출 다시 생성하기',
+                      context.l10n.recurring_regenerate,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,

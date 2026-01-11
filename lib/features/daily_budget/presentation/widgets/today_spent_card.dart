@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
@@ -17,11 +18,11 @@ class TodaySpentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isOverBudget = budgetData.remainingToday < 0;
     final netSpentToday = budgetData.spentToday;
-    final isNetIncome = netSpentToday < 0; // 수입이 지출보다 많은 경우
+    final isNetIncome = netSpentToday < 0;
 
     return Row(
       children: [
-        // Net Spent Today (순지출)
+        // Net Spent Today
         Expanded(
           child: Card(
             elevation: 2,
@@ -34,7 +35,7 @@ class TodaySpentCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isNetIncome ? '오늘 순수입' : '오늘 순지출',
+                    isNetIncome ? context.l10n.today_netIncome : context.l10n.today_netExpense,
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 13,
@@ -42,7 +43,7 @@ class TodaySpentCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${isNetIncome ? '+' : ''}${Formatters.formatCurrency(netSpentToday.abs())}',
+                    '${isNetIncome ? '+' : ''}${Formatters.formatCurrency(netSpentToday.abs(), context)}',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -68,7 +69,7 @@ class TodaySpentCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isOverBudget ? '오늘 예산 초과' : '오늘 남은 예산',
+                    isOverBudget ? context.l10n.today_overBudget : context.l10n.today_remaining,
                     style: TextStyle(
                       color: isOverBudget ? Colors.red[700] : AppColors.textSecondary,
                       fontSize: 13,
@@ -76,7 +77,7 @@ class TodaySpentCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    Formatters.formatCurrency(budgetData.remainingToday.abs()),
+                    Formatters.formatCurrency(budgetData.remainingToday.abs(), context),
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -86,7 +87,7 @@ class TodaySpentCard extends StatelessWidget {
                   if (isOverBudget) ...[
                     const SizedBox(height: 4),
                     Text(
-                      '내일부터 일별 예산이 줄어듭니다',
+                      context.l10n.today_budgetDecreaseHint,
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 10,

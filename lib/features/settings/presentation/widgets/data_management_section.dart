@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/data_backup.dart';
@@ -29,8 +30,8 @@ class DataManagementSection extends ConsumerWidget {
       final box = context.findRenderObject() as RenderBox?;
       final result = await Share.shareXFiles(
         [XFile(file.path)],
-        subject: 'Daily Pace 백업',
-        text: '데이터 백업 파일',
+        subject: context.l10n.data_backupSubject,
+        text: context.l10n.data_backupText,
         sharePositionOrigin: box != null
             ? box.localToGlobal(Offset.zero) & box.size
             : null,
@@ -39,7 +40,7 @@ class DataManagementSection extends ConsumerWidget {
       if (context.mounted && result.status == ShareResultStatus.success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('데이터가 내보내졌습니다.'),
+            content: Text(context.l10n.data_exportSuccess),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -48,7 +49,7 @@ class DataManagementSection extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('데이터 내보내기에 실패했습니다: $e'),
+            content: Text(context.l10n.data_exportError(e.toString())),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -83,11 +84,11 @@ class DataManagementSection extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '데이터를 가져왔습니다!\n'
-              '예산: ${counts['budgets']}, '
-              '거래: ${counts['transactions']}, '
-              '반복: ${counts['recurring']}, '
-              '카테고리: ${counts['categories']}',
+              context.l10n.data_importSuccess(
+                counts['budgets'] ?? 0,
+                counts['transactions'] ?? 0,
+                counts['recurring'] ?? 0,
+              ),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
             duration: const Duration(seconds: 3),
@@ -98,7 +99,7 @@ class DataManagementSection extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('데이터 가져오기에 실패했습니다: $e'),
+            content: Text(context.l10n.data_importError(e.toString())),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -110,22 +111,20 @@ class DataManagementSection extends ConsumerWidget {
     // First confirmation
     final confirmed1 = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('모든 데이터 삭제'),
-        content: const Text(
-          '정말로 모든 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.',
-        ),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.data_deleteConfirm),
+        content: Text(context.l10n.data_deleteConfirmMessage),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소'),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.l10n.common_cancel),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text('삭제'),
+            child: Text(context.l10n.common_delete),
           ),
         ],
       ),
@@ -136,20 +135,20 @@ class DataManagementSection extends ConsumerWidget {
     // Second confirmation
     final confirmed2 = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('한 번 더 확인'),
-        content: const Text('한 번 더 확인합니다. 정말로 삭제하시겠습니까?'),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.data_deleteDoubleConfirm),
+        content: Text(context.l10n.data_deleteDoubleConfirmMessage),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소'),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.l10n.common_cancel),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text('삭제'),
+            child: Text(context.l10n.common_delete),
           ),
         ],
       ),
@@ -170,7 +169,7 @@ class DataManagementSection extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('모든 데이터가 삭제되었습니다.'),
+            content: Text(context.l10n.data_deleteSuccess),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -179,7 +178,7 @@ class DataManagementSection extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('데이터 삭제에 실패했습니다: $e'),
+            content: Text(context.l10n.data_deleteError(e.toString())),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -195,7 +194,7 @@ class DataManagementSection extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
-            '데이터 관리',
+            context.l10n.data_title,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
@@ -250,7 +249,7 @@ class DataManagementSection extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '데이터 백업',
+                              context.l10n.data_backup,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium
@@ -260,7 +259,7 @@ class DataManagementSection extends ConsumerWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '현재 데이터를 파일로 저장합니다',
+                              context.l10n.data_backupDesc,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -303,7 +302,7 @@ class DataManagementSection extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '데이터 복원',
+                              context.l10n.data_restore,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium
@@ -313,7 +312,7 @@ class DataManagementSection extends ConsumerWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '백업 파일을 불러옵니다',
+                              context.l10n.data_restoreDesc,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -359,7 +358,7 @@ class DataManagementSection extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '모든 데이터 삭제',
+                              context.l10n.data_deleteAll,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium
@@ -370,7 +369,7 @@ class DataManagementSection extends ConsumerWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '이 작업은 되돌릴 수 없습니다',
+                              context.l10n.data_deleteAllDesc,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -392,7 +391,7 @@ class DataManagementSection extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
-            '데이터는 기기에 안전하게 저장됩니다. 앱 삭제 시 데이터가 사라지므로 정기적으로 백업하세요.',
+            context.l10n.data_hint,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textTertiary,
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 
@@ -54,8 +55,8 @@ class _CategoryChartCardSyncfusionState
   }
 
   /// 차트용 색상 (기타는 회색)
-  Color _getColorForChartItem(String name, int index) {
-    if (name == '기타') {
+  Color _getColorForChartItem(BuildContext context, String name, int index) {
+    if (name == context.l10n.category_other) {
       return const Color(0xFF9CA3AF); // Gray-400
     }
     return categoryColors[index % categoryColors.length];
@@ -63,7 +64,7 @@ class _CategoryChartCardSyncfusionState
 
   /// 차트용 데이터 전처리: 정렬 + 기타 합산
   List<CategorySpending> _preprocessChartData(
-      List<CategorySpending> data, int total) {
+      BuildContext context, List<CategorySpending> data, int total) {
     if (data.isEmpty || total <= 0) return data;
 
     const double threshold = 5.0; // 5% 미만은 기타로
@@ -85,7 +86,7 @@ class _CategoryChartCardSyncfusionState
 
     // 기타 항목 추가 (있는 경우)
     if (etcAmount > 0) {
-      majorItems.add(CategorySpending(name: '기타', amount: etcAmount));
+      majorItems.add(CategorySpending(name: context.l10n.category_other, amount: etcAmount));
     }
 
     return majorItems;
@@ -101,7 +102,7 @@ class _CategoryChartCardSyncfusionState
           children: [
             // Title
             Text(
-              '카테고리별 지출',
+              context.l10n.statistics_categoryExpense,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -122,7 +123,7 @@ class _CategoryChartCardSyncfusionState
 
                   // 차트용 전처리 데이터 (5% 미만 기타 합산, 내림차순)
                   final chartData = _preprocessChartData(
-                      widget.categoryData, widget.totalSpent);
+                      context, widget.categoryData, widget.totalSpent);
 
                   return SizedBox(
                     height: chartHeight,
@@ -134,7 +135,7 @@ class _CategoryChartCardSyncfusionState
                           xValueMapper: (data, _) => data.name,
                           yValueMapper: (data, _) => data.amount.toDouble(),
                           pointColorMapper: (data, index) =>
-                              _getColorForChartItem(data.name, index),
+                              _getColorForChartItem(context, data.name, index),
                           strokeWidth: 2,
                           strokeColor: Colors.white,
 
@@ -229,7 +230,7 @@ class _CategoryChartCardSyncfusionState
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              Formatters.formatCurrency(category.amount),
+                              Formatters.formatCurrency(category.amount, context),
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium

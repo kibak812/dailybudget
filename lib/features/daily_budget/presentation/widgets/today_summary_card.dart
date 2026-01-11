@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 
@@ -14,7 +15,7 @@ class TodaySummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final trendInfo = _getTrendInfo();
+    final trendInfo = _getTrendInfo(context);
 
     return Card(
       elevation: 8,
@@ -56,7 +57,7 @@ class TodaySummaryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '오늘 사용할 수 있는 예산',
+                    context.l10n.home_todayBudget,
                     style: TextStyle(
                       color: Colors.indigo[100],
                       fontSize: 14,
@@ -65,7 +66,7 @@ class TodaySummaryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    Formatters.formatCurrency(budgetData.dailyBudgetNow),
+                    Formatters.formatCurrency(budgetData.dailyBudgetNow, context),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 40,
@@ -114,23 +115,23 @@ class TodaySummaryCard extends StatelessWidget {
     );
   }
 
-  _TrendInfo _getTrendInfo() {
+  _TrendInfo _getTrendInfo(BuildContext context) {
     if (budgetData.diff > 0) {
       return _TrendInfo(
         icon: Icons.trending_up,
-        text: '어제보다 ${Formatters.formatCurrency(budgetData.diff)} 늘었어요',
+        text: context.l10n.diff_increased(Formatters.formatCurrency(budgetData.diff, context)),
         color: Colors.green[300]!,
       );
     } else if (budgetData.diff < 0) {
       return _TrendInfo(
         icon: Icons.trending_down,
-        text: '어제보다 ${Formatters.formatCurrency(budgetData.diff.abs())} 줄었어요',
+        text: context.l10n.diff_decreased(Formatters.formatCurrency(budgetData.diff.abs(), context)),
         color: Colors.red[300]!,
       );
     } else {
       return _TrendInfo(
         icon: Icons.remove,
-        text: '어제와 동일해요',
+        text: context.l10n.diff_same,
         color: Colors.indigo[200]!,
       );
     }

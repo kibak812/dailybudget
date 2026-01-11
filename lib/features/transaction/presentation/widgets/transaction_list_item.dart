@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
@@ -97,7 +98,7 @@ class TransactionListItem extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              '반복',
+                              context.l10n.recurring_title,
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: Colors.blue.shade700,
                                 fontSize: 10,
@@ -140,7 +141,7 @@ class TransactionListItem extends StatelessWidget {
 
               // Amount
               Text(
-                '${transaction.type == TransactionType.expense ? '-' : '+'}${Formatters.formatCurrency(transaction.amount)}',
+                '${transaction.type == TransactionType.expense ? '-' : '+'}${Formatters.formatCurrency(transaction.amount, context)}',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: transaction.type == TransactionType.expense
@@ -176,18 +177,18 @@ class TransactionListItem extends StatelessWidget {
           // Show confirmation dialog
           return await showDialog<bool>(
             context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('거래 삭제'),
-              content: const Text('이 거래를 삭제하시겠습니까?'),
+            builder: (ctx) => AlertDialog(
+              title: Text(ctx.l10n.transaction_deleteTitle),
+              content: Text(ctx.l10n.transaction_deleteMessage),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('취소'),
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: Text(ctx.l10n.common_cancel),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
+                  onPressed: () => Navigator.of(ctx).pop(true),
                   child: Text(
-                    '삭제',
+                    ctx.l10n.common_delete,
                     style: TextStyle(color: theme.colorScheme.error),
                   ),
                 ),

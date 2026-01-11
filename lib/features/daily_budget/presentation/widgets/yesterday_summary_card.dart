@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/services/daily_summary_service.dart';
 import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
@@ -137,14 +138,23 @@ class YesterdaySummary {
     return (savings.clamp(0.0, 1.0) * 100).round();
   }
 
-  /// Delegates to DayStatus.message
-  String get encouragementMessage => status.message;
-
   /// Delegates to DayStatus.cardColor
   Color get statusColor => status.cardColor;
 
   /// Delegates to DayStatus.icon
   IconData get statusIcon => status.icon;
+}
+
+/// Helper to get localized encouragement message based on status
+String _getLocalizedMessage(BuildContext context, DayStatus status) {
+  return switch (status) {
+    DayStatus.perfect => context.l10n.status_perfect,
+    DayStatus.safe => context.l10n.status_safe,
+    DayStatus.warning => context.l10n.status_warning,
+    DayStatus.danger => context.l10n.status_danger,
+    DayStatus.future => '',
+    DayStatus.noBudget => '',
+  };
 }
 
 /// Yesterday summary card widget
@@ -227,7 +237,9 @@ class _YesterdaySummaryCardState extends ConsumerState<YesterdaySummaryCard> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '${summary.date.month}월 ${summary.date.day}일 결산',
+                    context.l10n.yesterday_summary(
+                      Formatters.formatDate(Formatters.formatDateISO(summary.date), context),
+                    ),
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: summary.statusColor,
@@ -255,7 +267,7 @@ class _YesterdaySummaryCardState extends ConsumerState<YesterdaySummaryCard> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
             child: Text(
-              summary.encouragementMessage,
+              _getLocalizedMessage(context, summary.status),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
@@ -275,8 +287,8 @@ class _YesterdaySummaryCardState extends ConsumerState<YesterdaySummaryCard> {
                 Expanded(
                   child: _buildInfoColumn(
                     context,
-                    '예산',
-                    Formatters.formatCurrency(summary.budget),
+                    context.l10n.yesterday_budget,
+                    Formatters.formatCurrency(summary.budget, context),
                     AppColors.textSecondary,
                   ),
                 ),
@@ -288,8 +300,8 @@ class _YesterdaySummaryCardState extends ConsumerState<YesterdaySummaryCard> {
                 Expanded(
                   child: _buildInfoColumn(
                     context,
-                    '지출',
-                    Formatters.formatCurrency(summary.spent),
+                    context.l10n.yesterday_expense,
+                    Formatters.formatCurrency(summary.spent, context),
                     summary.spent > summary.budget
                         ? AppColors.danger
                         : AppColors.textPrimary,
@@ -303,7 +315,7 @@ class _YesterdaySummaryCardState extends ConsumerState<YesterdaySummaryCard> {
                 Expanded(
                   child: _buildInfoColumn(
                     context,
-                    '절약률',
+                    context.l10n.yesterday_savingsRate,
                     '${summary.savingsPercentage}%',
                     summary.statusColor,
                   ),

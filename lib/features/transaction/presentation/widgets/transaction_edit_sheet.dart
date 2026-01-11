@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/category_selector_sheet.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/calculator_sheet.dart';
@@ -46,7 +48,7 @@ class TransactionEditSheet extends ConsumerWidget {
 
               // Title
               Text(
-                '거래 상세',
+                context.l10n.transaction_detailTitle,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -57,23 +59,23 @@ class TransactionEditSheet extends ConsumerWidget {
               // Transaction details
               _buildDetailRow(
                 context,
-                '금액',
-                '${transaction.type == TransactionType.expense ? '-' : '+'}${Formatters.formatCurrency(transaction.amount)}',
+                context.l10n.transaction_amount,
+                '${transaction.type == TransactionType.expense ? '-' : '+'}${Formatters.formatCurrency(transaction.amount, context)}',
                 isAmount: true,
               ),
               const Divider(height: 24),
 
               _buildDetailRow(
                 context,
-                '카테고리',
-                transaction.category ?? '미분류',
+                context.l10n.transaction_category,
+                transaction.category ?? context.l10n.transaction_uncategorized,
               ),
               const Divider(height: 24),
 
               if (transaction.memo != null && transaction.memo!.isNotEmpty) ...[
                 _buildDetailRow(
                   context,
-                  '메모',
+                  context.l10n.transaction_memo.replaceAll(' (선택)', '').replaceAll(' (Optional)', ''),
                   transaction.memo!,
                 ),
                 const Divider(height: 24),
@@ -81,14 +83,14 @@ class TransactionEditSheet extends ConsumerWidget {
 
               _buildDetailRow(
                 context,
-                '날짜',
-                Formatters.formatDateFull(transaction.date),
+                context.l10n.transaction_date,
+                Formatters.formatDateFull(transaction.date, context),
               ),
               const Divider(height: 24),
 
               _buildDetailRow(
                 context,
-                '등록 시간',
+                context.l10n.transaction_createdAt,
                 Formatters.formatTime(transaction.createdAt),
               ),
 
@@ -96,8 +98,8 @@ class TransactionEditSheet extends ConsumerWidget {
                 const Divider(height: 24),
                 _buildDetailRow(
                   context,
-                  '반복 거래',
-                  '예',
+                  context.l10n.transaction_isRecurring,
+                  context.l10n.common_yes,
                   badge: true,
                 ),
               ],
@@ -114,18 +116,18 @@ class TransactionEditSheet extends ConsumerWidget {
                         // Confirm delete
                         final confirmed = await showDialog<bool>(
                           context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('거래 삭제'),
-                            content: const Text('이 거래를 삭제하시겠습니까?'),
+                          builder: (ctx) => AlertDialog(
+                            title: Text(ctx.l10n.transaction_deleteTitle),
+                            content: Text(ctx.l10n.transaction_deleteMessage),
                             actions: [
                               TextButton(
-                                onPressed: () => Navigator.of(context).pop(false),
-                                child: const Text('취소'),
+                                onPressed: () => Navigator.of(ctx).pop(false),
+                                child: Text(ctx.l10n.common_cancel),
                               ),
                               TextButton(
-                                onPressed: () => Navigator.of(context).pop(true),
+                                onPressed: () => Navigator.of(ctx).pop(true),
                                 child: Text(
-                                  '삭제',
+                                  ctx.l10n.common_delete,
                                   style: TextStyle(color: theme.colorScheme.error),
                                 ),
                               ),
@@ -145,7 +147,7 @@ class TransactionEditSheet extends ConsumerWidget {
                         }
                       },
                       icon: const Icon(Icons.delete_outline),
-                      label: const Text('삭제'),
+                      label: Text(context.l10n.common_delete),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: theme.colorScheme.error,
                         side: BorderSide(color: theme.colorScheme.error),
@@ -166,7 +168,7 @@ class TransactionEditSheet extends ConsumerWidget {
                         _showEditDialog(context, ref);
                       },
                       icon: const Icon(Icons.edit),
-                      label: const Text('수정'),
+                      label: Text(context.l10n.common_edit),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
@@ -266,19 +268,34 @@ class _TransactionEditModalSheetState
   late String? _categoryValue;
   late TransactionType _typeValue;
   late DateTime _selectedDate;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _amountController = TextEditingController(
-      text: Formatters.formatNumberInput(widget.transaction.amount.toString()),
-    );
+    _amountController = TextEditingController();
     _memoController = TextEditingController(
       text: widget.transaction.memo ?? '',
     );
     _categoryValue = widget.transaction.category;
     _typeValue = widget.transaction.type;
     _selectedDate = DateTime.parse(widget.transaction.date);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      // Initialize amount with locale-aware formatting
+      final isEnglish = Formatters.isEnglishLocale(context);
+      final amount = widget.transaction.amount;
+      // For English, convert cents to dollars for display
+      final displayValue = isEnglish
+          ? (amount / 100).toStringAsFixed(2)
+          : amount.toString();
+      _amountController.text = Formatters.formatNumberInput(displayValue, context);
+      _isInitialized = true;
+    }
   }
 
   @override
@@ -290,11 +307,11 @@ class _TransactionEditModalSheetState
 
   Future<void> _handleUpdate() async {
     try {
-      final amount = Formatters.parseFormattedNumber(_amountController.text);
+      final amount = Formatters.parseFormattedNumber(_amountController.text, context);
       if (amount <= 0) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('올바른 금액을 입력해주세요')),
+            SnackBar(content: Text(context.l10n.error_invalidAmount)),
           );
         }
         return;
@@ -323,7 +340,7 @@ class _TransactionEditModalSheetState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('수정 중 오류가 발생했습니다: $e'),
+            content: Text(context.l10n.error_generic(e.toString())),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -351,7 +368,7 @@ class _TransactionEditModalSheetState
   }
 
   void _showCalculator() async {
-    final currentAmount = Formatters.parseFormattedNumber(_amountController.text);
+    final currentAmount = Formatters.parseFormattedNumber(_amountController.text, context);
 
     final result = await showModalBottomSheet<int>(
       context: context,
@@ -365,7 +382,10 @@ class _TransactionEditModalSheetState
     );
 
     if (result != null && result > 0) {
-      final formatted = Formatters.formatNumberInput(result.toString());
+      // For English locale, convert cents back to dollars for display
+      final isEnglish = Formatters.isEnglishLocale(context);
+      final displayValue = isEnglish ? (result / 100).toStringAsFixed(2) : result.toString();
+      final formatted = Formatters.formatNumberInput(displayValue, context);
       _amountController.value = TextEditingValue(
         text: formatted,
         selection: TextSelection.collapsed(offset: formatted.length),
@@ -389,7 +409,7 @@ class _TransactionEditModalSheetState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '거래 수정',
+            context.l10n.transaction_editTitle,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -397,16 +417,16 @@ class _TransactionEditModalSheetState
           ),
           const SizedBox(height: 16),
           SegmentedButton<TransactionType>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: TransactionType.expense,
-                label: Text('지출'),
-                icon: Icon(Icons.remove_circle_outline),
+                label: Text(context.l10n.transaction_expense),
+                icon: const Icon(Icons.remove_circle_outline),
               ),
               ButtonSegment(
                 value: TransactionType.income,
-                label: Text('수입'),
-                icon: Icon(Icons.add_circle_outline),
+                label: Text(context.l10n.transaction_income),
+                icon: const Icon(Icons.add_circle_outline),
               ),
             ],
             selected: {_typeValue},
@@ -418,27 +438,39 @@ class _TransactionEditModalSheetState
             },
           ),
           const SizedBox(height: 16),
-          TextField(
-            controller: _amountController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: '금액',
-              hintText: '0',
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.calculate_outlined),
-                tooltip: '계산기',
-                onPressed: _showCalculator,
-              ),
-            ),
-            onChanged: (value) {
-              final formatted = Formatters.formatNumberInput(value);
-              if (formatted != value) {
-                _amountController.value = TextEditingValue(
-                  text: formatted,
-                  selection: TextSelection.collapsed(offset: formatted.length),
-                );
-              }
+          Builder(
+            builder: (context) {
+              final isEnglish = Formatters.isEnglishLocale(context);
+              return TextField(
+                controller: _amountController,
+                keyboardType: isEnglish
+                    ? const TextInputType.numberWithOptions(decimal: true)
+                    : TextInputType.number,
+                inputFormatters: isEnglish
+                    ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))]
+                    : [FilteringTextInputFormatter.digitsOnly],
+                decoration: InputDecoration(
+                  labelText: context.l10n.transaction_amount,
+                  hintText: isEnglish ? '0.00' : context.l10n.transaction_amountHint,
+                  prefixText: isEnglish ? '\$ ' : null,
+                  suffixText: isEnglish ? null : context.l10n.unit_won,
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.calculate_outlined),
+                    tooltip: context.l10n.calculator_title,
+                    onPressed: _showCalculator,
+                  ),
+                ),
+                onChanged: (value) {
+                  final formatted = Formatters.formatNumberInput(value, context);
+                  if (formatted != value) {
+                    _amountController.value = TextEditingValue(
+                      text: formatted,
+                      selection: TextSelection.collapsed(offset: formatted.length),
+                    );
+                  }
+                },
+              );
             },
           ),
           const SizedBox(height: 12),
@@ -446,15 +478,15 @@ class _TransactionEditModalSheetState
             onTap: () => _showCategorySelector(context),
             borderRadius: BorderRadius.circular(4),
             child: InputDecorator(
-              decoration: const InputDecoration(
-                labelText: '카테고리 (선택)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: context.l10n.transaction_categoryOptional,
+                border: const OutlineInputBorder(),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _categoryValue ?? '선택하세요',
+                    _categoryValue ?? context.l10n.transaction_categorySelect,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: _categoryValue == null
                           ? theme.colorScheme.onSurfaceVariant
@@ -472,9 +504,9 @@ class _TransactionEditModalSheetState
           const SizedBox(height: 12),
           TextField(
             controller: _memoController,
-            decoration: const InputDecoration(
-              labelText: '메모 (선택)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: context.l10n.transaction_memo,
+              border: const OutlineInputBorder(),
             ),
             maxLines: 2,
           ),
@@ -493,7 +525,7 @@ class _TransactionEditModalSheetState
             },
             icon: const Icon(Icons.calendar_today),
             label: Text(
-                '날짜: ${Formatters.formatDateFull(Formatters.formatDateISO(_selectedDate))}'),
+                context.l10n.transaction_dateLabel(Formatters.formatDateFull(Formatters.formatDateISO(_selectedDate), context))),
           ),
           const SizedBox(height: 20),
           FilledButton(
@@ -501,7 +533,7 @@ class _TransactionEditModalSheetState
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            child: const Text('수정 완료'),
+            child: Text(context.l10n.transaction_editButton),
           ),
           const SizedBox(height: 12),
         ],

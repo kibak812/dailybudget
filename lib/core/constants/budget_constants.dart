@@ -17,9 +17,6 @@ class BudgetThresholds {
 class CategoryConstants {
   CategoryConstants._();
 
-  /// Default category name for uncategorized transactions
-  static const String uncategorized = '기타';
-
-  /// Threshold percentage for grouping small categories as "기타" in charts
+  /// Threshold percentage for grouping small categories in charts
   static const double otherThreshold = 5.0;
 }

@@ -60,13 +60,4 @@ enum DayStatus {
     DayStatus.noBudget => Icons.info_rounded,
   };
 
-  /// Encouragement message in Korean
-  String get message => switch (this) {
-    DayStatus.perfect => '훌륭해요! 예산의 50% 이하로 지출했어요',
-    DayStatus.safe => '잘했어요! 예산 내에서 지출했어요',
-    DayStatus.warning => '조금 주의하세요. 예산을 약간 초과했어요',
-    DayStatus.danger => '예산 관리가 필요해요. 크게 초과했어요',
-    DayStatus.future => '',
-    DayStatus.noBudget => '',
-  };
 }

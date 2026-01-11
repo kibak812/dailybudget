@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:daily_pace/core/providers/isar_provider.dart';
+import 'package:daily_pace/core/services/locale_service.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 
 /// Category type enum
@@ -35,24 +36,23 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
   /// Prefix for income categories
   static const String _incomePrefix = 'income:';
 
-  /// Default expense categories
-  static const List<String> _defaultExpenseCategories = [
-    '식비',
-    '교통',
-    '쇼핑',
-    '생활',
-    '취미',
-    '의료',
-    '기타',
-  ];
+  /// Get default expense categories based on locale
+  static List<String> _getDefaultExpenseCategories(bool isEnglish) {
+    if (isEnglish) {
+      return ['Food', 'Transport', 'Shopping', 'Living', 'Hobby', 'Medical', 'Other'];
+    } else {
+      return ['식비', '교통', '쇼핑', '생활', '취미', '의료', '기타'];
+    }
+  }
 
-  /// Default income categories
-  static const List<String> _defaultIncomeCategories = [
-    '급여',
-    '용돈',
-    '보너스',
-    '기타',
-  ];
+  /// Get default income categories based on locale
+  static List<String> _getDefaultIncomeCategories(bool isEnglish) {
+    if (isEnglish) {
+      return ['Salary', 'Allowance', 'Bonus', 'Other'];
+    } else {
+      return ['급여', '용돈', '보너스', '기타'];
+    }
+  }
 
   /// Get categories by type
   List<String> getCategoriesByType(CategoryType type) {
@@ -80,7 +80,7 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
   }
 
   /// Load categories from SharedPreferences
-  /// If no categories exist, use default categories
+  /// If no categories exist, use default categories based on current locale
   /// Also handles migration of old categories without prefix
   Future<void> loadCategories() async {
     try {
@@ -105,20 +105,29 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
           state = savedCategories;
         }
       } else {
-        // Initialize with default categories
+        // Initialize with default categories based on current locale
+        final localeService = LocaleService();
+        await localeService.initialize();
+        final isEnglish = localeService.isEnglish;
+
+        final defaultExpense = _getDefaultExpenseCategories(isEnglish);
+        final defaultIncome = _getDefaultIncomeCategories(isEnglish);
+
         final defaultCategories = [
-          ..._defaultExpenseCategories.map((cat) => '$_expensePrefix$cat'),
-          ..._defaultIncomeCategories.map((cat) => '$_incomePrefix$cat'),
+          ...defaultExpense.map((cat) => '$_expensePrefix$cat'),
+          ...defaultIncome.map((cat) => '$_incomePrefix$cat'),
         ];
         state = defaultCategories;
         await _saveCategories();
       }
     } catch (e) {
       debugPrint('Error loading categories: $e');
-      // Fall back to default categories on error
+      // Fall back to Korean default categories on error
+      final defaultExpense = _getDefaultExpenseCategories(false);
+      final defaultIncome = _getDefaultIncomeCategories(false);
       final defaultCategories = [
-        ..._defaultExpenseCategories.map((cat) => '$_expensePrefix$cat'),
-        ..._defaultIncomeCategories.map((cat) => '$_incomePrefix$cat'),
+        ...defaultExpense.map((cat) => '$_expensePrefix$cat'),
+        ...defaultIncome.map((cat) => '$_incomePrefix$cat'),
       ];
       state = defaultCategories;
     }
@@ -236,11 +245,18 @@ class CategoriesNotifier extends StateNotifier<List<String>> {
     }
   }
 
-  /// Reset categories to default
+  /// Reset categories to default based on current locale
   Future<void> resetToDefaults() async {
+    final localeService = LocaleService();
+    await localeService.initialize();
+    final isEnglish = localeService.isEnglish;
+
+    final defaultExpense = _getDefaultExpenseCategories(isEnglish);
+    final defaultIncome = _getDefaultIncomeCategories(isEnglish);
+
     final defaultCategories = [
-      ..._defaultExpenseCategories.map((cat) => '$_expensePrefix$cat'),
-      ..._defaultIncomeCategories.map((cat) => '$_incomePrefix$cat'),
+      ...defaultExpense.map((cat) => '$_expensePrefix$cat'),
+      ...defaultIncome.map((cat) => '$_incomePrefix$cat'),
     ];
     state = defaultCategories;
     await _saveCategories();
