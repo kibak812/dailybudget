@@ -181,6 +181,8 @@
 
   "language_title": "언어",
   "language_system": "시스템 설정",
+  "language_systemHintKorean": "현재: 한국어",
+  "language_systemHintEnglish": "현재: English",
   "language_korean": "한국어",
   "language_english": "English",
   "language_changeWarningTitle": "언어 변경",

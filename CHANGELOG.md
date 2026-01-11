@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Phase 31] - 2026-01-11
 
 ### Summary
-Complete internationalization (i18n) support for Korean and English locales. The app now supports full multilingual UI with Flutter's official l10n system, locale-aware date/currency formatting, and YNAB-style dollar input for US users.
+Complete internationalization (i18n) support for Korean and English locales, ready for English-speaking market deployment. The app now supports full multilingual UI with Flutter's official l10n system, locale-aware date/currency formatting, and YNAB-style dollar input for US users. All hardcoded Korean strings have been removed or properly localized.
 
 ### Added
 
@@ -62,6 +62,12 @@ All input sheets now support locale-aware formatting:
 - Home page, Statistics, Transactions, Settings
 - All dialogs, sheets, and error messages
 - Category names remain user-defined (not translated)
+
+#### Hardcoded Korean Strings Removed
+- `budget_constants.dart` - Removed unused `'기타'` constant
+- `day_status.dart` - Removed hardcoded Korean `message` getter (uses ARB `status_*` keys)
+- `yesterday_summary_card.dart` - Removed deprecated `encouragementMessage` getter
+- `language_section.dart` - System language hint now uses `language_systemHintKorean/English` keys
 
 ### Technical Details
 

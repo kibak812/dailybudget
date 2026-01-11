@@ -113,9 +113,9 @@ class LanguageSection extends ConsumerWidget {
   String _getSystemLanguageHint(BuildContext context) {
     final locale = Localizations.localeOf(context);
     if (locale.languageCode == 'ko') {
-      return '현재: 한국어';
+      return context.l10n.language_systemHintKorean;
     } else {
-      return 'Current: English';
+      return context.l10n.language_systemHintEnglish;
     }
   }
 

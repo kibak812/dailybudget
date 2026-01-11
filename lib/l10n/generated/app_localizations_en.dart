@@ -519,6 +519,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get language_system => 'System Default';
 
   @override
+  String get language_systemHintKorean => 'Current: Korean';
+
+  @override
+  String get language_systemHintEnglish => 'Current: English';
+
+  @override
   String get language_korean => 'Korean';
 
   @override

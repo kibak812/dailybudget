@@ -1034,6 +1034,18 @@ abstract class AppLocalizations {
   /// **'System Default'**
   String get language_system;
 
+  /// No description provided for @language_systemHintKorean.
+  ///
+  /// In en, this message translates to:
+  /// **'Current: Korean'**
+  String get language_systemHintKorean;
+
+  /// No description provided for @language_systemHintEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'Current: English'**
+  String get language_systemHintEnglish;
+
   /// No description provided for @language_korean.
   ///
   /// In en, this message translates to:

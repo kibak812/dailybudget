@@ -512,6 +512,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get language_system => '시스템 설정';
 
   @override
+  String get language_systemHintKorean => '현재: 한국어';
+
+  @override
+  String get language_systemHintEnglish => '현재: English';
+
+  @override
   String get language_korean => '한국어';
 
   @override

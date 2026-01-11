@@ -259,6 +259,8 @@
 
   "language_title": "Language",
   "language_system": "System Default",
+  "language_systemHintKorean": "Current: Korean",
+  "language_systemHintEnglish": "Current: English",
   "language_korean": "Korean",
   "language_english": "English",
   "language_changeWarningTitle": "Change Language",

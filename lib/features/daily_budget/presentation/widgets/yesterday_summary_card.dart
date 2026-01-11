@@ -138,9 +138,6 @@ class YesterdaySummary {
     return (savings.clamp(0.0, 1.0) * 100).round();
   }
 
-  /// Delegates to DayStatus.message
-  String get encouragementMessage => status.message;
-
   /// Delegates to DayStatus.cardColor
   Color get statusColor => status.cardColor;
 
