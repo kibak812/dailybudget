@@ -1,5 +1,6 @@
 import 'package:daily_pace/features/transaction/domain/models/day_status.dart';
 import 'package:daily_pace/core/constants/budget_constants.dart';
+import 'package:daily_pace/core/services/locale_service.dart';
 
 /// Daily summary data for notifications
 class DailySummary {
@@ -25,7 +26,49 @@ class DailySummary {
     return ((yesterdaySpent / yesterdayBudget) * 100).round();
   }
 
-  /// Get encouragement message based on status
+  /// Get status key for locale service
+  String get _statusKey {
+    switch (status) {
+      case DayStatus.perfect:
+        return 'perfect';
+      case DayStatus.safe:
+        return 'safe';
+      case DayStatus.warning:
+        return 'warning';
+      case DayStatus.danger:
+        return 'danger';
+      case DayStatus.noBudget:
+        return 'noBudget';
+      case DayStatus.future:
+        return 'future';
+    }
+  }
+
+  /// Get encouragement message using LocaleService
+  String getEncouragementMessage(LocaleService localeService) {
+    return localeService.getStatusMessage(_statusKey);
+  }
+
+  /// Get notification title using LocaleService
+  String getNotificationTitle(LocaleService localeService) {
+    return localeService.getNotificationTitle(_statusKey);
+  }
+
+  /// Get notification body using LocaleService
+  String getNotificationBody(LocaleService localeService) {
+    return localeService.formatNotificationBody(
+      statusMessage: getEncouragementMessage(localeService),
+      yesterdayBudget: yesterdayBudget,
+      yesterdaySpent: yesterdaySpent,
+      todayBudget: todayBudget,
+      monthProgress: monthProgress,
+      usagePercentage: usagePercentage,
+    );
+  }
+
+  // Legacy getters for backward compatibility (Korean only)
+  // These are kept for any code that might still use them directly
+  @Deprecated('Use getEncouragementMessage(localeService) instead')
   String get encouragementMessage {
     switch (status) {
       case DayStatus.perfect:
@@ -43,7 +86,7 @@ class DailySummary {
     }
   }
 
-  /// Get notification title
+  @Deprecated('Use getNotificationTitle(localeService) instead')
   String get notificationTitle {
     switch (status) {
       case DayStatus.perfect:
@@ -60,9 +103,10 @@ class DailySummary {
     }
   }
 
-  /// Get notification body
+  @Deprecated('Use getNotificationBody(localeService) instead')
   String get notificationBody {
     final buffer = StringBuffer();
+    // ignore: deprecated_member_use_from_same_package
     buffer.writeln(encouragementMessage);
     buffer.writeln();
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/features/transaction/domain/models/monthly_mosaic_data.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/mosaic_colors.dart';
 
@@ -57,7 +58,7 @@ class MonthlyPaceMosaic extends StatelessWidget {
           child: Column(
             children: [
               // Week day headers (Sun-Sat)
-              _buildWeekdayHeaders(theme),
+              _buildWeekdayHeaders(context, theme),
               const SizedBox(height: 12),
 
               // Calendar grid
@@ -71,13 +72,23 @@ class MonthlyPaceMosaic extends StatelessWidget {
     );
   }
 
-  Widget _buildWeekdayHeaders(ThemeData theme) {
-    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+  Widget _buildWeekdayHeaders(BuildContext context, ThemeData theme) {
+    final weekdays = [
+      context.l10n.weekday_short_sun,
+      context.l10n.weekday_short_mon,
+      context.l10n.weekday_short_tue,
+      context.l10n.weekday_short_wed,
+      context.l10n.weekday_short_thu,
+      context.l10n.weekday_short_fri,
+      context.l10n.weekday_short_sat,
+    ];
 
     return Row(
-      children: weekdays.map((day) {
-        final isSunday = day == '일';
-        final isSaturday = day == '토';
+      children: weekdays.asMap().entries.map((entry) {
+        final index = entry.key;
+        final day = entry.value;
+        final isSunday = index == 0;
+        final isSaturday = index == 6;
 
         return Expanded(
           child: Center(

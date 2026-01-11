@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
@@ -26,7 +27,7 @@ class CategoryDetailPage extends ConsumerWidget {
     // Filter transactions for this category and month
     final categoryTransactions = allTransactions.where((t) {
       final matchesMonth = t.year == year && t.month == month;
-      final matchesCategory = (t.category ?? '기타') == categoryName;
+      final matchesCategory = (t.category ?? context.l10n.category_other) == categoryName;
       final isExpense = t.type == TransactionType.expense;
       return matchesMonth && matchesCategory && isExpense;
     }).toList()
@@ -40,7 +41,7 @@ class CategoryDetailPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('$categoryName 지출 내역'),
+        title: Text(context.l10n.statistics_categoryDetail(categoryName)),
         backgroundColor: categoryColor.withOpacity(0.1),
       ),
       body: Column(
@@ -73,7 +74,7 @@ class CategoryDetailPage extends ConsumerWidget {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      '$year년 $month월',
+                      context.l10n.statistics_yearMonth(year, month),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -82,14 +83,14 @@ class CategoryDetailPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '총 지출',
+                  context.l10n.statistics_totalExpense,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
                       ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  Formatters.formatCurrency(totalAmount),
+                  Formatters.formatCurrency(totalAmount, context),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: categoryColor,
@@ -97,7 +98,7 @@ class CategoryDetailPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${categoryTransactions.length}건',
+                  context.l10n.statistics_transactionCount(categoryTransactions.length),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -120,7 +121,7 @@ class CategoryDetailPage extends ConsumerWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          '이 카테고리의 지출 내역이 없습니다',
+                          context.l10n.statistics_categoryNoTransactions,
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 16,
@@ -185,7 +186,7 @@ class CategoryDetailPage extends ConsumerWidget {
               ),
             ),
             Text(
-              Formatters.formatCurrency(transaction.amount),
+              Formatters.formatCurrency(transaction.amount, context),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -196,11 +197,13 @@ class CategoryDetailPage extends ConsumerWidget {
         ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
-          child: Text(
-            _formatDate(transaction.date),
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 13,
+          child: Builder(
+            builder: (ctx) => Text(
+              _formatDate(ctx, transaction.date),
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+              ),
             ),
           ),
         ),
@@ -208,7 +211,7 @@ class CategoryDetailPage extends ConsumerWidget {
     );
   }
 
-  String _formatDate(String dateStr) {
+  String _formatDate(BuildContext context, String dateStr) {
     // Format: "YYYY-MM-DD" -> "M월 D일 (요일)"
     final parts = dateStr.split('-');
     if (parts.length != 3) return dateStr;
@@ -218,9 +221,17 @@ class CategoryDetailPage extends ConsumerWidget {
     final day = int.parse(parts[2]);
 
     final date = DateTime(year, month, day);
-    final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    final weekdays = [
+      context.l10n.weekday_mon,
+      context.l10n.weekday_tue,
+      context.l10n.weekday_wed,
+      context.l10n.weekday_thu,
+      context.l10n.weekday_fri,
+      context.l10n.weekday_sat,
+      context.l10n.weekday_sun,
+    ];
     final weekday = weekdays[date.weekday - 1];
 
-    return '$month월 $day일 ($weekday)';
+    return context.l10n.mosaic_dateLabel(month, day, weekday);
   }
 }

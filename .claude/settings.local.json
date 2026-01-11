@@ -21,9 +21,22 @@
       "Bash(/c/src/flutter/bin/flutter pub:*)",
       "Bash(dart analyze:*)",
       "Bash(git checkout:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(gh pr view:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(git stash pop:*)",
+      "Skill(ralph-loop:help)",
+      "Bash(flutter gen-l10n:*)",
+      "Bash(flutter clean:*)",
+      "Bash(flutter pub get:*)",
+      "Skill(ralph-loop:cancel-ralph)"
     ],
     "deny": [],
     "ask": []
+  },
+  "enabledPlugins": {
+    "ralph-loop@claude-plugins-official": true
   }
 }

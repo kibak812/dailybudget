@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/category_selector_sheet.dart';
@@ -44,11 +45,11 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   }
 
   Future<void> _handleSubmit() async {
-    // Validate amount
-    final amount = Formatters.parseFormattedNumber(_amountController.text);
+    // Validate amount (pass context for locale-aware parsing)
+    final amount = Formatters.parseFormattedNumber(_amountController.text, context);
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('금액을 입력해주세요')),
+        SnackBar(content: Text(context.l10n.error_enterAmount)),
       );
       return;
     }
@@ -73,7 +74,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('오류가 발생했습니다: $e'),
+            content: Text(context.l10n.error_generic(e.toString())),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -99,7 +100,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   }
 
   void _showCalculator() async {
-    final currentAmount = Formatters.parseFormattedNumber(_amountController.text);
+    final currentAmount = Formatters.parseFormattedNumber(_amountController.text, context);
 
     final result = await showModalBottomSheet<int>(
       context: context,
@@ -113,7 +114,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     );
 
     if (result != null && result > 0) {
-      final formatted = Formatters.formatNumberInput(result.toString());
+      // For English locale, convert cents back to dollars for display
+      final isEnglish = Formatters.isEnglishLocale(context);
+      final displayValue = isEnglish ? (result / 100).toStringAsFixed(2) : result.toString();
+      final formatted = Formatters.formatNumberInput(displayValue, context);
       _amountController.value = TextEditingValue(
         text: formatted,
         selection: TextSelection.collapsed(offset: formatted.length),
@@ -172,7 +176,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
 
               // Title
               Text(
-                '거래 추가',
+                context.l10n.transaction_addTitle,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -182,16 +186,16 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
 
               // Type selector
               SegmentedButton<TransactionType>(
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: TransactionType.expense,
-                    label: Text('지출'),
-                    icon: Icon(Icons.remove_circle_outline),
+                    label: Text(context.l10n.transaction_expense),
+                    icon: const Icon(Icons.remove_circle_outline),
                   ),
                   ButtonSegment(
                     value: TransactionType.income,
-                    label: Text('수입'),
-                    icon: Icon(Icons.add_circle_outline),
+                    label: Text(context.l10n.transaction_income),
+                    icon: const Icon(Icons.add_circle_outline),
                   ),
                 ],
                 selected: {_selectedType},
@@ -205,39 +209,47 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
               const SizedBox(height: 24),
 
               // Amount input
-              TextField(
-                controller: _amountController,
-                decoration: InputDecoration(
-                  labelText: '금액',
-                  hintText: '0',
-                  suffixText: '원',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: Icon(
-                    _selectedType == TransactionType.expense
-                        ? Icons.remove_circle
-                        : Icons.add_circle,
-                    color: _selectedType == TransactionType.expense
-                        ? theme.colorScheme.error
-                        : theme.colorScheme.primary,
-                  ),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.calculate_outlined),
-                    tooltip: '계산기',
-                    onPressed: _showCalculator,
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-                onChanged: (value) {
-                  final formatted = Formatters.formatNumberInput(value);
-                  if (formatted != value) {
-                    _amountController.value = TextEditingValue(
-                      text: formatted,
-                      selection: TextSelection.collapsed(offset: formatted.length),
-                    );
-                  }
+              Builder(
+                builder: (context) {
+                  final isEnglish = Formatters.isEnglishLocale(context);
+                  return TextField(
+                    controller: _amountController,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.transaction_amount,
+                      hintText: isEnglish ? '0.00' : context.l10n.transaction_amountHint,
+                      prefixText: isEnglish ? '\$ ' : null,
+                      suffixText: isEnglish ? null : context.l10n.unit_won,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: Icon(
+                        _selectedType == TransactionType.expense
+                            ? Icons.remove_circle
+                            : Icons.add_circle,
+                        color: _selectedType == TransactionType.expense
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.primary,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.calculate_outlined),
+                        tooltip: context.l10n.calculator_title,
+                        onPressed: _showCalculator,
+                      ),
+                    ),
+                    keyboardType: isEnglish
+                        ? const TextInputType.numberWithOptions(decimal: true)
+                        : TextInputType.number,
+                    inputFormatters: isEnglish
+                        ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))]
+                        : [FilteringTextInputFormatter.digitsOnly],
+                    onChanged: (value) {
+                      final formatted = Formatters.formatNumberInput(value, context);
+                      if (formatted != value) {
+                        _amountController.value = TextEditingValue(
+                          text: formatted,
+                          selection: TextSelection.collapsed(offset: formatted.length),
+                        );
+                      }
+                    },
+                  );
                 },
               ),
               const SizedBox(height: 16),
@@ -247,16 +259,16 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                 onTap: () => _showCategorySelector(),
                 borderRadius: BorderRadius.circular(4),
                 child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: '카테고리',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.category),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.transaction_category,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.category),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _selectedCategory ?? '선택하세요',
+                        _selectedCategory ?? context.l10n.transaction_categorySelect,
                         style: theme.textTheme.bodyLarge?.copyWith(
                           color: _selectedCategory == null
                               ? theme.colorScheme.onSurfaceVariant
@@ -276,11 +288,11 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
               // Memo input
               TextField(
                 controller: _memoController,
-                decoration: const InputDecoration(
-                  labelText: '메모 (선택)',
-                  hintText: '메모를 입력하세요',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.note),
+                decoration: InputDecoration(
+                  labelText: context.l10n.transaction_memo,
+                  hintText: context.l10n.transaction_memoHint,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.note),
                 ),
                 maxLines: 2,
                 textInputAction: TextInputAction.done,
@@ -292,14 +304,15 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                 onTap: _selectDate,
                 borderRadius: BorderRadius.circular(4),
                 child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: '날짜',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.calendar_today),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.transaction_date,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.calendar_today),
                   ),
                   child: Text(
                     Formatters.formatDateFull(
                       Formatters.formatDateISO(_selectedDate),
+                      context,
                     ),
                     style: theme.textTheme.bodyLarge,
                   ),
@@ -319,7 +332,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('추가하기'),
+                    : Text(context.l10n.transaction_addButton),
               ),
             ],
           ),

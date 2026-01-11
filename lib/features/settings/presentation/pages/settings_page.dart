@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/widgets/banner_ad_widget.dart';
 import 'package:daily_pace/features/settings/presentation/widgets/budget_settings_section.dart';
 import 'package:daily_pace/features/settings/presentation/widgets/recurring_section.dart';
 import 'package:daily_pace/features/settings/presentation/widgets/data_management_section.dart';
 import 'package:daily_pace/features/settings/presentation/widgets/notification_section.dart';
+import 'package:daily_pace/features/settings/presentation/widgets/language_section.dart';
 
 /// Settings page
 /// App configuration, preferences, and account settings
@@ -17,7 +19,7 @@ class SettingsPage extends ConsumerWidget {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('설정'),
+          title: Text(context.l10n.settings_title),
         ),
         body: Column(
         children: [
@@ -37,6 +39,10 @@ class SettingsPage extends ConsumerWidget {
 
                   // Notification Settings Section
                   const NotificationSection(),
+                  const SizedBox(height: 24),
+
+                  // Language Settings Section
+                  const LanguageSection(),
                   const SizedBox(height: 24),
 
                   // Data Management Section

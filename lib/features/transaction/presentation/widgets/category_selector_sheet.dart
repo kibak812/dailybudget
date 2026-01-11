@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 
@@ -48,7 +49,7 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('이미 존재하는 카테고리입니다'),
+            content: Text(context.l10n.error_categoryExists),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -59,18 +60,18 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
   Future<void> _handleDeleteCategory(String category) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('카테고리 삭제'),
-        content: Text('"$category" 카테고리를 삭제하시겠습니까?'),
+      builder: (ctx) => AlertDialog(
+        title: Text(ctx.l10n.category_deleteTitle),
+        content: Text(ctx.l10n.category_deleteMessage(category)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소'),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(ctx.l10n.common_cancel),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('삭제'),
+            child: Text(ctx.l10n.common_delete),
           ),
         ],
       ),
@@ -110,7 +111,7 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('이미 존재하는 카테고리 이름입니다'),
+            content: Text(context.l10n.error_categoryExists),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -164,7 +165,7 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    widget.type == CategoryType.expense ? '지출 카테고리' : '수입 카테고리',
+                    widget.type == CategoryType.expense ? context.l10n.category_expense : context.l10n.category_income,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -184,7 +185,7 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
                     _isEditMode ? Icons.check : Icons.edit,
                     color: _isEditMode ? theme.colorScheme.primary : null,
                   ),
-                  tooltip: _isEditMode ? '완료' : '편집',
+                  tooltip: _isEditMode ? context.l10n.common_confirm : context.l10n.common_edit,
                 ),
               ],
             ),
@@ -201,7 +202,7 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
                       controller: _addController,
                       focusNode: _focusNode,
                       decoration: InputDecoration(
-                        hintText: '새 카테고리 추가',
+                        hintText: context.l10n.category_add,
                         isDense: true,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -240,7 +241,7 @@ class _CategorySelectorSheetState extends ConsumerState<CategorySelectorSheet> {
                     child: Padding(
                       padding: const EdgeInsets.all(32),
                       child: Text(
-                        '카테고리가 없습니다',
+                        context.l10n.category_empty,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -401,12 +402,12 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('카테고리 수정'),
+      title: Text(context.l10n.category_editTitle),
       content: TextField(
         controller: _controller,
         autofocus: true,
         decoration: InputDecoration(
-          hintText: '카테고리 이름',
+          hintText: context.l10n.category_name,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -416,11 +417,11 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, null),
-          child: const Text('취소'),
+          child: Text(context.l10n.common_cancel),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, _controller.text.trim()),
-          child: const Text('저장'),
+          child: Text(context.l10n.common_save),
         ),
       ],
     );

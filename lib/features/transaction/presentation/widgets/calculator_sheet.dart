@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 
 /// Calculator bottom sheet for transaction amount input
 /// Returns the calculated result when confirmed
@@ -248,7 +249,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '계산기',
+                  context.l10n.calculator_title,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -284,7 +285,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                 const SizedBox(height: 8),
                 // Result
                 Text(
-                  '$_result 원',
+                  context.l10n.calculator_result(_result),
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.primary,
@@ -325,7 +326,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                child: const Text('확인'),
+                child: Text(context.l10n.common_ok),
               ),
             ),
           ),

@@ -6,6 +6,93 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 31] - 2026-01-11
+
+### Summary
+Complete internationalization (i18n) support for Korean and English locales. The app now supports full multilingual UI with Flutter's official l10n system, locale-aware date/currency formatting, and YNAB-style dollar input for US users.
+
+### Added
+
+#### Localization Infrastructure
+- `l10n.yaml` - Flutter l10n configuration
+- `lib/l10n/app_en.arb` - English translations (150+ strings)
+- `lib/l10n/app_ko.arb` - Korean translations (150+ strings)
+- `lib/core/extensions/localization_extension.dart` - `context.l10n` helper
+- `lib/core/services/locale_service.dart` - Locale access for background services
+- `lib/features/settings/presentation/providers/language_provider.dart` - Language state management
+- `lib/features/settings/presentation/widgets/language_section.dart` - Language selector UI
+
+#### YNAB-Style Currency Input (USD)
+- Decimal input support for English locale (e.g., `$50.50`)
+- Cents-based storage for USD (50.50 dollars → 5050 stored)
+- Dollar prefix display in input fields (`$ `)
+- Keyboard type switches to decimal for English
+
+### Changed
+
+#### Locale-Aware Formatting (`formatters.dart`)
+- `formatCurrency()`: KRW `123,456원` / USD `$1,234.56`
+- `formatCurrencyNumber()`: Handles cents-to-dollars conversion for USD
+- `formatNumberInput()`: Allows decimal input for English locale
+- `parseFormattedNumber()`: Parses dollars and converts to cents for USD
+- `formatDate()`: `12월 1일` / `Dec 1`
+- `formatDateFull()`: `2026년 1월 11일` / `January 11, 2026`
+- `formatYearMonthDisplay()`: `2026.1` / `Jan 2026`
+- Added `isEnglishLocale()` public helper
+
+#### Background Services (`locale_service.dart`)
+- Notification channel names: `하루 결산` / `Daily Summary`
+- Notification messages localized for both languages
+- Status messages (`perfect`, `safe`, `warning`, `danger`) translated
+- Currency and date formatting without BuildContext
+
+#### UI Components Updated
+All input sheets now support locale-aware formatting:
+- `add_transaction_sheet.dart` - $ prefix, decimal keyboard for English
+- `transaction_edit_sheet.dart` - Same updates
+- `budget_settings_section.dart` - Budget input with locale support
+- `recurring_modal.dart` - Recurring transaction input
+
+#### All UI Text Localized
+- Home page, Statistics, Transactions, Settings
+- All dialogs, sheets, and error messages
+- Category names remain user-defined (not translated)
+
+### Technical Details
+
+#### Dependencies Added
+- `flutter_localizations` (SDK)
+- `intl: ^0.20.2`
+
+#### Key Architecture Decisions
+- **Storage**: Korean stores as-is (50000), English stores cents (5050)
+- **Display**: Both convert to locale-appropriate format
+- **Input**: Korean integer-only, English allows decimals
+- **Background**: `LocaleService` reads from SharedPreferences
+
+#### Files Created (7)
+- `l10n.yaml`
+- `lib/l10n/app_en.arb`
+- `lib/l10n/app_ko.arb`
+- `lib/core/extensions/localization_extension.dart`
+- `lib/core/services/locale_service.dart`
+- `lib/features/settings/presentation/providers/language_provider.dart`
+- `lib/features/settings/presentation/widgets/language_section.dart`
+
+#### Files Modified (30+)
+- `pubspec.yaml` - Added l10n dependencies
+- `lib/main.dart` - MaterialApp localization setup
+- `lib/core/utils/formatters.dart` - Locale-aware formatting
+- `lib/core/services/notification_service.dart` - Localized notifications
+- `lib/core/services/daily_summary_service.dart` - Localized summaries
+- All presentation widgets updated with `context.l10n.*` calls
+
+### References
+- [YNAB Currency Entry](https://www.eshmoneycoach.com/ynab-toolkit/pos-style-currency-entry-mode/)
+- [Flutter Internationalization](https://docs.flutter.dev/ui/accessibility-and-internationalization/internationalization)
+
+---
+
 ## [Phase 30] - 2026-01-10
 
 ### Summary

@@ -56,7 +56,7 @@ class SummaryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    Formatters.formatCurrency(amount),
+                    Formatters.formatCurrency(amount, context),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: amountColor ?? AppColors.textPrimary,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
@@ -55,7 +56,7 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '일별 예산 추이',
+                  context.l10n.trend_title,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -67,18 +68,18 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
             // Period selector
             Center(
               child: SegmentedButton<ChartPeriod>(
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: ChartPeriod.week,
-                    label: Text('1주'),
+                    label: Text(context.l10n.trend_1week),
                   ),
                   ButtonSegment(
                     value: ChartPeriod.twoWeeks,
-                    label: Text('2주'),
+                    label: Text(context.l10n.trend_2weeks),
                   ),
                   ButtonSegment(
                     value: ChartPeriod.month,
-                    label: Text('1달'),
+                    label: Text(context.l10n.trend_1month),
                   ),
                 ],
                 selected: {_selectedPeriod},
@@ -120,7 +121,7 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
               ),
               const SizedBox(height: 12),
               Text(
-                '예산 데이터가 없습니다',
+                context.l10n.trend_noData,
                 style: TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 14,
@@ -191,7 +192,7 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
           final data = tooltipData[idx];
           final dateLabel = data.dateLabel;
           final budget = data.budget.toInt();
-          pointInfo.label = '$dateLabel\n${Formatters.formatCurrency(budget)}';
+          pointInfo.label = '$dateLabel\n${Formatters.formatCurrency(budget, context)}';
         }
       },
 

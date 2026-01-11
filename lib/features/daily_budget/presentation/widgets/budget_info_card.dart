@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 
@@ -45,7 +46,7 @@ class BudgetInfoCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '이달 예산',
+                  context.l10n.budget_monthlyBudget,
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 15,
@@ -53,7 +54,7 @@ class BudgetInfoCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '$remainingDays일 남음',
+                  context.l10n.budget_daysRemaining(remainingDays),
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 13,
@@ -68,13 +69,13 @@ class BudgetInfoCard extends StatelessWidget {
             const SizedBox(height: 10),
 
             // Labels below the bar
-            _buildLabels(netSpent, remaining, isNetIncome),
+            _buildLabels(context, netSpent, remaining, isNetIncome),
             const SizedBox(height: 12),
 
             // Total budget at bottom
             Center(
               child: Text(
-                '예산 ${Formatters.formatCurrency(monthlyBudget)}',
+                context.l10n.budget_budgetAmount(Formatters.formatCurrency(monthlyBudget, context)),
                 style: TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 13,
@@ -124,7 +125,7 @@ class BudgetInfoCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLabels(int netSpent, int remaining, bool isNetIncome) {
+  Widget _buildLabels(BuildContext context, int netSpent, int remaining, bool isNetIncome) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -145,8 +146,8 @@ class BudgetInfoCard extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               isNetIncome
-                  ? '순수입 ${Formatters.formatCurrency(netSpent.abs())}'
-                  : '순지출 ${Formatters.formatCurrency(netSpent)}',
+                  ? context.l10n.net_income_amount(Formatters.formatCurrency(netSpent.abs(), context))
+                  : context.l10n.net_expense_amount(Formatters.formatCurrency(netSpent, context)),
               style: TextStyle(
                 color: isNetIncome ? AppColors.success : AppColors.textSecondary,
                 fontSize: 12,
@@ -168,7 +169,7 @@ class BudgetInfoCard extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Text(
-              '남은 예산 ${Formatters.formatCurrency(remaining)}',
+              context.l10n.remaining_budget_amount(Formatters.formatCurrency(remaining, context)),
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 12,

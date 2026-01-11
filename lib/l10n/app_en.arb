@@ -1,0 +1,415 @@
+{
+  "@@locale": "en",
+
+  "common_save": "Save",
+  "common_cancel": "Cancel",
+  "common_confirm": "Confirm",
+  "common_delete": "Delete",
+  "common_add": "Add",
+  "common_edit": "Edit",
+  "common_close": "Close",
+  "common_yes": "Yes",
+  "common_no": "No",
+  "common_ok": "OK",
+  "common_search": "Search",
+  "common_reset": "Reset",
+
+  "nav_home": "Home",
+  "nav_transactions": "Transactions",
+  "nav_statistics": "Statistics",
+  "nav_settings": "Settings",
+
+  "home_todayBudget": "Today's Available Budget",
+  "home_setBudget": "Please set a budget",
+  "home_setBudgetDesc": "Set a budget to see\nyour daily available amount",
+  "home_setBudgetButton": "Set Budget",
+  "home_previousMonth": "Previous month",
+  "home_nextMonth": "Next month",
+  "home_addTransaction": "Add transaction",
+
+  "budget_monthlyBudget": "Monthly Budget",
+  "budget_daysRemaining": "{days} days left",
+  "@budget_daysRemaining": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "budget_budgetAmount": "Budget {amount}",
+  "@budget_budgetAmount": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "budget_monthBudget": "{month} Budget",
+  "@budget_monthBudget": {
+    "placeholders": {
+      "month": {"type": "int"}
+    }
+  },
+  "budget_budgetSettings": "Budget Settings",
+  "budget_periodSettings": "Budget Period Settings",
+  "budget_startDay": "Budget Start Day",
+  "budget_startDayDesc": "Day {day} of each month",
+  "@budget_startDayDesc": {
+    "placeholders": {
+      "day": {"type": "int"}
+    }
+  },
+  "budget_startDayHint": "Monthly budget resets on this day",
+  "budget_notSet": "Not Set",
+  "budget_enterNewAmount": "Enter new budget amount",
+  "budget_monthlyStartDay": "Monthly Start Day",
+  "budget_dayDefault": "Day {day} (Default)",
+  "@budget_dayDefault": {
+    "placeholders": {
+      "day": {"type": "int"}
+    }
+  },
+  "budget_dayFormat": "Day {day}",
+  "@budget_dayFormat": {
+    "placeholders": {
+      "day": {"type": "int"}
+    }
+  },
+  "budget_startDayExplain": "Set a budget start day (like payday) to calculate the budget period from that date to the day before next month's start.",
+  "budget_selectStartDay": "Select Budget Start Day",
+
+  "today_netIncome": "Today's Net Income",
+  "today_netExpense": "Today's Net Expense",
+  "today_overBudget": "Over budget today",
+  "today_remaining": "Remaining today",
+
+  "yesterday_summary": "{month}/{day} Summary",
+  "@yesterday_summary": {
+    "placeholders": {
+      "month": {"type": "int"},
+      "day": {"type": "int"}
+    }
+  },
+  "yesterday_budget": "Budget",
+  "yesterday_expense": "Expense",
+  "yesterday_savingsRate": "Savings Rate",
+
+  "trend_title": "Daily Budget Trend",
+  "trend_1week": "1W",
+  "trend_2weeks": "2W",
+  "trend_1month": "1M",
+
+  "transaction_addTitle": "Add Transaction",
+  "transaction_editTitle": "Edit Transaction",
+  "transaction_detailTitle": "Transaction Details",
+  "transaction_expense": "Expense",
+  "transaction_income": "Income",
+  "transaction_amount": "Amount",
+  "transaction_amountHint": "0",
+  "transaction_category": "Category",
+  "transaction_categoryOptional": "Category (Optional)",
+  "transaction_categorySelect": "Select",
+  "transaction_memo": "Memo (Optional)",
+  "transaction_memoHint": "Enter memo",
+  "transaction_date": "Date",
+  "transaction_dateLabel": "Date: {date}",
+  "@transaction_dateLabel": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "transaction_createdAt": "Created at",
+  "transaction_isRecurring": "Recurring Transaction",
+  "transaction_addButton": "Add",
+  "transaction_editButton": "Save Changes",
+  "transaction_uncategorized": "Uncategorized",
+
+  "transaction_deleteTitle": "Delete Transaction",
+  "transaction_deleteMessage": "Are you sure you want to delete this transaction?",
+
+  "calculator_title": "Calculator",
+  "calculator_result": "{result} won",
+  "@calculator_result": {
+    "placeholders": {
+      "result": {"type": "String"}
+    }
+  },
+
+  "category_title": "Categories",
+  "category_expense": "Expense Categories",
+  "category_income": "Income Categories",
+  "category_add": "Add new category",
+  "category_edit": "Edit Category",
+  "category_editTitle": "Edit Category",
+  "category_name": "Category Name",
+  "category_empty": "No categories",
+  "category_deleteTitle": "Delete Category",
+  "category_deleteMessage": "Are you sure you want to delete \"{category}\"?",
+  "@category_deleteMessage": {
+    "placeholders": {
+      "category": {"type": "String"}
+    }
+  },
+
+  "category_food": "Food",
+  "category_transport": "Transport",
+  "category_shopping": "Shopping",
+  "category_living": "Living",
+  "category_hobby": "Hobby",
+  "category_medical": "Medical",
+  "category_other": "Other",
+  "category_salary": "Salary",
+  "category_allowance": "Allowance",
+  "category_bonus": "Bonus",
+
+  "statistics_title": "Statistics",
+  "statistics_totalExpense": "Total Expense",
+  "statistics_categoryDetail": "{category} Expense History",
+  "@statistics_categoryDetail": {
+    "placeholders": {
+      "category": {"type": "String"}
+    }
+  },
+  "statistics_yearMonth": "{year}.{month}",
+  "@statistics_yearMonth": {
+    "placeholders": {
+      "year": {"type": "int"},
+      "month": {"type": "int"}
+    }
+  },
+
+  "settings_title": "Settings",
+
+  "notification_title": "Notification Settings",
+  "notification_dailySummary": "Daily Summary Notification",
+  "notification_dailySummaryDesc": "Get notified about yesterday's spending at your set time",
+  "notification_time": "Notification Time",
+  "notification_timeSelect": "Select notification time",
+  "notification_permissionRequired": "Notification permission required. Please allow it in settings.",
+  "notification_requestAgain": "Request Again",
+  "notification_am": "AM",
+  "notification_pm": "PM",
+  "notification_hour": "Hour",
+  "notification_minute": "Minute",
+
+  "notification_channelName": "Daily Summary",
+  "notification_channelDesc": "Daily spending summary notifications at your set time",
+  "notification_pushTitle": "Daily Summary",
+  "notification_pushBody": "Check yesterday's spending",
+
+  "recurring_title": "Recurring",
+  "recurring_addTitle": "Add Recurring",
+  "recurring_editTitle": "Edit Recurring",
+  "recurring_add": "Add",
+  "recurring_empty": "No recurring transactions",
+  "recurring_regenerate": "Regenerate recurring for current period",
+  "recurring_type": "Type",
+  "recurring_amount": "Amount",
+  "recurring_dayOfMonth": "Day of Month",
+  "recurring_dayOfMonthHint": "1-31",
+  "recurring_memo": "Memo",
+  "recurring_enabled": "Enabled",
+  "recurring_deleteTitle": "Delete Recurring",
+  "recurring_deleteMessage": "Are you sure you want to delete this recurring transaction?",
+  "recurring_example": "e.g., Rent",
+  "recurring_amountExample": "e.g., 500,000",
+  "recurring_monthly": "monthly",
+  "recurring_active": "active",
+  "recurring_inactive": "inactive",
+
+  "data_title": "Data Management",
+  "data_backup": "Backup Data",
+  "data_backupDesc": "Save current data to file",
+  "data_restore": "Restore Data",
+  "data_restoreDesc": "Load backup file",
+  "data_deleteAll": "Delete All Data",
+  "data_deleteAllDesc": "This action cannot be undone",
+  "data_hint": "Data is securely stored on device. Back up regularly as data is lost when app is deleted.",
+
+  "data_exportSuccess": "Data exported successfully.",
+  "data_exportError": "Failed to export data: {error}",
+  "@data_exportError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "data_importSuccess": "Data imported!\nBudgets: {budgets}, Transactions: {transactions}, Recurring: {recurring}",
+  "@data_importSuccess": {
+    "placeholders": {
+      "budgets": {"type": "int"},
+      "transactions": {"type": "int"},
+      "recurring": {"type": "int"}
+    }
+  },
+  "data_importError": "Failed to import data: {error}",
+  "@data_importError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "data_deleteConfirm": "Delete All Data",
+  "data_deleteConfirmMessage": "Are you sure you want to delete all data?\nThis action cannot be undone.",
+  "data_deleteDoubleConfirm": "Confirm Again",
+  "data_deleteDoubleConfirmMessage": "Please confirm once more. Are you sure you want to delete?",
+  "data_deleteSuccess": "All data has been deleted.",
+  "data_deleteError": "Failed to delete data: {error}",
+  "@data_deleteError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "data_backupSubject": "DailyBudget Backup",
+  "data_backupText": "Data backup file",
+
+  "language_title": "Language",
+  "language_system": "System Default",
+  "language_korean": "Korean",
+  "language_english": "English",
+
+  "error_invalidAmount": "Please enter a valid amount",
+  "error_enterAmount": "Please enter an amount",
+  "error_generic": "An error occurred: {error}",
+  "@error_generic": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "error_categoryExists": "Category already exists",
+  "error_categoryEmpty": "Please enter a category name",
+  "error_selectCategory": "Please select a category",
+  "error_invalidDay": "Day must be between 1 and 31",
+
+  "transaction_dateTransactions": "{date} Transactions",
+  "@transaction_dateTransactions": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "transaction_viewAll": "View All",
+  "transaction_noTransactionsDate": "No transactions on this day!",
+  "transaction_noSearchResults": "No search results.",
+  "transaction_noTransactions": "No transactions",
+
+  "mosaic_noBudget": "Budget not set.",
+  "mosaic_summary": "This period: Perfect {perfect} days, Overspent {overspent} days",
+  "@mosaic_summary": {
+    "placeholders": {
+      "perfect": {"type": "int"},
+      "overspent": {"type": "int"}
+    }
+  },
+  "mosaic_dateLabel": "{month}/{day} ({weekday})",
+  "@mosaic_dateLabel": {
+    "placeholders": {
+      "month": {"type": "int"},
+      "day": {"type": "int"},
+      "weekday": {"type": "String"}
+    }
+  },
+
+  "weekday_sun": "Sun",
+  "weekday_mon": "Mon",
+  "weekday_tue": "Tue",
+  "weekday_wed": "Wed",
+  "weekday_thu": "Thu",
+  "weekday_fri": "Fri",
+  "weekday_sat": "Sat",
+
+  "weekday_short_sun": "S",
+  "weekday_short_mon": "M",
+  "weekday_short_tue": "T",
+  "weekday_short_wed": "W",
+  "weekday_short_thu": "T",
+  "weekday_short_fri": "F",
+  "weekday_short_sat": "S",
+
+  "date_yearMonthDay": "{year}.{month}.{day}",
+  "@date_yearMonthDay": {
+    "placeholders": {
+      "year": {"type": "int"},
+      "month": {"type": "int"},
+      "day": {"type": "int"}
+    }
+  },
+  "date_monthDay": "{month}/{day}",
+  "@date_monthDay": {
+    "placeholders": {
+      "month": {"type": "int"},
+      "day": {"type": "int"}
+    }
+  },
+  "date_yearMonth": "{year}.{month}",
+  "@date_yearMonth": {
+    "placeholders": {
+      "year": {"type": "int"},
+      "month": {"type": "int"}
+    }
+  },
+
+  "unit_won": "",
+  "unit_man": "0K",
+  "unit_chun": "K",
+
+  "format_currency": "{amount}",
+  "@format_currency": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+
+  "status_perfect": "Great! You spent less than 50% of budget",
+  "status_safe": "Good job! You stayed within budget",
+  "status_warning": "Be careful. You slightly exceeded budget",
+  "status_danger": "Budget management needed. Significantly exceeded",
+
+  "diff_increased": "{amount} more than yesterday",
+  "@diff_increased": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "diff_decreased": "{amount} less than yesterday",
+  "@diff_decreased": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "diff_same": "Same as yesterday",
+
+  "statistics_currentPeriodBudget": "Current Period Budget",
+  "statistics_netIncome": "Net Income",
+  "statistics_netExpense": "Net Expense",
+  "statistics_remainingBudget": "Remaining Budget",
+  "statistics_totalIncome": "Total Income",
+  "statistics_noBudget": "Please set a budget first.",
+  "statistics_noTransactions": "No transactions yet",
+  "statistics_budgetUsage": "Budget Usage",
+  "statistics_categoryExpense": "Expenses by Category",
+  "statistics_transactionCount": "{count} transactions",
+  "@statistics_transactionCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "statistics_categoryNoTransactions": "No expense history in this category",
+
+  "today_budgetDecreaseHint": "Daily budget decreases from tomorrow",
+  "trend_noData": "No budget data",
+
+  "net_income": "Net Income",
+  "net_expense": "Net Expense",
+  "net_income_amount": "Net Income {amount}",
+  "@net_income_amount": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "net_expense_amount": "Net Expense {amount}",
+  "@net_expense_amount": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "remaining_budget_amount": "Remaining {amount}",
+  "@remaining_budget_amount": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  }
+}

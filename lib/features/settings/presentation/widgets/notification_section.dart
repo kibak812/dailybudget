@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/features/settings/presentation/providers/notification_settings_provider.dart';
 
@@ -20,7 +21,7 @@ class NotificationSection extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
-            '알림 설정',
+            context.l10n.notification_title,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
@@ -49,8 +50,8 @@ class NotificationSection extends ConsumerWidget {
               // Daily summary toggle
               _buildToggleTile(
                 context: context,
-                title: '하루 결산 알림',
-                subtitle: '매일 설정한 시간에 어제의 지출 결산을 알려드려요',
+                title: context.l10n.notification_dailySummary,
+                subtitle: context.l10n.notification_dailySummaryDesc,
                 value: settings.isDailySummaryEnabled,
                 onChanged: (value) => _handleToggle(context, notifier, value),
               ),
@@ -60,7 +61,7 @@ class NotificationSection extends ConsumerWidget {
                 const Divider(height: 1),
                 _buildTimeTile(
                   context: context,
-                  title: '알림 시간',
+                  title: context.l10n.notification_time,
                   time: settings.summaryTime,
                   onTap: () => _showTimePicker(context, ref),
                 ),
@@ -90,8 +91,8 @@ class NotificationSection extends ConsumerWidget {
       case NotificationEnableResult.notificationPermissionDenied:
         _showPermissionSnackBar(
           context,
-          message: '알림 권한이 필요합니다. 설정에서 권한을 허용해주세요.',
-          actionLabel: '다시 요청',
+          message: context.l10n.notification_permissionRequired,
+          actionLabel: context.l10n.notification_requestAgain,
           onAction: () => notifier.requestPermission(),
         );
         break;
@@ -171,7 +172,7 @@ class NotificationSection extends ConsumerWidget {
     required TimeOfDay time,
     required VoidCallback onTap,
   }) {
-    final timeString = _formatTime(time);
+    final timeString = _formatTime(context, time);
 
     return InkWell(
       onTap: onTap,
@@ -219,10 +220,10 @@ class NotificationSection extends ConsumerWidget {
     );
   }
 
-  String _formatTime(TimeOfDay time) {
+  String _formatTime(BuildContext context, TimeOfDay time) {
     final hour = time.hour;
     final minute = time.minute.toString().padLeft(2, '0');
-    final period = hour < 12 ? '오전' : '오후';
+    final period = hour < 12 ? context.l10n.notification_am : context.l10n.notification_pm;
     final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
     return '$period $displayHour:$minute';
   }
@@ -235,11 +236,11 @@ class NotificationSection extends ConsumerWidget {
       context: context,
       initialTime: settings.summaryTime,
       initialEntryMode: TimePickerEntryMode.inputOnly,
-      helpText: '알림 시간 선택',
-      cancelText: '취소',
-      confirmText: '확인',
-      hourLabelText: '시',
-      minuteLabelText: '분',
+      helpText: context.l10n.notification_timeSelect,
+      cancelText: context.l10n.common_cancel,
+      confirmText: context.l10n.common_confirm,
+      hourLabelText: context.l10n.notification_hour,
+      minuteLabelText: context.l10n.notification_minute,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(

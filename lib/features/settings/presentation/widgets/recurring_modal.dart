@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
@@ -30,16 +32,15 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
   bool _isActive = true;
   String? _startMonth;
   String? _endMonth;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
 
     if (widget.recurring != null) {
-      // Edit mode
+      // Edit mode (amount will be set in didChangeDependencies)
       _type = widget.recurring!.type;
-      _amountController.text =
-          Formatters.formatNumberInput(widget.recurring!.amount.toString());
       _dayController.text = widget.recurring!.dayOfMonth.toString();
       _category = widget.recurring!.category;
       _memoController.text = widget.recurring!.memo ?? '';
@@ -57,6 +58,22 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized && widget.recurring != null) {
+      // Initialize amount with locale-aware formatting
+      final isEnglish = Formatters.isEnglishLocale(context);
+      final amount = widget.recurring!.amount;
+      // For English, convert cents to dollars for display
+      final displayValue = isEnglish
+          ? (amount / 100).toStringAsFixed(2)
+          : amount.toString();
+      _amountController.text = Formatters.formatNumberInput(displayValue, context);
+      _isInitialized = true;
+    }
+  }
+
+  @override
   void dispose() {
     _amountController.dispose();
     _dayController.dispose();
@@ -65,14 +82,14 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
   }
 
   Future<void> _handleSave() async {
-    final amount = Formatters.parseFormattedNumber(_amountController.text);
+    final amount = Formatters.parseFormattedNumber(_amountController.text, context);
     final day = int.tryParse(_dayController.text);
 
     // Validation
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('올바른 금액을 입력해주세요.'),
+          content: Text(context.l10n.error_invalidAmount),
           backgroundColor: AppColors.danger,
         ),
       );
@@ -82,7 +99,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
     if (day == null || day < 1 || day > 31) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('날짜는 1~31 사이여야 합니다.'),
+          content: Text(context.l10n.error_invalidDay),
           backgroundColor: AppColors.danger,
         ),
       );
@@ -92,7 +109,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
     if (_category == null || _category!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('카테고리를 선택해주세요.'),
+          content: Text(context.l10n.error_selectCategory),
           backgroundColor: AppColors.danger,
         ),
       );
@@ -139,7 +156,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('오류가 발생했습니다: $e'),
+            content: Text(context.l10n.error_generic(e.toString())),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -177,7 +194,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.recurring != null ? '반복 지출 수정' : '반복 지출 추가',
+                  widget.recurring != null ? context.l10n.recurring_editTitle : context.l10n.recurring_addTitle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -186,21 +203,21 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
 
                 // Type Selector
                 Text(
-                  '타입',
+                  context.l10n.recurring_type,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                 ),
                 const SizedBox(height: 8),
                 SegmentedButton<RecurringTransactionType>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: RecurringTransactionType.expense,
-                      label: Text('지출'),
+                      label: Text(context.l10n.transaction_expense),
                     ),
                     ButtonSegment(
                       value: RecurringTransactionType.income,
-                      label: Text('수입'),
+                      label: Text(context.l10n.transaction_income),
                     ),
                   ],
                   selected: {_type},
@@ -216,39 +233,51 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
 
                 // Amount
                 Text(
-                  '금액',
+                  context.l10n.recurring_amount,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                 ),
                 const SizedBox(height: 8),
-                TextField(
-                  controller: _amountController,
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.right,
-                  decoration: InputDecoration(
-                    hintText: '예: 500,000',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onChanged: (value) {
-                    final formatted = Formatters.formatNumberInput(value);
-                    if (formatted != value) {
-                      _amountController.value = TextEditingValue(
-                        text: formatted,
-                        selection: TextSelection.collapsed(
-                          offset: formatted.length,
+                Builder(
+                  builder: (context) {
+                    final isEnglish = Formatters.isEnglishLocale(context);
+                    return TextField(
+                      controller: _amountController,
+                      keyboardType: isEnglish
+                          ? const TextInputType.numberWithOptions(decimal: true)
+                          : TextInputType.number,
+                      inputFormatters: isEnglish
+                          ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))]
+                          : [FilteringTextInputFormatter.digitsOnly],
+                      textAlign: TextAlign.right,
+                      decoration: InputDecoration(
+                        hintText: isEnglish ? '0.00' : context.l10n.recurring_amountExample,
+                        prefixText: isEnglish ? '\$ ' : null,
+                        suffixText: isEnglish ? null : context.l10n.unit_won,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                    }
+                      ),
+                      onChanged: (value) {
+                        final formatted = Formatters.formatNumberInput(value, context);
+                        if (formatted != value) {
+                          _amountController.value = TextEditingValue(
+                            text: formatted,
+                            selection: TextSelection.collapsed(
+                              offset: formatted.length,
+                            ),
+                          );
+                        }
+                      },
+                    );
                   },
                 ),
                 const SizedBox(height: 16),
 
                 // Day of Month
                 Text(
-                  '매월 실행 날짜',
+                  context.l10n.recurring_dayOfMonth,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -258,7 +287,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
                   controller: _dayController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    hintText: '1~31',
+                    hintText: context.l10n.recurring_dayOfMonthHint,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -268,7 +297,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
 
                 // Category
                 Text(
-                  '카테고리',
+                  context.l10n.transaction_category,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -297,7 +326,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
 
                 // Memo
                 Text(
-                  '메모',
+                  context.l10n.recurring_memo,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -306,7 +335,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
                 TextField(
                   controller: _memoController,
                   decoration: InputDecoration(
-                    hintText: '예: 월세',
+                    hintText: context.l10n.recurring_example,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -316,7 +345,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
 
                 // Active Switch
                 SwitchListTile(
-                  title: const Text('활성화'),
+                  title: Text(context.l10n.recurring_enabled),
                   value: _isActive,
                   onChanged: (value) {
                     setState(() {
@@ -343,7 +372,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text('취소'),
+                        child: Text(context.l10n.common_cancel),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -356,7 +385,7 @@ class _RecurringModalState extends ConsumerState<RecurringModal> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Text(widget.recurring != null ? '수정' : '추가'),
+                        child: Text(widget.recurring != null ? context.l10n.common_edit : context.l10n.common_add),
                       ),
                     ),
                   ],

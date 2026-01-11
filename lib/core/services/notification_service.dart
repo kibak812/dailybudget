@@ -4,6 +4,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tzData;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:daily_pace/core/services/daily_summary_service.dart';
+import 'package:daily_pace/core/services/locale_service.dart';
 
 /// Service for handling local notifications
 class NotificationService {
@@ -13,17 +14,19 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
+  final LocaleService _localeService = LocaleService();
 
   static const int _dailySummaryNotificationId = 1;
   static const String _channelId = 'daily_summary';
-  static const String _channelName = '하루 결산';
-  static const String _channelDescription = '매일 설정한 시간에 어제의 지출 결산을 알려드립니다';
 
   bool _isInitialized = false;
 
   /// Initialize the notification service
   Future<void> initialize() async {
     if (_isInitialized) return;
+
+    // Initialize locale service first
+    await _localeService.initialize();
 
     // Initialize timezone with device's local timezone
     tzData.initializeTimeZones();
@@ -132,6 +135,9 @@ class NotificationService {
 
     if (!enabled) return;
 
+    // Refresh locale before scheduling
+    await _localeService.refresh();
+
     // Check exact alarm permission and choose schedule mode
     final hasExactAlarmPermission = await canScheduleExactAlarms();
     final scheduleMode = hasExactAlarmPermission
@@ -160,14 +166,20 @@ class NotificationService {
     final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
     debugPrint('Scheduling notification for: $tzScheduledDate (mode: $scheduleMode)');
 
+    // Get localized strings
+    final channelName = _localeService.notificationChannelName;
+    final channelDesc = _localeService.notificationChannelDesc;
+    final pushTitle = _localeService.notificationPushTitle;
+    final pushBody = _localeService.notificationPushBody;
+
     // Notification details
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       _channelId,
-      _channelName,
-      channelDescription: _channelDescription,
+      channelName,
+      channelDescription: channelDesc,
       importance: Importance.high,
       priority: Priority.high,
-      styleInformation: BigTextStyleInformation(''),
+      styleInformation: const BigTextStyleInformation(''),
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -176,7 +188,7 @@ class NotificationService {
       presentSound: true,
     );
 
-    const notificationDetails = NotificationDetails(
+    final notificationDetails = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
@@ -184,8 +196,8 @@ class NotificationService {
     // Schedule notification to repeat daily
     await _notifications.zonedSchedule(
       _dailySummaryNotificationId,
-      '하루 결산',
-      '어제의 지출을 확인해보세요',
+      pushTitle,
+      pushBody,
       tzScheduledDate,
       notificationDetails,
       androidScheduleMode: scheduleMode,
@@ -195,13 +207,19 @@ class NotificationService {
 
   /// Show immediate notification (for testing or immediate alerts)
   Future<void> showDailySummaryNow(DailySummary summary) async {
-    const androidDetails = AndroidNotificationDetails(
+    // Refresh locale before showing
+    await _localeService.refresh();
+
+    final channelName = _localeService.notificationChannelName;
+    final channelDesc = _localeService.notificationChannelDesc;
+
+    final androidDetails = AndroidNotificationDetails(
       _channelId,
-      _channelName,
-      channelDescription: _channelDescription,
+      channelName,
+      channelDescription: channelDesc,
       importance: Importance.high,
       priority: Priority.high,
-      styleInformation: BigTextStyleInformation(''),
+      styleInformation: const BigTextStyleInformation(''),
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -210,15 +228,15 @@ class NotificationService {
       presentSound: true,
     );
 
-    const notificationDetails = NotificationDetails(
+    final notificationDetails = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
 
     await _notifications.show(
       _dailySummaryNotificationId,
-      summary.notificationTitle,
-      summary.notificationBody,
+      summary.getNotificationTitle(_localeService),
+      summary.getNotificationBody(_localeService),
       notificationDetails,
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/core/widgets/banner_ad_widget.dart';
@@ -177,14 +178,14 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 children: [
                   if (_searchKeyword.isNotEmpty)
                     InputChip(
-                      label: Text('검색: $_searchKeyword'),
+                      label: Text('${context.l10n.common_search}: $_searchKeyword'),
                       onDeleted: () => setState(() => _searchKeyword = ''),
                     ),
                   if (_typeFilter != null)
                     InputChip(
                       label: Text(_typeFilter == TransactionType.expense
-                          ? '필터: 지출'
-                          : '필터: 수입'),
+                          ? context.l10n.transaction_expense
+                          : context.l10n.transaction_income),
                       onDeleted: () => setState(() => _typeFilter = null),
                     ),
                 ],
@@ -206,7 +207,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '${Formatters.formatDate(_selectedDate!)} 거래',
+                    context.l10n.transaction_dateTransactions(Formatters.formatDate(_selectedDate!, context)),
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w600,
@@ -215,7 +216,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   const Spacer(),
                   TextButton(
                     onPressed: () => setState(() => _selectedDate = null),
-                    child: const Text('전체 보기'),
+                    child: Text(context.l10n.transaction_viewAll),
                   ),
                 ],
               ),
@@ -247,7 +248,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      title: const Text('거래 내역'),
+      title: Text(context.l10n.nav_transactions),
       actions: [
         IconButton(
           icon: const Icon(Icons.search),
@@ -298,14 +299,14 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 children: [
                   if (_searchKeyword.isNotEmpty)
                     InputChip(
-                      label: Text('검색: $_searchKeyword'),
+                      label: Text('${context.l10n.common_search}: $_searchKeyword'),
                       onDeleted: () => setState(() => _searchKeyword = ''),
                     ),
                   if (_typeFilter != null)
                     InputChip(
                       label: Text(_typeFilter == TransactionType.expense
-                          ? '필터: 지출'
-                          : '필터: 수입'),
+                          ? context.l10n.transaction_expense
+                          : context.l10n.transaction_income),
                       onDeleted: () => setState(() => _typeFilter = null),
                     ),
                 ],
@@ -341,11 +342,11 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     String message;
     if (_selectedDate != null) {
-      message = '이 날은 거래 내역이 없어요!';
+      message = context.l10n.transaction_noTransactionsDate;
     } else if (_hasActiveFilters) {
-      message = '검색 결과가 없습니다.';
+      message = context.l10n.transaction_noSearchResults;
     } else {
-      message = '거래 내역 없음';
+      message = context.l10n.transaction_noTransactions;
     }
 
     return Center(
@@ -372,10 +373,18 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       ..sort((a, b) => b.date.compareTo(a.date)); // Newest first
   }
 
-  /// Get day of week in Korean
-  String _getDayOfWeek(String dateStr) {
+  /// Get day of week localized
+  String _getDayOfWeek(BuildContext context, String dateStr) {
     final date = DateTime.parse(dateStr);
-    const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    final weekdays = [
+      context.l10n.weekday_mon,
+      context.l10n.weekday_tue,
+      context.l10n.weekday_wed,
+      context.l10n.weekday_thu,
+      context.l10n.weekday_fri,
+      context.l10n.weekday_sat,
+      context.l10n.weekday_sun,
+    ];
     return weekdays[date.weekday - 1];
   }
 
@@ -427,7 +436,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           child: Row(
             children: [
               Text(
-                '${Formatters.formatDate(date)} (${_getDayOfWeek(date)})',
+                '${Formatters.formatDate(date, context)} (${_getDayOfWeek(context, date)})',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -436,8 +445,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               if (dayTotal != 0)
                 Text(
                   dayTotal < 0
-                      ? '+${Formatters.formatCurrency(dayTotal.abs())}'
-                      : '-${Formatters.formatCurrency(dayTotal)}',
+                      ? '+${Formatters.formatCurrency(dayTotal.abs(), context)}'
+                      : '-${Formatters.formatCurrency(dayTotal, context)}',
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: dayTotal < 0 ? Colors.green[700] : theme.colorScheme.error,
                     fontWeight: FontWeight.w600,
@@ -551,24 +560,24 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     final result = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('거래 검색'),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.l10n.common_search),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: '메모, 카테고리, 금액으로 검색',
+          decoration: InputDecoration(
+            hintText: dialogContext.l10n.transaction_memoHint,
           ),
           autofocus: true,
-          onSubmitted: (value) => Navigator.of(context).pop(value.trim()),
+          onSubmitted: (value) => Navigator.of(dialogContext).pop(value.trim()),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(''),
-            child: const Text('초기화'),
+            onPressed: () => Navigator.of(dialogContext).pop(''),
+            child: Text(dialogContext.l10n.common_reset),
           ),
           FilledButton(
-            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-            child: const Text('검색'),
+            onPressed: () => Navigator.of(dialogContext).pop(controller.text.trim()),
+            child: Text(dialogContext.l10n.common_search),
           ),
         ],
       ),
@@ -588,24 +597,24 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => SafeArea(
+      builder: (sheetContext) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.all_inclusive),
-              title: const Text('전체 보기'),
-              onTap: () => Navigator.of(context).pop('all'),
+              title: Text(sheetContext.l10n.common_confirm),
+              onTap: () => Navigator.of(sheetContext).pop('all'),
             ),
             ListTile(
               leading: const Icon(Icons.remove_circle_outline),
-              title: const Text('지출만 보기'),
-              onTap: () => Navigator.of(context).pop('expense'),
+              title: Text(sheetContext.l10n.transaction_expense),
+              onTap: () => Navigator.of(sheetContext).pop('expense'),
             ),
             ListTile(
               leading: const Icon(Icons.add_circle_outline),
-              title: const Text('수입만 보기'),
-              onTap: () => Navigator.of(context).pop('income'),
+              title: Text(sheetContext.l10n.transaction_income),
+              onTap: () => Navigator.of(sheetContext).pop('income'),
             ),
           ],
         ),
