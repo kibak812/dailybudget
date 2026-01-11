@@ -733,4 +733,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String remaining_budget_amount(String amount) {
     return 'Remaining $amount';
   }
+
+  @override
+  String get category_expense_food => 'Food';
+
+  @override
+  String get category_expense_transport => 'Transport';
+
+  @override
+  String get category_expense_shopping => 'Shopping';
+
+  @override
+  String get category_expense_living => 'Living';
+
+  @override
+  String get category_expense_hobby => 'Hobby';
+
+  @override
+  String get category_expense_medical => 'Medical';
+
+  @override
+  String get category_expense_other => 'Other';
+
+  @override
+  String get category_income_salary => 'Salary';
+
+  @override
+  String get category_income_allowance => 'Allowance';
+
+  @override
+  String get category_income_bonus => 'Bonus';
+
+  @override
+  String get category_income_other => 'Other';
 }

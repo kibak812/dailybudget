@@ -31,7 +31,8 @@
       "Bash(flutter gen-l10n:*)",
       "Bash(flutter clean:*)",
       "Bash(flutter pub get:*)",
-      "Skill(ralph-loop:cancel-ralph)"
+      "Skill(ralph-loop:cancel-ralph)",
+      "Bash(gh pr create:*)"
     ],
     "deny": [],
     "ask": []

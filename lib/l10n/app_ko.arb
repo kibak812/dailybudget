@@ -250,5 +250,18 @@
   "net_expense": "순지출",
   "net_income_amount": "순수입 {amount}",
   "net_expense_amount": "순지출 {amount}",
-  "remaining_budget_amount": "남은 예산 {amount}"
+  "remaining_budget_amount": "남은 예산 {amount}",
+
+  "category_expense_food": "식비",
+  "category_expense_transport": "교통",
+  "category_expense_shopping": "쇼핑",
+  "category_expense_living": "생활",
+  "category_expense_hobby": "취미",
+  "category_expense_medical": "의료",
+  "category_expense_other": "기타",
+
+  "category_income_salary": "급여",
+  "category_income_allowance": "용돈",
+  "category_income_bonus": "보너스",
+  "category_income_other": "기타"
 }

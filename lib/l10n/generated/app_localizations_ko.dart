@@ -724,4 +724,37 @@ class AppLocalizationsKo extends AppLocalizations {
   String remaining_budget_amount(String amount) {
     return '남은 예산 $amount';
   }
+
+  @override
+  String get category_expense_food => '식비';
+
+  @override
+  String get category_expense_transport => '교통';
+
+  @override
+  String get category_expense_shopping => '쇼핑';
+
+  @override
+  String get category_expense_living => '생활';
+
+  @override
+  String get category_expense_hobby => '취미';
+
+  @override
+  String get category_expense_medical => '의료';
+
+  @override
+  String get category_expense_other => '기타';
+
+  @override
+  String get category_income_salary => '급여';
+
+  @override
+  String get category_income_allowance => '용돈';
+
+  @override
+  String get category_income_bonus => '보너스';
+
+  @override
+  String get category_income_other => '기타';
 }

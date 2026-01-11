@@ -411,5 +411,18 @@
     "placeholders": {
       "amount": {"type": "String"}
     }
-  }
+  },
+
+  "category_expense_food": "Food",
+  "category_expense_transport": "Transport",
+  "category_expense_shopping": "Shopping",
+  "category_expense_living": "Living",
+  "category_expense_hobby": "Hobby",
+  "category_expense_medical": "Medical",
+  "category_expense_other": "Other",
+
+  "category_income_salary": "Salary",
+  "category_income_allowance": "Allowance",
+  "category_income_bonus": "Bonus",
+  "category_income_other": "Other"
 }

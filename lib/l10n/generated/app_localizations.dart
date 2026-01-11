@@ -1405,6 +1405,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remaining {amount}'**
   String remaining_budget_amount(String amount);
+
+  /// No description provided for @category_expense_food.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get category_expense_food;
+
+  /// No description provided for @category_expense_transport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get category_expense_transport;
+
+  /// No description provided for @category_expense_shopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get category_expense_shopping;
+
+  /// No description provided for @category_expense_living.
+  ///
+  /// In en, this message translates to:
+  /// **'Living'**
+  String get category_expense_living;
+
+  /// No description provided for @category_expense_hobby.
+  ///
+  /// In en, this message translates to:
+  /// **'Hobby'**
+  String get category_expense_hobby;
+
+  /// No description provided for @category_expense_medical.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical'**
+  String get category_expense_medical;
+
+  /// No description provided for @category_expense_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get category_expense_other;
+
+  /// No description provided for @category_income_salary.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary'**
+  String get category_income_salary;
+
+  /// No description provided for @category_income_allowance.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowance'**
+  String get category_income_allowance;
+
+  /// No description provided for @category_income_bonus.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus'**
+  String get category_income_bonus;
+
+  /// No description provided for @category_income_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get category_income_other;
 }
 
 class _AppLocalizationsDelegate
