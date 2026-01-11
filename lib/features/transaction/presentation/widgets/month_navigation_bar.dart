@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/extensions/localization_extension.dart';
+import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/budget/presentation/providers/current_month_provider.dart';
 import 'package:daily_pace/features/settings/presentation/providers/budget_start_day_provider.dart';
 import 'package:daily_pace/core/utils/date_range_extension.dart';
@@ -37,7 +38,7 @@ class MonthNavigationBar extends ConsumerWidget {
           ),
           Text(
             startDay == 1
-                ? context.l10n.date_yearMonth(currentMonth.year, currentMonth.month)
+                ? Formatters.formatYearMonthDisplay(currentMonth.year, currentMonth.month, context)
                 : '${periodStart.year}.${periodStart.month}.${periodStart.day} ~ ${periodEnd.month}.${periodEnd.day}',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,

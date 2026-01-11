@@ -74,7 +74,7 @@ class CategoryDetailPage extends ConsumerWidget {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      context.l10n.statistics_yearMonth(year, month),
+                      Formatters.formatYearMonthDisplay(year, month, context),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -212,7 +212,7 @@ class CategoryDetailPage extends ConsumerWidget {
   }
 
   String _formatDate(BuildContext context, String dateStr) {
-    // Format: "YYYY-MM-DD" -> "M월 D일 (요일)"
+    // Format: "YYYY-MM-DD" -> locale-aware date with weekday
     final parts = dateStr.split('-');
     if (parts.length != 3) return dateStr;
 
@@ -232,6 +232,8 @@ class CategoryDetailPage extends ConsumerWidget {
     ];
     final weekday = weekdays[date.weekday - 1];
 
-    return context.l10n.mosaic_dateLabel(month, day, weekday);
+    // Use locale-aware date formatting
+    final dateFormatted = Formatters.formatDateWithoutYear(date, context);
+    return '$dateFormatted ($weekday)';
   }
 }

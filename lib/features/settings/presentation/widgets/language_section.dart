@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/extensions/localization_extension.dart';
+import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/features/settings/presentation/providers/language_provider.dart';
 
@@ -8,6 +9,34 @@ import 'package:daily_pace/features/settings/presentation/providers/language_pro
 /// Allows user to select app language
 class LanguageSection extends ConsumerWidget {
   const LanguageSection({super.key});
+
+  /// Check if there's existing data that might be affected by language change
+  bool _hasExistingData(WidgetRef ref) {
+    final transactions = ref.read(transactionProvider);
+    return transactions.isNotEmpty;
+  }
+
+  /// Show confirmation dialog before changing language
+  Future<bool> _showLanguageChangeWarning(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.l10n.language_changeWarningTitle),
+        content: Text(dialogContext.l10n.language_changeWarningMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(dialogContext.l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(dialogContext.l10n.language_changeConfirm),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -104,7 +133,16 @@ class LanguageSection extends ConsumerWidget {
     final isSelected = currentSetting == setting;
 
     return InkWell(
-      onTap: () {
+      onTap: () async {
+        // Skip if already selected
+        if (isSelected) return;
+
+        // Show warning if there's existing data
+        if (_hasExistingData(ref)) {
+          final confirmed = await _showLanguageChangeWarning(context);
+          if (!confirmed) return;
+        }
+
         ref.read(languageSettingProvider.notifier).setSetting(setting);
       },
       borderRadius: BorderRadius.vertical(

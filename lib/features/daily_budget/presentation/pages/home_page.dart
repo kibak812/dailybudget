@@ -4,6 +4,7 @@ import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/widgets/banner_ad_widget.dart';
 import 'package:daily_pace/core/utils/date_range_extension.dart';
+import 'package:daily_pace/core/utils/formatters.dart';
 import 'package:daily_pace/features/daily_budget/domain/models/daily_budget_data.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/today_summary_card.dart';
 import 'package:daily_pace/features/daily_budget/presentation/widgets/today_spent_card.dart';
@@ -31,7 +32,7 @@ class HomePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: startDay == 1
-            ? Text(context.l10n.date_yearMonth(currentMonth.year, currentMonth.month))
+            ? Text(Formatters.formatYearMonthDisplay(currentMonth.year, currentMonth.month, context))
             : Text(
                 '${periodStart.year}.${periodStart.month}.${periodStart.day} ~ ${periodEnd.month}.${periodEnd.day}',
               ),

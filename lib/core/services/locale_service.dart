@@ -194,6 +194,29 @@ class LocaleService {
     }
   }
 
+  /// Format date for chart X-axis (compact, unambiguous)
+  /// English: "Jan 6" (month abbreviation + day)
+  /// Korean: "1/6" (compact numeric)
+  String formatChartDate(DateTime date) {
+    if (isEnglish) {
+      final formatter = DateFormat.MMMd('en_US');
+      return formatter.format(date);
+    } else {
+      return '${date.month}/${date.day}';
+    }
+  }
+
+  /// Format date for chart X-axis from month/day
+  String formatChartDateFromParts(int month, int day) {
+    if (isEnglish) {
+      final date = DateTime(2000, month, day); // Year doesn't matter for formatting
+      final formatter = DateFormat.MMMd('en_US');
+      return formatter.format(date);
+    } else {
+      return '$month/$day';
+    }
+  }
+
   /// Format year and month (e.g., "Jan 2026" or "2026년 1월")
   String formatYearMonth(int year, int month) {
     if (isEnglish) {

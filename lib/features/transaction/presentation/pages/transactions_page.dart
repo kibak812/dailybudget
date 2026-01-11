@@ -603,7 +603,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           children: [
             ListTile(
               leading: const Icon(Icons.all_inclusive),
-              title: Text(sheetContext.l10n.common_confirm),
+              title: Text(sheetContext.l10n.filter_all),
               onTap: () => Navigator.of(sheetContext).pop('all'),
             ),
             ListTile(

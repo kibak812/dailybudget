@@ -240,7 +240,9 @@ class _YesterdaySummaryCardState extends ConsumerState<YesterdaySummaryCard> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    context.l10n.yesterday_summary(summary.date.month, summary.date.day),
+                    context.l10n.yesterday_summary(
+                      Formatters.formatDate(Formatters.formatDateISO(summary.date), context),
+                    ),
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: summary.statusColor,

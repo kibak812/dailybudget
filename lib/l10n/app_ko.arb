@@ -13,6 +13,7 @@
   "common_ok": "확인",
   "common_search": "검색",
   "common_reset": "초기화",
+  "filter_all": "전체",
 
   "nav_home": "홈",
   "nav_transactions": "거래내역",
@@ -49,7 +50,12 @@
   "today_overBudget": "오늘 예산 초과",
   "today_remaining": "오늘 남은 예산",
 
-  "yesterday_summary": "{month}월 {day}일 결산",
+  "yesterday_summary": "{date} 결산",
+  "@yesterday_summary": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
   "yesterday_budget": "예산",
   "yesterday_expense": "지출",
   "yesterday_savingsRate": "절약률",
@@ -177,6 +183,9 @@
   "language_system": "시스템 설정",
   "language_korean": "한국어",
   "language_english": "English",
+  "language_changeWarningTitle": "언어 변경",
+  "language_changeWarningMessage": "언어를 변경하면 기존 거래 금액 표시에 영향을 줄 수 있습니다.\n\n한국어는 원 단위(정수), 영어는 달러 단위(소수점)를 사용합니다.\n\n기존 데이터는 유지되지만 다르게 표시될 수 있습니다.",
+  "language_changeConfirm": "변경하기",
 
   "error_invalidAmount": "올바른 금액을 입력해주세요",
   "error_enterAmount": "금액을 입력해주세요",

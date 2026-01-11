@@ -45,6 +45,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_reset => '초기화';
 
   @override
+  String get filter_all => '전체';
+
+  @override
   String get nav_home => '홈';
 
   @override
@@ -151,8 +154,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get today_remaining => '오늘 남은 예산';
 
   @override
-  String yesterday_summary(int month, int day) {
-    return '$month월 $day일 결산';
+  String yesterday_summary(String date) {
+    return '$date 결산';
   }
 
   @override
@@ -513,6 +516,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get language_english => 'English';
+
+  @override
+  String get language_changeWarningTitle => '언어 변경';
+
+  @override
+  String get language_changeWarningMessage =>
+      '언어를 변경하면 기존 거래 금액 표시에 영향을 줄 수 있습니다.\n\n한국어는 원 단위(정수), 영어는 달러 단위(소수점)를 사용합니다.\n\n기존 데이터는 유지되지만 다르게 표시될 수 있습니다.';
+
+  @override
+  String get language_changeConfirm => '변경하기';
 
   @override
   String get error_invalidAmount => '올바른 금액을 입력해주세요';

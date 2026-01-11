@@ -170,6 +170,12 @@ abstract class AppLocalizations {
   /// **'Reset'**
   String get common_reset;
 
+  /// No description provided for @filter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filter_all;
+
   /// No description provided for @nav_home.
   ///
   /// In en, this message translates to:
@@ -359,8 +365,8 @@ abstract class AppLocalizations {
   /// No description provided for @yesterday_summary.
   ///
   /// In en, this message translates to:
-  /// **'{month}/{day} Summary'**
-  String yesterday_summary(int month, int day);
+  /// **'{date} Summary'**
+  String yesterday_summary(String date);
 
   /// No description provided for @yesterday_budget.
   ///
@@ -1039,6 +1045,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'English'**
   String get language_english;
+
+  /// No description provided for @language_changeWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Language'**
+  String get language_changeWarningTitle;
+
+  /// No description provided for @language_changeWarningMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing languages may affect how existing transaction amounts are displayed.\n\nKorean uses whole numbers (won), while English uses dollars with cents.\n\nExisting data will remain but may display differently.'**
+  String get language_changeWarningMessage;
+
+  /// No description provided for @language_changeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Anyway'**
+  String get language_changeConfirm;
 
   /// No description provided for @error_invalidAmount.
   ///

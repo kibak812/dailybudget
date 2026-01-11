@@ -45,6 +45,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_reset => 'Reset';
 
   @override
+  String get filter_all => 'All';
+
+  @override
   String get nav_home => 'Home';
 
   @override
@@ -152,8 +155,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get today_remaining => 'Remaining today';
 
   @override
-  String yesterday_summary(int month, int day) {
-    return '$month/$day Summary';
+  String yesterday_summary(String date) {
+    return '$date Summary';
   }
 
   @override
@@ -520,6 +523,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get language_english => 'English';
+
+  @override
+  String get language_changeWarningTitle => 'Change Language';
+
+  @override
+  String get language_changeWarningMessage =>
+      'Changing languages may affect how existing transaction amounts are displayed.\n\nKorean uses whole numbers (won), while English uses dollars with cents.\n\nExisting data will remain but may display differently.';
+
+  @override
+  String get language_changeConfirm => 'Change Anyway';
 
   @override
   String get error_invalidAmount => 'Please enter a valid amount';

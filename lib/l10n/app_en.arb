@@ -13,6 +13,7 @@
   "common_ok": "OK",
   "common_search": "Search",
   "common_reset": "Reset",
+  "filter_all": "All",
 
   "nav_home": "Home",
   "nav_transactions": "Transactions",
@@ -79,11 +80,10 @@
   "today_overBudget": "Over budget today",
   "today_remaining": "Remaining today",
 
-  "yesterday_summary": "{month}/{day} Summary",
+  "yesterday_summary": "{date} Summary",
   "@yesterday_summary": {
     "placeholders": {
-      "month": {"type": "int"},
-      "day": {"type": "int"}
+      "date": {"type": "String"}
     }
   },
   "yesterday_budget": "Budget",
@@ -261,6 +261,9 @@
   "language_system": "System Default",
   "language_korean": "Korean",
   "language_english": "English",
+  "language_changeWarningTitle": "Change Language",
+  "language_changeWarningMessage": "Changing languages may affect how existing transaction amounts are displayed.\n\nKorean uses whole numbers (won), while English uses dollars with cents.\n\nExisting data will remain but may display differently.",
+  "language_changeConfirm": "Change Anyway",
 
   "error_invalidAmount": "Please enter a valid amount",
   "error_enterAmount": "Please enter an amount",

@@ -248,10 +248,10 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
         maximum: yMax,
         interval: (yMax - yMin) / 4,
 
-        // CRITICAL: Korean formatting
+        // Locale-aware formatting for Y axis
         axisLabelFormatter: (AxisLabelRenderDetails args) {
           return ChartAxisLabel(
-            _formatYAxisValue(args.value.toInt()),
+            _formatYAxisValue(args.value.toInt(), context),
             TextStyle(
               color: AppColors.textSecondary,
               fontSize: 10,
@@ -316,25 +316,42 @@ class _DailyBudgetTrendChartSyncfusionState extends ConsumerState<DailyBudgetTre
     return 5;
   }
 
-  /// Format Y-axis values with Korean units
-  String _formatYAxisValue(int value) {
+  /// Format Y-axis values with locale-aware units
+  String _formatYAxisValue(int value, BuildContext context) {
     if (value == 0) return '0';
 
+    final isEnglish = Formatters.isEnglishLocale(context);
     final absValue = value.abs();
     final sign = value < 0 ? '-' : '';
 
-    if (absValue >= 10000) {
-      final man = (absValue / 10000).floor();
-      final remainder = absValue % 10000;
-      if (remainder == 0) {
-        return '$sign$man만';
+    if (isEnglish) {
+      // English: Use K for thousands, convert cents to dollars
+      final dollars = absValue / 100;
+      if (dollars >= 1000) {
+        final k = (dollars / 1000);
+        if (k == k.floor()) {
+          return '$sign\$${k.toInt()}K';
+        } else {
+          return '$sign\$${k.toStringAsFixed(1)}K';
+        }
       } else {
-        return '$sign$man.${(remainder / 1000).floor()}만';
+        return '$sign\$${dollars.toInt()}';
       }
-    } else if (absValue >= 1000) {
-      return '$sign${(absValue / 1000).floor()}천';
     } else {
-      return '$sign$absValue';
+      // Korean: Use 만 (10K) and 천 (1K)
+      if (absValue >= 10000) {
+        final man = (absValue / 10000).floor();
+        final remainder = absValue % 10000;
+        if (remainder == 0) {
+          return '$sign$man만';
+        } else {
+          return '$sign$man.${(remainder / 1000).floor()}만';
+        }
+      } else if (absValue >= 1000) {
+        return '$sign${(absValue / 1000).floor()}천';
+      } else {
+        return '$sign$absValue';
+      }
     }
   }
 }
