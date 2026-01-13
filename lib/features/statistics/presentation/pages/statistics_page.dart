@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
+import 'package:daily_pace/core/utils/date_range_extension.dart';
 import 'package:daily_pace/core/widgets/banner_ad_widget.dart';
 import 'package:daily_pace/features/budget/presentation/providers/current_month_provider.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/statistics/presentation/widgets/summary_card.dart';
 import 'package:daily_pace/features/statistics/presentation/widgets/budget_usage_card.dart';
 import 'package:daily_pace/features/statistics/presentation/widgets/category_chart_card.dart';
+import 'package:daily_pace/features/settings/presentation/providers/budget_start_day_provider.dart';
+import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 
 /// Statistics page
@@ -19,14 +22,21 @@ class StatisticsPage extends ConsumerWidget {
   // Breakpoint for wide layout (Galaxy Fold inner display)
   static const double _wideBreakpoint = 600.0;
 
-  /// Filter transactions by current month
+  /// Filter transactions by month period (considering start day)
   List<TransactionModel> _filterByMonth(
     List<TransactionModel> transactions,
     CurrentMonth currentMonth,
+    int startDay,
   ) {
-    final monthPrefix =
-        '${currentMonth.year}-${currentMonth.month.toString().padLeft(2, '0')}';
-    return transactions.where((t) => t.date.startsWith(monthPrefix)).toList();
+    // Get the actual date range for this budget period
+    final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
+
+    // Filter transactions within the period
+    return DailyBudgetService.filterTransactionsForPeriod(
+      transactions,
+      periodStart,
+      periodEnd,
+    );
   }
 
   /// Calculate category spending data
@@ -219,6 +229,7 @@ class StatisticsPage extends ConsumerWidget {
     final transactions = ref.watch(transactionProvider);
     final budgets = ref.watch(budgetProvider);
     final budgetData = ref.watch(dailyBudgetProvider);
+    final startDay = ref.watch(budgetStartDayProvider);
 
     // Get budget for current month
     final budget = budgets
@@ -239,8 +250,8 @@ class StatisticsPage extends ConsumerWidget {
       );
     }
 
-    // Filter transactions for current month
-    final monthTransactions = _filterByMonth(transactions, currentMonth);
+    // Filter transactions for current month period (considering start day)
+    final monthTransactions = _filterByMonth(transactions, currentMonth, startDay);
 
     // Calculate category data
     final categoryData = _calculateCategoryData(monthTransactions, context);

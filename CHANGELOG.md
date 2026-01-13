@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 31.1] - 2026-01-13
+
+### Summary
+Bug fix release for custom budget start day feature. Fixed an issue where statistics, category details, and yesterday summary were not respecting the custom budget start day setting.
+
+### Fixed
+
+#### Budget Start Day Now Applied Everywhere (PR #15 + additional fixes)
+- **Transactions page** (PR #15): Transaction list now correctly filters by budget period
+- **Statistics page**: Summary cards and category breakdown now use budget period
+- **Category detail page**: Individual category transactions filtered by budget period
+- **Yesterday summary card**: Now shows data based on budget period, not calendar month
+
+#### Technical Details
+All affected files now use:
+- `budgetStartDayProvider` to watch start day changes
+- `getDateRange(startDay)` for period calculation
+- `DailyBudgetService.filterTransactionsForPeriod()` for consistent filtering
+
+### Changed
+- Version bump: `1.0.5+8` → `1.1.1+10`
+
+---
+
 ## [Phase 31] - 2026-01-11
 
 ### Summary

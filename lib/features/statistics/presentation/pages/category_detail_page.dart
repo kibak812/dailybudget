@@ -3,7 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
+import 'package:daily_pace/core/utils/date_range_extension.dart';
+import 'package:daily_pace/features/budget/presentation/providers/current_month_provider.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
+import 'package:daily_pace/features/settings/presentation/providers/budget_start_day_provider.dart';
+import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
 import 'package:daily_pace/app/theme/app_colors.dart';
 
 class CategoryDetailPage extends ConsumerWidget {
@@ -23,13 +27,23 @@ class CategoryDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final allTransactions = ref.watch(transactionProvider);
+    final startDay = ref.watch(budgetStartDayProvider);
 
-    // Filter transactions for this category and month
-    final categoryTransactions = allTransactions.where((t) {
-      final matchesMonth = t.year == year && t.month == month;
+    // Get the actual date range for this budget period
+    final currentMonth = CurrentMonth(year: year, month: month);
+    final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
+
+    // Filter transactions for this category and period
+    final periodTransactions = DailyBudgetService.filterTransactionsForPeriod(
+      allTransactions,
+      periodStart,
+      periodEnd,
+    );
+
+    final categoryTransactions = periodTransactions.where((t) {
       final matchesCategory = (t.category ?? context.l10n.category_other) == categoryName;
       final isExpense = t.type == TransactionType.expense;
-      return matchesMonth && matchesCategory && isExpense;
+      return matchesCategory && isExpense;
     }).toList()
       ..sort((a, b) => b.date.compareTo(a.date)); // Sort by date descending
 

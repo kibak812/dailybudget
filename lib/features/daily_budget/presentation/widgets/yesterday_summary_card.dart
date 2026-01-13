@@ -5,8 +5,10 @@ import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/services/daily_summary_service.dart';
+import 'package:daily_pace/core/utils/date_range_extension.dart';
 import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
+import 'package:daily_pace/features/settings/presentation/providers/budget_start_day_provider.dart';
 import 'package:daily_pace/features/transaction/domain/models/day_status.dart';
 
 /// Key for storing last dismissed date in SharedPreferences
@@ -55,16 +57,21 @@ final yesterdaySummaryProvider = Provider<YesterdaySummary?>((ref) {
   final today = ref.watch(currentDateProvider);
   final budgets = ref.watch(budgetProvider);
   final transactions = ref.watch(transactionProvider);
+  final startDay = ref.watch(budgetStartDayProvider);
 
-  // Only show if today is not the 1st of the month
-  if (today.day == 1) return null;
+  // Calculate period date range based on start day
+  final (periodStart, periodEnd) = currentMonth.getDateRange(startDay);
+  final daysInPeriod = periodEnd.difference(periodStart).inDays + 1;
 
-  // Check if we're viewing current month
-  final isCurrentMonth =
-      today.year == currentMonth.year && today.month == currentMonth.month;
-  if (!isCurrentMonth) return null;
+  // Check if today is within the current period
+  final isTodayInPeriod = !today.isBefore(periodStart) && !today.isAfter(periodEnd);
+  if (!isTodayInPeriod) return null;
 
-  // Get budget for current month
+  // Only show if today is not the first day of the period
+  final todayDayIndex = today.difference(periodStart).inDays + 1;
+  if (todayDayIndex == 1) return null;
+
+  // Get budget for current month (label month)
   final budget = budgets
       .where(
           (b) => b.year == currentMonth.year && b.month == currentMonth.month)
@@ -74,35 +81,37 @@ final yesterdaySummaryProvider = Provider<YesterdaySummary?>((ref) {
   // Calculate yesterday's data
   final yesterday = today.subtract(const Duration(days: 1));
   final yesterdayStr = Formatters.formatDateISO(yesterday);
+  final yesterdayDayIndex = todayDayIndex - 1;
 
-  // Filter transactions for current month
-  final monthPrefix = Formatters.formatYearMonth(currentMonth.year, currentMonth.month);
-  final monthTransactions =
-      transactions.where((t) => t.date.startsWith(monthPrefix)).toList();
+  // Filter transactions for the budget period
+  final periodTransactions = DailyBudgetService.filterTransactionsForPeriod(
+    transactions,
+    periodStart,
+    periodEnd,
+  );
 
   // Get yesterday's spending
   final yesterdayExpenses =
-      DailyBudgetService.getSpentForDate(monthTransactions, yesterdayStr);
+      DailyBudgetService.getSpentForDate(periodTransactions, yesterdayStr);
   final yesterdayIncome =
-      DailyBudgetService.getIncomeForDate(monthTransactions, yesterdayStr);
+      DailyBudgetService.getIncomeForDate(periodTransactions, yesterdayStr);
   final yesterdayNetSpent = yesterdayExpenses - yesterdayIncome;
 
   // Calculate yesterday's budget (based on day before yesterday)
-  final daysInMonth =
-      DailyBudgetService.getDaysInMonth(currentMonth.year, currentMonth.month);
-  final dayBeforeYesterdayStr = yesterday.day > 1
-      ? Formatters.formatDateISO(yesterday.subtract(const Duration(days: 1)))
-      : null;
+  final dayBeforeYesterday = yesterday.subtract(const Duration(days: 1));
+  final dayBeforeYesterdayStr = dayBeforeYesterday.isBefore(periodStart)
+      ? null
+      : Formatters.formatDateISO(dayBeforeYesterday);
   final netSpentUntilDayBeforeYesterday = dayBeforeYesterdayStr != null
       ? DailyBudgetService.getNetSpentUntilDate(
-          monthTransactions, dayBeforeYesterdayStr)
+          periodTransactions, dayBeforeYesterdayStr)
       : 0;
 
   final yesterdayBudget = DailyBudgetService.calculateDailyBudget(
     budget.amount,
     netSpentUntilDayBeforeYesterday,
-    daysInMonth,
-    yesterday.day,
+    daysInPeriod,
+    yesterdayDayIndex,
   );
 
   // Determine status using centralized calculation
