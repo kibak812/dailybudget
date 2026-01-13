@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_pace/core/extensions/localization_extension.dart';
 import 'package:daily_pace/core/providers/providers.dart';
 import 'package:daily_pace/core/utils/formatters.dart';
+import 'package:daily_pace/core/utils/date_range_extension.dart';
 import 'package:daily_pace/core/widgets/banner_ad_widget.dart';
 import 'package:daily_pace/features/transaction/data/models/transaction_model.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/transaction_list_item.dart';
@@ -10,6 +11,8 @@ import 'package:daily_pace/features/transaction/presentation/widgets/transaction
 import 'package:daily_pace/features/transaction/presentation/widgets/add_transaction_sheet.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/month_navigation_bar.dart';
 import 'package:daily_pace/features/transaction/presentation/widgets/monthly_pace_mosaic.dart';
+import 'package:daily_pace/features/settings/presentation/providers/budget_start_day_provider.dart';
+import 'package:daily_pace/features/daily_budget/domain/services/daily_budget_service.dart';
 
 /// Transactions page
 /// Displays list of all transactions grouped by date with filtering and management
@@ -33,6 +36,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final currentMonth = ref.watch(currentMonthProvider);
     final transactions = ref.watch(transactionProvider);
     final mosaicData = ref.watch(monthlyMosaicProvider);
+    final startDay = ref.watch(budgetStartDayProvider);
 
     // Listen for month changes and reset date selection
     ref.listen(currentMonthProvider, (previous, next) {
@@ -41,8 +45,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       }
     });
 
-    // Filter transactions for current month
-    final monthTransactions = _filterByMonth(transactions, currentMonth);
+    // Filter transactions for current month period (considering start day)
+    final monthTransactions = _filterByMonth(transactions, currentMonth, startDay);
 
     // Filter by selected date (if any)
     final dateFilteredTransactions = _selectedDate == null
@@ -362,15 +366,21 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     );
   }
 
-  /// Filter transactions by month
+  /// Filter transactions by month period (considering start day)
   List<TransactionModel> _filterByMonth(
     List<TransactionModel> transactions,
     CurrentMonth month,
+    int startDay,
   ) {
-    return transactions.where((t) {
-      return t.year == month.year && t.month == month.month;
-    }).toList()
-      ..sort((a, b) => b.date.compareTo(a.date)); // Newest first
+    // Get the actual date range for this budget period
+    final (periodStart, periodEnd) = month.getDateRange(startDay);
+
+    // Filter transactions within the period
+    return DailyBudgetService.filterTransactionsForPeriod(
+      transactions,
+      periodStart,
+      periodEnd,
+    )..sort((a, b) => b.date.compareTo(a.date)); // Newest first
   }
 
   /// Get day of week localized
