@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 31.4] - 2026-01-14
+
+### Summary
+Auto-reset default categories when language is changed (for new users without transactions).
+
+### Fixed
+
+#### Language-aware Default Categories
+- **Issue**: When user changes language setting (e.g., Korean → English), default categories remained in the original language
+- **Solution**: When language is changed and no transactions exist, categories are automatically reset to match the new language
+- **Behavior**:
+  - No transactions → Categories auto-reset to new language (e.g., "식비" → "Food")
+  - Has transactions → Categories preserved (user may have customized them)
+
+### Changed Files
+- `lib/features/settings/presentation/widgets/language_section.dart`
+
+---
+
 ## [Phase 31.3] - 2026-01-14
 
 ### Summary

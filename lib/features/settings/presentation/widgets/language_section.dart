@@ -137,13 +137,21 @@ class LanguageSection extends ConsumerWidget {
         // Skip if already selected
         if (isSelected) return;
 
+        final hasData = _hasExistingData(ref);
+
         // Show warning if there's existing data
-        if (_hasExistingData(ref)) {
+        if (hasData) {
           final confirmed = await _showLanguageChangeWarning(context);
           if (!confirmed) return;
         }
 
-        ref.read(languageSettingProvider.notifier).setSetting(setting);
+        // Change language
+        await ref.read(languageSettingProvider.notifier).setSetting(setting);
+
+        // Reset categories to match new language if no existing transactions
+        if (!hasData) {
+          await ref.read(categoriesProvider.notifier).resetToDefaults();
+        }
       },
       borderRadius: BorderRadius.vertical(
         top: isFirst ? const Radius.circular(16) : Radius.zero,
