@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:daily_pace/core/services/locale_service.dart';
 
 const String _languageKey = 'app_language';
 
@@ -58,6 +59,9 @@ class LanguageNotifier extends StateNotifier<Locale?> {
         state = const Locale('en');
         break;
     }
+
+    // Refresh LocaleService singleton to update cached locale
+    await LocaleService().refresh();
   }
 }
 

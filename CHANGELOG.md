@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 31.2] - 2026-01-14
+
+### Summary
+Fixed chart x-axis date format not updating when language setting changes.
+
+### Fixed
+
+#### LocaleService Refresh on Language Change
+- **Issue**: Line chart x-axis labels remained in previous locale format (e.g., "1/8") after switching to English (should show "Jan 8")
+- **Cause**: `LocaleService` singleton cached the locale and wasn't refreshed when language setting changed
+- **Fix**: Added `LocaleService().refresh()` call in `LanguageNotifier.setLanguage()` to update cached locale
+
+### Changed Files
+- `lib/features/settings/presentation/providers/language_provider.dart`
+
+---
+
 ## [Phase 31.1] - 2026-01-13
 
 ### Summary
