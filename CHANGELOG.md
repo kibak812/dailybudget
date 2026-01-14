@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 31.3] - 2026-01-14
+
+### Summary
+Added English landing page for international marketing (Reddit, etc).
+
+### Added
+
+#### English Landing Page
+- **New file**: `docs/en.html` - Full English version of the marketing landing page
+- **English screenshots**: Added `home-en.png`, `transactions-en.png`, `statistics-en.png`, `settings-en.png` to `docs/images/`
+- **Features highlighted**: Daily budget calculation, Pace Calendar, Smart Analytics
+- **Trust signals**: No account, No subscription, No ads, 100% offline privacy
+
+### Notes
+- Uses Inter font (optimized for English)
+- URL: `https://[domain]/en.html`
+
+---
+
 ## [Phase 31.2] - 2026-01-14
 
 ### Summary
