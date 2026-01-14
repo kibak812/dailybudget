@@ -4,161 +4,329 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DailyBudget - 하루 예산 플래너</title>
+    <meta name="description" content="매일 얼마까지 써도 될까? DailyBudget이 월 예산을 기반으로 오늘 사용할 수 있는 금액을 알려드립니다.">
+    <meta name="keywords" content="예산 관리, 가계부, 하루 예산, 지출 관리, 예산 앱">
+    <meta property="og:title" content="DailyBudget - 하루 예산 플래너">
+    <meta property="og:description" content="매일 얼마까지 써도 될까? 오늘 쓸 수 있는 예산을 자동으로 계산해드립니다.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    },
+                    colors: {
+                        indigo: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        .hero-gradient {
+            background: linear-gradient(135deg, #4338ca 0%, #6366f1 50%, #818cf8 100%);
         }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
-            line-height: 1.8;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+        .phone-mockup {
+            filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.25));
         }
-        .container {
-            max-width: 600px;
-            width: 100%;
-            padding: 40px;
-            background-color: #fff;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        .feature-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(67, 56, 202, 0.15);
         }
-        h1 {
-            color: #3949AB;
-            font-size: 32px;
-            margin-bottom: 10px;
+        .screenshot-card {
+            transition: transform 0.3s ease;
         }
-        .subtitle {
-            color: #666;
-            font-size: 18px;
-        }
-        .section {
-            margin-bottom: 25px;
-        }
-        .section h2 {
-            color: #3949AB;
-            font-size: 18px;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #E8EAF6;
-        }
-        .section p {
-            color: #555;
-        }
-        .features {
-            list-style: none;
-            color: #555;
-        }
-        .features li {
-            padding: 8px 0;
-            padding-left: 24px;
-            position: relative;
-        }
-        .features li::before {
-            content: "~";
-            position: absolute;
-            left: 0;
-            color: #3949AB;
-        }
-        .links {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 20px;
-        }
-        .links a {
-            display: block;
-            padding: 14px 24px;
-            background-color: #E8EAF6;
-            color: #3949AB;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: background-color 0.3s;
-            text-align: center;
-        }
-        .links a:hover {
-            background-color: #C5CAE9;
-        }
-        .contact-box {
-            background-color: #F5F5F5;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-        .contact-box p {
-            margin-bottom: 8px;
-            color: #555;
-        }
-        .contact-box a {
-            color: #3949AB;
-            text-decoration: none;
-        }
-        .contact-box a:hover {
-            text-decoration: underline;
-        }
-        .footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            text-align: center;
-            color: #999;
-            font-size: 13px;
+        .screenshot-card:hover {
+            transform: scale(1.02);
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>DailyBudget</h1>
-            <p class="subtitle">하루 예산 플래너</p>
+<body class="font-sans text-gray-800 antialiased">
+    <!-- Hero Section -->
+    <section class="hero-gradient min-h-screen flex items-center relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-20 right-10 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         </div>
 
-        <div class="section">
-            <h2>앱 소개</h2>
-            <p>DailyBudget은 월 예산을 기반으로 매일 사용할 수 있는 최적의 금액을 계산해주는 스마트 예산 관리 앱입니다. 어제보다 오늘 더 나은 소비 습관을 만들어보세요!</p>
-        </div>
+        <div class="container mx-auto px-6 py-16 relative z-10">
+            <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+                <!-- Text Content -->
+                <div class="flex-1 text-center lg:text-left">
+                    <!-- Pain Point Hook -->
+                    <p class="text-indigo-200 text-lg md:text-xl mb-4 font-medium">
+                        가계부, 작심삼일로 끝나셨죠?
+                    </p>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+                        기록만 하는 가계부는<br>그만.
+                    </h1>
+                    <p class="text-xl md:text-2xl text-indigo-100 mb-8 leading-relaxed">
+                        DailyBudget은 <span class="font-semibold text-white">오늘 쓸 수 있는 금액</span>을<br>
+                        매일 알려드립니다.
+                    </p>
 
-        <div class="section">
-            <h2>주요 기능</h2>
-            <ul class="features">
-                <li>월 예산 기반 일일 예산 자동 계산</li>
-                <li>지출/수입 간편 기록</li>
-                <li>월간 지출 현황 모자이크 캘린더</li>
-                <li>카테고리별 지출 통계 차트</li>
-                <li>반복 지출 자동 등록</li>
-                <li>데이터 백업 및 복원</li>
-            </ul>
-        </div>
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a href="https://apps.apple.com/kr/app/dailybudget-%ED%95%98%EB%A3%A8-%EC%98%88%EC%82%B0-%ED%94%8C%EB%9E%98%EB%84%88/id6757256379"
+                           target="_blank"
+                           class="inline-flex items-center justify-center gap-3 bg-white text-indigo-700 px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-indigo-50 transition-colors shadow-lg">
+                            <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                            </svg>
+                            App Store
+                        </a>
+                        <a href="https://play.google.com/store/apps/details?id=com.dailypace.daily_pace&pcampaignid=web_share"
+                           target="_blank"
+                           class="inline-flex items-center justify-center gap-3 bg-white/10 text-white border-2 border-white/30 px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/20 transition-colors">
+                            <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                            </svg>
+                            Google Play
+                        </a>
+                    </div>
+                </div>
 
-        <div class="section">
-            <h2>고객 지원</h2>
-            <div class="contact-box">
-                <p>앱 사용 중 문의사항이나 버그 리포트가 있으시면 아래로 연락해주세요.</p>
-                <p><a href="mailto:kibak812@gmail.com">kibak812@gmail.com</a></p>
+                <!-- Phone Mockup -->
+                <div class="flex-1 flex justify-center">
+                    <div class="relative">
+                        <img src="images/home.png"
+                             alt="DailyBudget 앱 홈 화면"
+                             class="phone-mockup w-64 md:w-72 lg:w-80 rounded-3xl">
+                    </div>
+                </div>
             </div>
         </div>
+    </section>
 
-        <div class="section">
-            <h2>법적 정보</h2>
-            <div class="links">
-                <a href="privacy-policy.html">개인정보처리방침</a>
+    <!-- Problem → Solution Section -->
+    <section class="py-20 md:py-28 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto">
+                <!-- Pain Points -->
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-12 text-center">
+                    기존 가계부, 이래서 포기하셨죠?
+                </h2>
+
+                <div class="grid md:grid-cols-3 gap-6 mb-16">
+                    <div class="bg-white rounded-2xl p-6 border border-gray-200">
+                        <div class="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-2">매번 기록하기 귀찮아</h3>
+                        <p class="text-gray-600 text-sm">커피 한 잔까지 일일이 입력하다 보면 금방 지쳐버려요</p>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 border border-gray-200">
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-2">기록만 하고 끝</h3>
+                        <p class="text-gray-600 text-sm">열심히 적어도 "그래서 얼마 쓰라고?" 답이 없어요</p>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 border border-gray-200">
+                        <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-2">월말에 결국 터짐</h3>
+                        <p class="text-gray-600 text-sm">아무리 기록해도 월말엔 늘 텅 빈 통장...</p>
+                    </div>
+                </div>
+
+                <!-- Solution -->
+                <div class="bg-white rounded-3xl p-8 md:p-12 shadow-lg border border-indigo-100 text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-2xl mb-6">
+                        <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl md:text-3xl font-bold text-indigo-700 mb-4">
+                        DailyBudget은 다릅니다
+                    </h3>
+                    <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                        기록이 목적이 아닙니다.<br>
+                        <span class="font-semibold text-gray-900">"오늘 얼마까지 써도 되는지"</span> 알려주는 게 핵심이에요.<br>
+                        어제 지출을 반영해서 매일 새로운 예산을 계산해드립니다.
+                    </p>
+                </div>
             </div>
         </div>
+    </section>
 
-        <div class="footer">
-            <p>&copy; 2025 DailyBudget. All rights reserved.</p>
+    <!-- Features Section -->
+    <section class="py-20 md:py-28">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    핵심 기능
+                </h2>
+                <p class="text-lg text-gray-600">
+                    간단하지만 강력한 예산 관리
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Feature 1 -->
+                <div class="feature-card bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                    <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">오늘의 예산</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        어제까지의 지출을 반영해서 오늘 쓸 수 있는 금액을 자동으로 계산합니다.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                    <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">한눈에 보는 지출</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        모자이크 캘린더로 한 달 소비 패턴을 색상으로 한눈에 파악할 수 있어요.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                    <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">통계와 분석</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        카테고리별 지출 현황을 차트로 확인하고 소비 습관을 개선하세요.
+                    </p>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- Screenshots Section -->
+    <section class="py-20 md:py-28 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    앱 미리보기
+                </h2>
+                <p class="text-lg text-gray-600">
+                    깔끔한 디자인, 직관적인 사용성
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
+                <div class="screenshot-card">
+                    <img src="images/home.png"
+                         alt="홈 화면 - 오늘의 예산"
+                         class="rounded-2xl shadow-lg w-full">
+                    <p class="text-center text-sm text-gray-600 mt-3 font-medium">홈</p>
+                </div>
+                <div class="screenshot-card">
+                    <img src="images/transactions.png"
+                         alt="거래내역 화면 - 모자이크 캘린더"
+                         class="rounded-2xl shadow-lg w-full">
+                    <p class="text-center text-sm text-gray-600 mt-3 font-medium">거래내역</p>
+                </div>
+                <div class="screenshot-card">
+                    <img src="images/statistics.png"
+                         alt="통계 화면 - 카테고리별 지출"
+                         class="rounded-2xl shadow-lg w-full">
+                    <p class="text-center text-sm text-gray-600 mt-3 font-medium">통계</p>
+                </div>
+                <div class="screenshot-card">
+                    <img src="images/settings.png"
+                         alt="설정 화면 - 예산 및 알림 설정"
+                         class="rounded-2xl shadow-lg w-full">
+                    <p class="text-center text-sm text-gray-600 mt-3 font-medium">설정</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="py-20 md:py-28 hero-gradient">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+                오늘부터 시작하세요
+            </h2>
+            <p class="text-xl text-indigo-100 mb-10 max-w-2xl mx-auto">
+                매일 고민하지 마세요.<br>
+                DailyBudget이 오늘 쓸 수 있는 예산을 알려드립니다.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="https://apps.apple.com/kr/app/dailybudget-%ED%95%98%EB%A3%A8-%EC%98%88%EC%82%B0-%ED%94%8C%EB%9E%98%EB%84%88/id6757256379"
+                   target="_blank"
+                   class="inline-flex items-center justify-center gap-3 bg-white text-indigo-700 px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-indigo-50 transition-colors shadow-lg">
+                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                    </svg>
+                    App Store에서 다운로드
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.dailypace.daily_pace&pcampaignid=web_share"
+                   target="_blank"
+                   class="inline-flex items-center justify-center gap-3 bg-white/10 text-white border-2 border-white/30 px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/20 transition-colors">
+                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                    </svg>
+                    Google Play에서 다운로드
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-12">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-center md:text-left">
+                    <h3 class="text-white font-bold text-xl mb-2">DailyBudget</h3>
+                    <p class="text-sm">하루 예산 플래너</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-sm">
+                    <a href="privacy-policy.html" class="hover:text-white transition-colors">
+                        개인정보처리방침
+                    </a>
+                    <a href="mailto:kibak812@gmail.com" class="hover:text-white transition-colors">
+                        문의: kibak812@gmail.com
+                    </a>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
+                <p>&copy; 2025 DailyBudget. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
