@@ -5,7 +5,7 @@ import 'package:daily_pace/app/theme/app_colors.dart';
 import 'package:daily_pace/features/settings/presentation/providers/notification_settings_provider.dart';
 
 /// Notification Settings Section Widget
-/// Allows user to configure daily summary notification
+/// Allows user to configure daily summary notification in an expandable tile
 class NotificationSection extends ConsumerWidget {
   const NotificationSection({super.key});
 
@@ -14,83 +14,126 @@ class NotificationSection extends ConsumerWidget {
     final settings = ref.watch(notificationSettingsProvider);
     final notifier = ref.read(notificationSettingsProvider.notifier);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section header
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
+    // Count active notifications
+    int activeCount = 0;
+    if (settings.isDailySummaryEnabled) activeCount++;
+    if (settings.isEveningReminderEnabled) activeCount++;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          dividerColor: Colors.transparent,
+        ),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          childrenPadding: EdgeInsets.zero,
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: activeCount > 0
+                  ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5)
+                  : AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.notifications_outlined,
+              size: 20,
+              color: activeCount > 0
+                  ? Theme.of(context).colorScheme.primary
+                  : AppColors.textSecondary,
+            ),
+          ),
+          title: Text(
             context.l10n.notification_title,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
-                  letterSpacing: 1.2,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
                 ),
           ),
-        ),
-        const SizedBox(height: 12),
-
-        // Settings card
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Daily summary toggle
-              _buildToggleTile(
-                context: context,
-                title: context.l10n.notification_dailySummary,
-                subtitle: context.l10n.notification_dailySummaryDesc,
-                value: settings.isDailySummaryEnabled,
-                onChanged: (value) => _handleToggle(context, notifier, value),
-              ),
-
-              // Time picker (only show when enabled)
-              if (settings.isDailySummaryEnabled) ...[
-                const Divider(height: 1),
-                _buildTimeTile(
-                  context: context,
-                  title: context.l10n.notification_time,
-                  time: settings.summaryTime,
-                  onTap: () => _showTimePicker(context, ref),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: activeCount > 0
+                      ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5)
+                      : AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ],
-
-              // Evening reminder toggle
-              const Divider(height: 1),
-              _buildToggleTile(
-                context: context,
-                title: context.l10n.notification_eveningReminder,
-                subtitle: context.l10n.notification_eveningReminderDesc,
-                value: settings.isEveningReminderEnabled,
-                onChanged: (value) => _handleEveningToggle(context, notifier, value),
-              ),
-
-              // Evening time picker (only show when enabled)
-              if (settings.isEveningReminderEnabled) ...[
-                const Divider(height: 1),
-                _buildTimeTile(
-                  context: context,
-                  title: context.l10n.notification_eveningTime,
-                  time: settings.eveningReminderTime,
-                  onTap: () => _showEveningTimePicker(context, ref),
+                child: Text(
+                  activeCount > 0
+                      ? context.l10n.notification_activeCount(activeCount)
+                      : context.l10n.notification_off,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: activeCount > 0
+                            ? Theme.of(context).colorScheme.primary
+                            : AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
-              ],
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.expand_more),
             ],
           ),
+          children: [
+            const Divider(height: 1),
+            // Daily summary toggle
+            _buildToggleTile(
+              context: context,
+              title: context.l10n.notification_dailySummary,
+              subtitle: context.l10n.notification_dailySummaryDesc,
+              value: settings.isDailySummaryEnabled,
+              onChanged: (value) => _handleToggle(context, notifier, value),
+            ),
+
+            // Time picker (only show when enabled)
+            if (settings.isDailySummaryEnabled) ...[
+              const Divider(height: 1),
+              _buildTimeTile(
+                context: context,
+                title: context.l10n.notification_time,
+                time: settings.summaryTime,
+                onTap: () => _showTimePicker(context, ref),
+              ),
+            ],
+
+            // Evening reminder toggle
+            const Divider(height: 1),
+            _buildToggleTile(
+              context: context,
+              title: context.l10n.notification_eveningReminder,
+              subtitle: context.l10n.notification_eveningReminderDesc,
+              value: settings.isEveningReminderEnabled,
+              onChanged: (value) => _handleEveningToggle(context, notifier, value),
+            ),
+
+            // Evening time picker (only show when enabled)
+            if (settings.isEveningReminderEnabled) ...[
+              const Divider(height: 1),
+              _buildTimeTile(
+                context: context,
+                title: context.l10n.notification_eveningTime,
+                time: settings.eveningReminderTime,
+                onTap: () => _showEveningTimePicker(context, ref),
+              ),
+            ],
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -107,7 +150,7 @@ class NotificationSection extends ConsumerWidget {
       case NotificationEnableResult.success:
       case NotificationEnableResult.successWithInexactScheduling:
       case NotificationEnableResult.exactAlarmPermissionDenied:
-        // 성공 - 토스트 없이 UI 토글로 확인 가능
+        // Success - UI toggle confirms the change
         break;
       case NotificationEnableResult.notificationPermissionDenied:
         _showPermissionSnackBar(

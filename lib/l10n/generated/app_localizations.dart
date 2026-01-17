@@ -698,6 +698,24 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings_title;
 
+  /// No description provided for @settings_budgetManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Management'**
+  String get settings_budgetManagement;
+
+  /// No description provided for @settings_appPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'App Preferences'**
+  String get settings_appPreferences;
+
+  /// No description provided for @settings_dataManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Management'**
+  String get settings_dataManagement;
+
   /// No description provided for @notification_title.
   ///
   /// In en, this message translates to:
@@ -764,6 +782,18 @@ abstract class AppLocalizations {
   /// **'Minute'**
   String get notification_minute;
 
+  /// No description provided for @notification_activeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active'**
+  String notification_activeCount(int count);
+
+  /// No description provided for @notification_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get notification_off;
+
   /// No description provided for @notification_channelName.
   ///
   /// In en, this message translates to:
@@ -817,6 +847,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recurring'**
   String get recurring_title;
+
+  /// No description provided for @recurring_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String recurring_count(int count);
 
   /// No description provided for @recurring_addTitle.
   ///
@@ -931,6 +967,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Data Management'**
   String get data_title;
+
+  /// No description provided for @data_actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup/Restore'**
+  String get data_actions;
 
   /// No description provided for @data_backup.
   ///

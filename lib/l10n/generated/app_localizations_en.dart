@@ -336,6 +336,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_title => 'Settings';
 
   @override
+  String get settings_budgetManagement => 'Budget Management';
+
+  @override
+  String get settings_appPreferences => 'App Preferences';
+
+  @override
+  String get settings_dataManagement => 'Data Management';
+
+  @override
   String get notification_title => 'Notification Settings';
 
   @override
@@ -371,6 +380,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notification_minute => 'Minute';
 
   @override
+  String notification_activeCount(int count) {
+    return '$count active';
+  }
+
+  @override
+  String get notification_off => 'Off';
+
+  @override
   String get notification_channelName => 'Daily Summary';
 
   @override
@@ -399,6 +416,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recurring_title => 'Recurring';
+
+  @override
+  String recurring_count(int count) {
+    return '$count items';
+  }
 
   @override
   String get recurring_addTitle => 'Add Recurring';
@@ -457,6 +479,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get data_title => 'Data Management';
+
+  @override
+  String get data_actions => 'Backup/Restore';
 
   @override
   String get data_backup => 'Backup Data';

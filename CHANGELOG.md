@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 32] - 2026-01-17
+
+### Summary
+Reorganized settings page with grouped sections and collapsible tiles for cleaner UX. Updated evening reminder notification message with Stick! principles.
+
+### Changed
+
+#### Settings Page Reorganization
+- **Grouped layout**: Settings now organized into 3 logical groups
+  - 예산 관리 (Budget Management): Budget settings + Recurring transactions
+  - 앱 설정 (App Preferences): Language + Notifications
+  - 데이터 관리 (Data Management): Backup/Restore/Delete
+- **Collapsible sections**: Recurring, Notifications, Data Management use ExpansionTile
+- **Status badges**: Each collapsed tile shows summary (e.g., "3개", "2개 활성화")
+- **New widget**: `SettingsGroup` for consistent group styling
+
+#### Evening Reminder Message (Stick! Style)
+- **Before**: "지출 기록 리마인드" / "오늘 지출을 기록하셨나요?"
+- **After**: "잠깐만요!" / "오늘 지출 다 적으셨나요? 내일 예산에 반영됩니다"
+- Applied Stick! principles: Unexpected title, Concrete action, Credible outcome
+
+### New Files
+- `lib/features/settings/presentation/widgets/settings_group.dart`
+
+### Changed Files
+- `lib/features/settings/presentation/pages/settings_page.dart` - Grouped layout
+- `lib/features/settings/presentation/widgets/recurring_section.dart` - ExpansionTile
+- `lib/features/settings/presentation/widgets/notification_section.dart` - ExpansionTile
+- `lib/features/settings/presentation/widgets/data_management_section.dart` - ExpansionTile
+- `lib/core/services/locale_service.dart` - Updated evening reminder messages
+- `lib/l10n/app_ko.arb`, `lib/l10n/app_en.arb` - Added new localization keys
+
+---
+
 ## [Phase 31.5] - 2026-01-17
 
 ### Summary

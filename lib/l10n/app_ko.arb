@@ -119,6 +119,9 @@
   "statistics_yearMonth": "{year}년 {month}월",
 
   "settings_title": "설정",
+  "settings_budgetManagement": "예산 관리",
+  "settings_appPreferences": "앱 설정",
+  "settings_dataManagement": "데이터 관리",
 
   "notification_title": "알림 설정",
   "notification_dailySummary": "하루 결산 알림",
@@ -131,6 +134,8 @@
   "notification_pm": "오후",
   "notification_hour": "시",
   "notification_minute": "분",
+  "notification_activeCount": "{count}개 활성화",
+  "notification_off": "OFF",
 
   "notification_channelName": "하루 결산",
   "notification_channelDesc": "매일 설정한 시간에 어제의 지출 결산을 알려드립니다",
@@ -143,6 +148,7 @@
   "notification_eveningTimeSelect": "저녁 알림 시간 선택",
 
   "recurring_title": "반복 지출",
+  "recurring_count": "{count}개",
   "recurring_addTitle": "반복 지출 추가",
   "recurring_editTitle": "반복 지출 수정",
   "recurring_add": "추가하기",
@@ -163,6 +169,7 @@
   "recurring_inactive": "비활성",
 
   "data_title": "데이터 관리",
+  "data_actions": "백업/복원",
   "data_backup": "데이터 백업",
   "data_backupDesc": "현재 데이터를 파일로 저장합니다",
   "data_restore": "데이터 복원",

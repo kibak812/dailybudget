@@ -79,13 +79,13 @@ class LocaleService {
 
   /// Evening reminder notification title
   String get eveningReminderPushTitle => isEnglish
-      ? 'Spending Reminder'
-      : '지출 기록 리마인드';
+      ? 'Just a sec!'
+      : '잠깐만요!';
 
   /// Evening reminder notification body
   String get eveningReminderPushBody => isEnglish
-      ? 'Don\'t forget to record today\'s spending!'
-      : '오늘 지출을 기록하셨나요?';
+      ? 'Did you log all today\'s spending? It affects tomorrow\'s budget'
+      : '오늘 지출 다 적으셨나요? 내일 예산에 반영됩니다';
 
   /// Status messages based on spending
   String getStatusMessage(String status) {

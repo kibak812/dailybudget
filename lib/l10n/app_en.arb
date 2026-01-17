@@ -175,6 +175,9 @@
   },
 
   "settings_title": "Settings",
+  "settings_budgetManagement": "Budget Management",
+  "settings_appPreferences": "App Preferences",
+  "settings_dataManagement": "Data Management",
 
   "notification_title": "Notification Settings",
   "notification_dailySummary": "Daily Summary Notification",
@@ -187,6 +190,13 @@
   "notification_pm": "PM",
   "notification_hour": "Hour",
   "notification_minute": "Minute",
+  "notification_activeCount": "{count} active",
+  "@notification_activeCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "notification_off": "Off",
 
   "notification_channelName": "Daily Summary",
   "notification_channelDesc": "Daily spending summary notifications at your set time",
@@ -199,6 +209,12 @@
   "notification_eveningTimeSelect": "Select evening notification time",
 
   "recurring_title": "Recurring",
+  "recurring_count": "{count} items",
+  "@recurring_count": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "recurring_addTitle": "Add Recurring",
   "recurring_editTitle": "Edit Recurring",
   "recurring_add": "Add",
@@ -219,6 +235,7 @@
   "recurring_inactive": "inactive",
 
   "data_title": "Data Management",
+  "data_actions": "Backup/Restore",
   "data_backup": "Backup Data",
   "data_backupDesc": "Save current data to file",
   "data_restore": "Restore Data",

@@ -7,6 +7,7 @@ import 'package:daily_pace/features/settings/presentation/widgets/recurring_sect
 import 'package:daily_pace/features/settings/presentation/widgets/data_management_section.dart';
 import 'package:daily_pace/features/settings/presentation/widgets/notification_section.dart';
 import 'package:daily_pace/features/settings/presentation/widgets/language_section.dart';
+import 'package:daily_pace/features/settings/presentation/widgets/settings_group.dart';
 
 /// Settings page
 /// App configuration, preferences, and account settings
@@ -29,24 +30,35 @@ class SettingsPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Budget Settings Section
-                  const BudgetSettingsSection(),
+                  // Group 1: Budget Management
+                  SettingsGroup(
+                    title: context.l10n.settings_budgetManagement,
+                    children: const [
+                      BudgetSettingsSection(),
+                      SizedBox(height: 12),
+                      RecurringSection(),
+                    ],
+                  ),
                   const SizedBox(height: 24),
 
-                  // Recurring Transactions Section
-                  const RecurringSection(),
+                  // Group 2: App Preferences
+                  SettingsGroup(
+                    title: context.l10n.settings_appPreferences,
+                    children: const [
+                      LanguageSection(),
+                      SizedBox(height: 12),
+                      NotificationSection(),
+                    ],
+                  ),
                   const SizedBox(height: 24),
 
-                  // Notification Settings Section
-                  const NotificationSection(),
-                  const SizedBox(height: 24),
-
-                  // Language Settings Section
-                  const LanguageSection(),
-                  const SizedBox(height: 24),
-
-                  // Data Management Section
-                  const DataManagementSection(),
+                  // Group 3: Data Management
+                  SettingsGroup(
+                    title: context.l10n.settings_dataManagement,
+                    children: const [
+                      DataManagementSection(),
+                    ],
+                  ),
                   const SizedBox(height: 24),
                 ],
               ),

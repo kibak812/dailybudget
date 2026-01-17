@@ -334,6 +334,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_title => '설정';
 
   @override
+  String get settings_budgetManagement => '예산 관리';
+
+  @override
+  String get settings_appPreferences => '앱 설정';
+
+  @override
+  String get settings_dataManagement => '데이터 관리';
+
+  @override
   String get notification_title => '알림 설정';
 
   @override
@@ -368,6 +377,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notification_minute => '분';
 
   @override
+  String notification_activeCount(int count) {
+    return '$count개 활성화';
+  }
+
+  @override
+  String get notification_off => 'OFF';
+
+  @override
   String get notification_channelName => '하루 결산';
 
   @override
@@ -393,6 +410,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get recurring_title => '반복 지출';
+
+  @override
+  String recurring_count(int count) {
+    return '$count개';
+  }
 
   @override
   String get recurring_addTitle => '반복 지출 추가';
@@ -450,6 +472,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get data_title => '데이터 관리';
+
+  @override
+  String get data_actions => '백업/복원';
 
   @override
   String get data_backup => '데이터 백업';
