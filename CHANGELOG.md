@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Phase 31.5] - 2026-01-17
+
+### Summary
+Added evening reminder notification feature to help users record their daily spending before the day ends.
+
+### Added
+
+#### Evening Reminder Notification
+- **New feature**: Separate evening reminder notification (in addition to existing morning summary)
+- **Purpose**: Remind users to record today's spending before the day ends
+- **Default time**: 9:00 PM (customizable)
+- **Default state**: Disabled (user opt-in)
+- **Notification content**:
+  - Korean: "지출 기록 리마인드" / "오늘 지출을 기록하셨나요?"
+  - English: "Spending Reminder" / "Don't forget to record today's spending!"
+
+### Changed Files
+- `lib/features/settings/presentation/providers/notification_settings_provider.dart` - Added evening reminder state management
+- `lib/core/services/notification_service.dart` - Added scheduleEveningReminder() method
+- `lib/core/services/locale_service.dart` - Added evening reminder localized strings
+- `lib/features/settings/presentation/widgets/notification_section.dart` - Added evening reminder toggle and time picker UI
+- `lib/l10n/app_ko.arb`, `lib/l10n/app_en.arb` - Added UI localization keys
+
+---
+
 ## [Phase 31.4] - 2026-01-14
 
 ### Summary

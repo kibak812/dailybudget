@@ -66,6 +66,27 @@ class NotificationSection extends ConsumerWidget {
                   onTap: () => _showTimePicker(context, ref),
                 ),
               ],
+
+              // Evening reminder toggle
+              const Divider(height: 1),
+              _buildToggleTile(
+                context: context,
+                title: context.l10n.notification_eveningReminder,
+                subtitle: context.l10n.notification_eveningReminderDesc,
+                value: settings.isEveningReminderEnabled,
+                onChanged: (value) => _handleEveningToggle(context, notifier, value),
+              ),
+
+              // Evening time picker (only show when enabled)
+              if (settings.isEveningReminderEnabled) ...[
+                const Divider(height: 1),
+                _buildTimeTile(
+                  context: context,
+                  title: context.l10n.notification_eveningTime,
+                  time: settings.eveningReminderTime,
+                  onTap: () => _showEveningTimePicker(context, ref),
+                ),
+              ],
             ],
           ),
         ),
@@ -279,6 +300,86 @@ class NotificationSection extends ConsumerWidget {
 
     if (picked != null) {
       await notifier.setSummaryTime(picked);
+    }
+  }
+
+  Future<void> _handleEveningToggle(
+    BuildContext context,
+    NotificationSettingsNotifier notifier,
+    bool value,
+  ) async {
+    final result = await notifier.setEveningReminderEnabled(value);
+
+    if (!context.mounted) return;
+
+    switch (result) {
+      case NotificationEnableResult.success:
+      case NotificationEnableResult.successWithInexactScheduling:
+      case NotificationEnableResult.exactAlarmPermissionDenied:
+        // Success - UI toggle confirms the change
+        break;
+      case NotificationEnableResult.notificationPermissionDenied:
+        _showPermissionSnackBar(
+          context,
+          message: context.l10n.notification_permissionRequired,
+          actionLabel: context.l10n.notification_requestAgain,
+          onAction: () => notifier.requestPermission(),
+        );
+        break;
+    }
+  }
+
+  Future<void> _showEveningTimePicker(BuildContext context, WidgetRef ref) async {
+    final settings = ref.read(notificationSettingsProvider);
+    final notifier = ref.read(notificationSettingsProvider.notifier);
+
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: settings.eveningReminderTime,
+      initialEntryMode: TimePickerEntryMode.inputOnly,
+      helpText: context.l10n.notification_eveningTimeSelect,
+      cancelText: context.l10n.common_cancel,
+      confirmText: context.l10n.common_confirm,
+      hourLabelText: context.l10n.notification_hour,
+      minuteLabelText: context.l10n.notification_minute,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: Colors.white,
+              hourMinuteShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              hourMinuteTextStyle: const TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.w500,
+              ),
+              dayPeriodTextStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+              helpTextStyle: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              alwaysUse24HourFormat: false,
+            ),
+            child: child!,
+          ),
+        );
+      },
+    );
+
+    if (picked != null) {
+      await notifier.setEveningReminderTime(picked);
     }
   }
 }

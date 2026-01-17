@@ -193,6 +193,11 @@
   "notification_pushTitle": "Daily Summary",
   "notification_pushBody": "Check yesterday's spending",
 
+  "notification_eveningReminder": "Evening Reminder",
+  "notification_eveningReminderDesc": "Get reminded to record expenses before the day ends",
+  "notification_eveningTime": "Evening Notification Time",
+  "notification_eveningTimeSelect": "Select evening notification time",
+
   "recurring_title": "Recurring",
   "recurring_addTitle": "Add Recurring",
   "recurring_editTitle": "Edit Recurring",

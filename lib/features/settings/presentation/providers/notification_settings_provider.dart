@@ -15,19 +15,27 @@ enum NotificationEnableResult {
 class NotificationSettings {
   final bool isDailySummaryEnabled;
   final TimeOfDay summaryTime;
+  final bool isEveningReminderEnabled;
+  final TimeOfDay eveningReminderTime;
 
   const NotificationSettings({
     required this.isDailySummaryEnabled,
     required this.summaryTime,
+    required this.isEveningReminderEnabled,
+    required this.eveningReminderTime,
   });
 
   NotificationSettings copyWith({
     bool? isDailySummaryEnabled,
     TimeOfDay? summaryTime,
+    bool? isEveningReminderEnabled,
+    TimeOfDay? eveningReminderTime,
   }) {
     return NotificationSettings(
       isDailySummaryEnabled: isDailySummaryEnabled ?? this.isDailySummaryEnabled,
       summaryTime: summaryTime ?? this.summaryTime,
+      isEveningReminderEnabled: isEveningReminderEnabled ?? this.isEveningReminderEnabled,
+      eveningReminderTime: eveningReminderTime ?? this.eveningReminderTime,
     );
   }
 
@@ -35,6 +43,8 @@ class NotificationSettings {
   static const NotificationSettings defaults = NotificationSettings(
     isDailySummaryEnabled: true,
     summaryTime: TimeOfDay(hour: 7, minute: 0), // 07:00 AM
+    isEveningReminderEnabled: false, // Disabled by default
+    eveningReminderTime: TimeOfDay(hour: 21, minute: 0), // 09:00 PM
   );
 }
 
@@ -50,6 +60,9 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
   static const String _keySummaryTimeHour = 'notification_summary_time_hour';
   static const String _keySummaryTimeMinute = 'notification_summary_time_minute';
   static const String _keyPermissionRequested = 'notification_permission_requested';
+  static const String _keyEveningReminderEnabled = 'notification_evening_reminder_enabled';
+  static const String _keyEveningReminderTimeHour = 'notification_evening_reminder_time_hour';
+  static const String _keyEveningReminderTimeMinute = 'notification_evening_reminder_time_minute';
 
   final NotificationService _notificationService = NotificationService();
 
@@ -63,6 +76,7 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
     await _loadSettings();
     await _checkFirstLaunchPermission();
     await _scheduleNotification();
+    await _scheduleEveningReminder();
   }
 
   /// Check and request permission on first launch
@@ -90,9 +104,15 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
     final hour = prefs.getInt(_keySummaryTimeHour) ?? 7;
     final minute = prefs.getInt(_keySummaryTimeMinute) ?? 0;
 
+    final isEveningReminderEnabled = prefs.getBool(_keyEveningReminderEnabled) ?? false;
+    final eveningHour = prefs.getInt(_keyEveningReminderTimeHour) ?? 21;
+    final eveningMinute = prefs.getInt(_keyEveningReminderTimeMinute) ?? 0;
+
     state = NotificationSettings(
       isDailySummaryEnabled: isDailySummaryEnabled,
       summaryTime: TimeOfDay(hour: hour, minute: minute),
+      isEveningReminderEnabled: isEveningReminderEnabled,
+      eveningReminderTime: TimeOfDay(hour: eveningHour, minute: eveningMinute),
     );
   }
 
@@ -155,5 +175,61 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
   /// Request notification permission
   Future<bool> requestPermission() async {
     return await _notificationService.requestPermission();
+  }
+
+  /// Schedule evening reminder based on current settings
+  Future<void> _scheduleEveningReminder() async {
+    await _notificationService.scheduleEveningReminder(
+      time: state.eveningReminderTime,
+      enabled: state.isEveningReminderEnabled,
+    );
+  }
+
+  /// Toggle evening reminder notification
+  /// Returns result indicating success or which permission was denied
+  Future<NotificationEnableResult> setEveningReminderEnabled(bool enabled) async {
+    if (enabled) {
+      // Step 1: Check and request basic notification permission
+      final hasNotificationPermission = await _notificationService.checkPermission();
+      if (!hasNotificationPermission) {
+        final granted = await _notificationService.requestPermission();
+        if (!granted) {
+          return NotificationEnableResult.notificationPermissionDenied;
+        }
+      }
+
+      // Step 2: Check exact alarm permission (Android 12+)
+      // If not granted, still enable with inexact scheduling
+      final hasExactAlarmPermission = await _notificationService.canScheduleExactAlarms();
+
+      await _setEveningReminderEnabledInternal(enabled);
+
+      if (!hasExactAlarmPermission) {
+        // Notification is scheduled with inexact mode - warn user
+        return NotificationEnableResult.successWithInexactScheduling;
+      }
+
+      return NotificationEnableResult.success;
+    }
+
+    await _setEveningReminderEnabledInternal(enabled);
+    return NotificationEnableResult.success;
+  }
+
+  /// Internal method to set evening reminder enabled state without permission check
+  Future<void> _setEveningReminderEnabledInternal(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyEveningReminderEnabled, enabled);
+    state = state.copyWith(isEveningReminderEnabled: enabled);
+    await _scheduleEveningReminder();
+  }
+
+  /// Set evening reminder notification time
+  Future<void> setEveningReminderTime(TimeOfDay time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keyEveningReminderTimeHour, time.hour);
+    await prefs.setInt(_keyEveningReminderTimeMinute, time.minute);
+    state = state.copyWith(eveningReminderTime: time);
+    await _scheduleEveningReminder();
   }
 }

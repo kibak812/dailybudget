@@ -17,7 +17,9 @@ class NotificationService {
   final LocaleService _localeService = LocaleService();
 
   static const int _dailySummaryNotificationId = 1;
+  static const int _eveningReminderNotificationId = 2;
   static const String _channelId = 'daily_summary';
+  static const String _eveningChannelId = 'evening_reminder';
 
   bool _isInitialized = false;
 
@@ -244,5 +246,91 @@ class NotificationService {
   /// Cancel all scheduled notifications
   Future<void> cancelAll() async {
     await _notifications.cancelAll();
+  }
+
+  /// Schedule evening reminder notification
+  /// Automatically falls back to inexact scheduling if exact alarm permission is not granted
+  Future<void> scheduleEveningReminder({
+    required TimeOfDay time,
+    required bool enabled,
+  }) async {
+    // Cancel existing notification first
+    await _notifications.cancel(_eveningReminderNotificationId);
+
+    if (!enabled) return;
+
+    // Refresh locale before scheduling
+    await _localeService.refresh();
+
+    // Check exact alarm permission and choose schedule mode
+    final hasExactAlarmPermission = await canScheduleExactAlarms();
+    final scheduleMode = hasExactAlarmPermission
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
+
+    if (!hasExactAlarmPermission) {
+      debugPrint('Exact alarm permission not granted, using inexact scheduling for evening reminder');
+    }
+
+    // Calculate next notification time
+    final now = DateTime.now();
+    var scheduledDate = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+    );
+
+    // If time has passed today, schedule for tomorrow
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
+    debugPrint('Scheduling evening reminder for: $tzScheduledDate (mode: $scheduleMode)');
+
+    // Get localized strings
+    final channelName = _localeService.eveningReminderChannelName;
+    final channelDesc = _localeService.eveningReminderChannelDesc;
+    final pushTitle = _localeService.eveningReminderPushTitle;
+    final pushBody = _localeService.eveningReminderPushBody;
+
+    // Notification details
+    final androidDetails = AndroidNotificationDetails(
+      _eveningChannelId,
+      channelName,
+      channelDescription: channelDesc,
+      importance: Importance.high,
+      priority: Priority.high,
+      styleInformation: const BigTextStyleInformation(''),
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    final notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    // Schedule notification to repeat daily
+    await _notifications.zonedSchedule(
+      _eveningReminderNotificationId,
+      pushTitle,
+      pushBody,
+      tzScheduledDate,
+      notificationDetails,
+      androidScheduleMode: scheduleMode,
+      matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
+    );
+  }
+
+  /// Cancel evening reminder notification
+  Future<void> cancelEveningReminder() async {
+    await _notifications.cancel(_eveningReminderNotificationId);
   }
 }

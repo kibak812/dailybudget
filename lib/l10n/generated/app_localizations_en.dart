@@ -384,6 +384,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notification_pushBody => 'Check yesterday\'s spending';
 
   @override
+  String get notification_eveningReminder => 'Evening Reminder';
+
+  @override
+  String get notification_eveningReminderDesc =>
+      'Get reminded to record expenses before the day ends';
+
+  @override
+  String get notification_eveningTime => 'Evening Notification Time';
+
+  @override
+  String get notification_eveningTimeSelect =>
+      'Select evening notification time';
+
+  @override
   String get recurring_title => 'Recurring';
 
   @override

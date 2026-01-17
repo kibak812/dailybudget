@@ -67,6 +67,26 @@ class LocaleService {
       ? 'Check yesterday\'s spending'
       : '어제의 지출을 확인해보세요';
 
+  /// Evening reminder channel name
+  String get eveningReminderChannelName => isEnglish
+      ? 'Evening Reminder'
+      : '저녁 리마인드';
+
+  /// Evening reminder channel description
+  String get eveningReminderChannelDesc => isEnglish
+      ? 'Reminder to record your spending before the day ends'
+      : '하루가 끝나기 전에 지출을 기록하라는 알림';
+
+  /// Evening reminder notification title
+  String get eveningReminderPushTitle => isEnglish
+      ? 'Spending Reminder'
+      : '지출 기록 리마인드';
+
+  /// Evening reminder notification body
+  String get eveningReminderPushBody => isEnglish
+      ? 'Don\'t forget to record today\'s spending!'
+      : '오늘 지출을 기록하셨나요?';
+
   /// Status messages based on spending
   String getStatusMessage(String status) {
     final messages = isEnglish

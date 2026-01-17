@@ -788,6 +788,30 @@ abstract class AppLocalizations {
   /// **'Check yesterday\'s spending'**
   String get notification_pushBody;
 
+  /// No description provided for @notification_eveningReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening Reminder'**
+  String get notification_eveningReminder;
+
+  /// No description provided for @notification_eveningReminderDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get reminded to record expenses before the day ends'**
+  String get notification_eveningReminderDesc;
+
+  /// No description provided for @notification_eveningTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening Notification Time'**
+  String get notification_eveningTime;
+
+  /// No description provided for @notification_eveningTimeSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select evening notification time'**
+  String get notification_eveningTimeSelect;
+
   /// No description provided for @recurring_title.
   ///
   /// In en, this message translates to:

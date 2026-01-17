@@ -137,6 +137,11 @@
   "notification_pushTitle": "하루 결산",
   "notification_pushBody": "어제의 지출을 확인해보세요",
 
+  "notification_eveningReminder": "저녁 리마인드 알림",
+  "notification_eveningReminderDesc": "하루가 끝나기 전에 지출 기록을 리마인드해요",
+  "notification_eveningTime": "저녁 알림 시간",
+  "notification_eveningTimeSelect": "저녁 알림 시간 선택",
+
   "recurring_title": "반복 지출",
   "recurring_addTitle": "반복 지출 추가",
   "recurring_editTitle": "반복 지출 수정",

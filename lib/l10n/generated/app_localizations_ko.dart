@@ -380,6 +380,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notification_pushBody => '어제의 지출을 확인해보세요';
 
   @override
+  String get notification_eveningReminder => '저녁 리마인드 알림';
+
+  @override
+  String get notification_eveningReminderDesc => '하루가 끝나기 전에 지출 기록을 리마인드해요';
+
+  @override
+  String get notification_eveningTime => '저녁 알림 시간';
+
+  @override
+  String get notification_eveningTimeSelect => '저녁 알림 시간 선택';
+
+  @override
   String get recurring_title => '반복 지출';
 
   @override
